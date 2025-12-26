@@ -5,12 +5,14 @@ import Link from "next/link"
 import { validateSession } from "@/lib/auth"
 import LogoutButton from "@/components/admin-logout-button"
 
+export const dynamic = "force-dynamic"
+
 export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const cookieStore = await cookies()
+  const cookieStore = cookies()
   const adminSessionId = cookieStore.get("admin_session")?.value
 
   if (!adminSessionId || !validateSession(adminSessionId)) {
