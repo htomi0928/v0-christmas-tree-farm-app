@@ -11,7 +11,7 @@ export default async function AdminLayout({
   children: React.ReactNode
 }) {
   const cookieStore = await cookies()
-  const adminSessionId = cookieStore.get("adminSessionId")?.value
+  const adminSessionId = cookieStore.get("admin_session")?.value
 
   if (!adminSessionId || !validateSession(adminSessionId)) {
     redirect("/admin-login")
