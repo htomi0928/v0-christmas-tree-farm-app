@@ -12,7 +12,7 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode
 }) {
-  const cookieStore = cookies()
+  const cookieStore = await cookies()
   const adminSessionId = cookieStore.get("admin_session")?.value
 
   if (!adminSessionId || !validateSession(adminSessionId)) {
