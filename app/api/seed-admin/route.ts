@@ -2,8 +2,6 @@ import { neon } from "@neondatabase/serverless"
 import { hashPassword } from "@/lib/auth"
 import { NextResponse } from "next/server"
 
-export const runtime = "nodejs"
-
 export async function POST(req: Request) {
   if (req.headers.get("x-seed-key") !== process.env.SEED_ADMIN_KEY) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
