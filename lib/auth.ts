@@ -1,22 +1,63 @@
 // Simple in-memory session store
-const VALID_CREDENTIALS = {
-  username: "admin",
-  password: "fenyo2025",
-}
+import { sql } from "./db"
 
-const SECRET = "fenyo-farm-secret-key-2025"
+// AUTH_SECRET should be a long, random string stored in Vercel environment variables
+const SECRET = process.env.AUTH_SECRET || "fallback-secret-for-dev-only"
 
 const SESSION_DURATION = 24 * 60 * 60 * 1000 // 24 hours
 
-export function validateCredentials(username: string, password: string): boolean {
-  return username === VALID_CREDENTIALS.username && password === VALID_CREDENTIALS.password
+// PBKDF2 password hashing for Edge Runtime compatibility
+export async function hashPassword(password: string, salt?: string): Promise<string> {
+  const enc = new TextEncoder()
+  const saltBuffer = salt ? enc.encode(salt) : crypto.getRandomValues(new Uint8Array(16))
+  const passwordBuffer = enc.encode(password)
+
+  const importedKey = await crypto.subtle.importKey("raw", passwordBuffer, { name: "PBKDF2" }, false, ["deriveBits"])
+
+  const derivedBits = await crypto.subtle.deriveBits(
+    {
+      name: "PBKDF2",
+      salt: saltBuffer,
+      iterations: 100000,
+      hash: "SHA-256",
+    },
+    importedKey,
+    256,
+  )
+
+  const hashArray = Array.from(new Uint8Array(derivedBits))
+  const saltArray = Array.from(new Uint8Array(saltBuffer))
+
+  const hashHex = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("")
+  const saltHex = saltArray.map((b) => b.toString(16).padStart(2, "0")).join("")
+
+  return `${saltHex}:${hashHex}`
+}
+
+export async function verifyPassword(password: string, storedHash: string): Promise<boolean> {
+  const [saltHex, _] = storedHash.split(":")
+  const newHash = await hashPassword(password, saltHex)
+  return newHash === storedHash
+}
+
+export async function validateCredentials(username: string, password: string): Promise<boolean> {
+  try {
+    const rows = await sql`SELECT password_hash FROM admin_users WHERE username = ${username}`
+    if (rows.length === 0) return false
+
+    return await verifyPassword(password, rows[0].password_hash)
+  } catch (error) {
+    console.error("[v0] Auth database error:", error)
+    return false
+  }
 }
 
 export function createSession(username: string): string {
   const timestamp = Date.now()
   const data = `${username}:${timestamp}`
-  // In production, use crypto.createHmac or a JWT library
-  const signature = btoa(data + SECRET).substring(0, 16)
+
+  // Simple signature - in a full production app, consider using jose for JWT
+  const signature = btoa(data + SECRET).substring(0, 32)
   return btoa(`${data}:${signature}`)
 }
 
@@ -26,11 +67,9 @@ export function validateSession(token: string): boolean {
     const [username, timestampStr, signature] = decoded.split(":")
     const timestamp = Number.parseInt(timestampStr)
 
-    // Check if it's the right "signature"
-    const expectedSignature = btoa(`${username}:${timestampStr}${SECRET}`).substring(0, 16)
+    const expectedSignature = btoa(`${username}:${timestampStr}${SECRET}`).substring(0, 32)
     if (signature !== expectedSignature) return false
 
-    // Check expiration
     const age = Date.now() - timestamp
     if (age > SESSION_DURATION) return false
 

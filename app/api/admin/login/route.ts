@@ -16,7 +16,7 @@ export async function POST(request: Request) {
       )
     }
 
-    if (validateCredentials(username, password)) {
+    if (await validateCredentials(username, password)) {
       const sessionId = createSession(username)
 
       const cookieStore = await cookies()

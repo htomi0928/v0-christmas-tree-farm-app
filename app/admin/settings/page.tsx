@@ -6,7 +6,7 @@ import SettingsClient from "@/components/settings-client"
 
 export default async function SettingsPage() {
   const cookieStore = await cookies()
-  const sessionId = cookieStore.get("adminSessionId")?.value
+  const sessionId = cookieStore.get("admin_session")?.value
 
   // Server-side auth check
   if (!sessionId || !validateSession(sessionId)) {

@@ -86,7 +86,6 @@ export default function LoginPage() {
               required
               className="w-full px-4 py-2 rounded-lg border border-border bg-background text-foreground placeholder:text-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary"
             />
-            <p className="text-xs text-foreground/50 mt-2">Demó: admin / fenyo2025</p>
           </div>
 
           <Button type="submit" disabled={isLoading} className="w-full bg-primary hover:bg-primary/90 text-lg py-3">
