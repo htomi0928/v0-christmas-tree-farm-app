@@ -6,37 +6,58 @@ const SECRET = process.env.AUTH_SECRET || "fallback-secret-for-dev-only"
 
 const SESSION_DURATION = 24 * 60 * 60 * 1000 // 24 hours
 
-// PBKDF2 password hashing for Edge Runtime compatibility
-export async function hashPassword(password: string, salt?: string): Promise<string> {
+function hexToBytes(hex: string): Uint8Array {
+  const bytes = new Uint8Array(hex.length / 2)
+  for (let i = 0; i < bytes.length; i++) {
+    bytes[i] = parseInt(hex.substr(i * 2, 2), 16)
+  }
+  return bytes
+}
+
+export async function hashPassword(password: string, saltHex?: string): Promise<string> {
   const enc = new TextEncoder()
-  const saltBuffer = salt ? enc.encode(salt) : crypto.getRandomValues(new Uint8Array(16))
+
+  const saltBuffer = saltHex
+    ? hexToBytes(saltHex)
+    : crypto.getRandomValues(new Uint8Array(16))
+
   const passwordBuffer = enc.encode(password)
 
-  const importedKey = await crypto.subtle.importKey("raw", passwordBuffer, { name: "PBKDF2" }, false, ["deriveBits"])
+  const importedKey = await crypto.subtle.importKey(
+    "raw",
+    passwordBuffer,
+    { name: "PBKDF2" },
+    false,
+    ["deriveBits"]
+  )
 
   const derivedBits = await crypto.subtle.deriveBits(
     {
       name: "PBKDF2",
       salt: saltBuffer,
-      iterations: 100000,
+      iterations: 100_000,
       hash: "SHA-256",
     },
     importedKey,
-    256,
+    256
   )
 
-  const hashArray = Array.from(new Uint8Array(derivedBits))
-  const saltArray = Array.from(new Uint8Array(saltBuffer))
+  const hashHex = [...new Uint8Array(derivedBits)]
+    .map(b => b.toString(16).padStart(2, "0"))
+    .join("")
 
-  const hashHex = hashArray.map((b) => b.toString(16).padStart(2, "0")).join("")
-  const saltHex = saltArray.map((b) => b.toString(16).padStart(2, "0")).join("")
+  const saltHexOut = [...saltBuffer]
+    .map(b => b.toString(16).padStart(2, "0"))
+    .join("")
 
-  return `${saltHex}:${hashHex}`
+  return `${saltHexOut}:${hashHex}`
 }
 
 export async function verifyPassword(password: string, storedHash: string): Promise<boolean> {
   const [saltHex, _] = storedHash.split(":")
   const newHash = await hashPassword(password, saltHex)
+  console.log("NewHash: " + newHash)
+  console.log("StoredHash: " + storedHash)
   return newHash === storedHash
 }
 

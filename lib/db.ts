@@ -10,4 +10,6 @@ if (!connectionString) {
 }
 
 // Initialize Neon SQL client - ensure it's not exported to client components
-export const sql = neon(connectionString!)
+export const sql = neon(connectionString!, {
+  disableWarningInBrowsers: true
+})
