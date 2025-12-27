@@ -5,8 +5,6 @@ import Link from "next/link"
 import { validateSession } from "@/lib/auth"
 import LogoutButton from "@/components/admin-logout-button"
 
-export const dynamic = "force-dynamic"
-
 export default async function AdminLayout({
   children,
 }: {
