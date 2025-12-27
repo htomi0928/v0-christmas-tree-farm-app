@@ -1,5 +1,5 @@
 import { neon } from "@neondatabase/serverless"
-import { hashPassword } from "../lib/auth"
+import { hashPassword } from "@/lib/auth"
 import { NextResponse } from "next/server"
 
 export const runtime = "nodejs"
