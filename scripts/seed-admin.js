@@ -1,15 +1,14 @@
 import { neon } from "@neondatabase/serverless"
-import { hashPassword } from "@/lib/auth"
-import { NextResponse } from "next/server"
+import { hashPassword } from "../lib/auth"
 
-export async function POST(req: Request) {
-  if (req.headers.get("x-seed-key") !== process.env.SEED_ADMIN_KEY) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+async function seed {
+  if (!process.env.DATABASE_URL) {
+    throw new Error("DATABASE_URL is not set")
   }
   const sql = neon(process.env.DATABASE_URL!)
 
   const username = "admin"
-  const password = "admin" // User should change this immediately
+  const password = "admin"
   const hashedPassword = await hashPassword(password)
 
   console.log(`Seeding admin user: ${username}`)
@@ -22,5 +21,14 @@ export async function POST(req: Request) {
 
   console.log("Admin user seeded successfully.")
 
-  return NextResponse.json({ ok: true })
 }
+
+seed()
+  .then(() => {
+    console.log("🎉 Done")
+    process.exit(0)
+  })
+  .catch((err) => {
+    console.error("❌ Seed failed:", err)
+    process.exit(1)
+  })
