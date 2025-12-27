@@ -4,7 +4,7 @@ const VALID_CREDENTIALS = {
   password: "fenyo2025",
 }
 
-const sessions: Map<string, { username: string; createdAt: number }> = new Map()
+const SECRET = "fenyo-farm-secret-key-2025"
 
 const SESSION_DURATION = 24 * 60 * 60 * 1000 // 24 hours
 
@@ -13,34 +13,44 @@ export function validateCredentials(username: string, password: string): boolean
 }
 
 export function createSession(username: string): string {
-  const sessionId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
-  sessions.set(sessionId, {
-    username,
-    createdAt: Date.now(),
-  })
-  return sessionId
+  const timestamp = Date.now()
+  const data = `${username}:${timestamp}`
+  // In production, use crypto.createHmac or a JWT library
+  const signature = btoa(data + SECRET).substring(0, 16)
+  return btoa(`${data}:${signature}`)
 }
 
-export function validateSession(sessionId: string): boolean {
-  const session = sessions.get(sessionId)
-  if (!session) return false
+export function validateSession(token: string): boolean {
+  try {
+    const decoded = atob(token)
+    const [username, timestampStr, signature] = decoded.split(":")
+    const timestamp = Number.parseInt(timestampStr)
 
-  const age = Date.now() - session.createdAt
-  if (age > SESSION_DURATION) {
-    sessions.delete(sessionId)
+    // Check if it's the right "signature"
+    const expectedSignature = btoa(`${username}:${timestampStr}${SECRET}`).substring(0, 16)
+    if (signature !== expectedSignature) return false
+
+    // Check expiration
+    const age = Date.now() - timestamp
+    if (age > SESSION_DURATION) return false
+
+    return true
+  } catch (e) {
     return false
   }
-
-  return true
 }
 
-export function destroySession(sessionId: string): void {
-  sessions.delete(sessionId)
+export function destroySession(_sessionId: string): void {
+  // Stateless sessions are "destroyed" by clearing the cookie on the client/response
 }
 
-export function getSessionUser(sessionId: string): string | null {
-  if (validateSession(sessionId)) {
-    return sessions.get(sessionId)?.username || null
+export function getSessionUser(token: string): string | null {
+  if (validateSession(token)) {
+    try {
+      return atob(token).split(":")[0]
+    } catch (e) {
+      return null
+    }
   }
   return null
 }

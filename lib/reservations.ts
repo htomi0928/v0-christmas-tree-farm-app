@@ -1,31 +1,5 @@
+import { sql } from "./db"
 import { type Reservation, ReservationStatus, type CreateReservationData, type UpdateReservationData } from "./types"
-
-// In-memory storage - replace with real database
-const reservations: Reservation[] = [
-  {
-    id: 1,
-    name: "Kovács István",
-    phone: "+36301234567",
-    email: "istvan@example.com",
-    visitDate: "2024-12-07",
-    treeCount: 2,
-    notes: "Nagyobb fák, minimum 2m",
-    treeNumbers: "12,13",
-    status: ReservationStatus.BOOKED,
-    createdAt: "2024-11-01T10:30:00Z",
-  },
-  {
-    id: 2,
-    name: "Nagy Magda",
-    phone: "+36309876543",
-    visitDate: "2024-12-08",
-    treeCount: 1,
-    status: ReservationStatus.TREE_TAGGED,
-    createdAt: "2024-11-02T14:15:00Z",
-  },
-]
-
-let nextId = 3
 
 // Validation
 function validateReservationData(data: CreateReservationData): string[] {
@@ -46,22 +20,58 @@ function validateReservationData(data: CreateReservationData): string[] {
 export async function listReservations(filters?: { visitDate?: string; status?: ReservationStatus }): Promise<
   Reservation[]
 > {
-  let result = [...reservations]
+  let query = "SELECT * FROM reservations WHERE 1=1"
+  const params: any[] = []
 
   if (filters?.visitDate) {
-    result = result.filter((r) => r.visitDate === filters.visitDate)
+    params.push(filters.visitDate)
+    query += ` AND visit_date = $${params.length}`
   }
 
   if (filters?.status) {
-    result = result.filter((r) => r.status === filters.status)
+    params.push(filters.status)
+    query += ` AND status = $${params.length}`
   }
 
-  return result
+  query += " ORDER BY visit_date DESC, created_at DESC"
+
+  const rows = await sql.query(query, params)
+
+  return rows.map((row: any) => ({
+    id: row.id,
+    name: row.name,
+    phone: row.phone,
+    email: row.email || undefined,
+    visitDate: row.visit_date,
+    treeCount: row.tree_count,
+    notes: row.notes || undefined,
+    treeNumbers: row.tree_numbers || undefined,
+    status: row.status as ReservationStatus,
+    paidTo: row.paid_to || undefined,
+    createdAt: row.created_at,
+  }))
 }
 
 // Get single reservation
 export async function getReservationById(id: number): Promise<Reservation | null> {
-  return reservations.find((r) => r.id === id) || null
+  const rows = await sql`SELECT * FROM reservations WHERE id = ${id}`
+
+  if (rows.length === 0) return null
+
+  const row = rows[0]
+  return {
+    id: row.id,
+    name: row.name,
+    phone: row.phone,
+    email: row.email || undefined,
+    visitDate: row.visit_date,
+    treeCount: row.tree_count,
+    notes: row.notes || undefined,
+    treeNumbers: row.tree_numbers || undefined,
+    status: row.status as ReservationStatus,
+    paidTo: row.paid_to || undefined,
+    createdAt: row.created_at,
+  }
 }
 
 // Create reservation
@@ -73,14 +83,27 @@ export async function createReservation(
     return { success: false, errors }
   }
 
+  const rows = await sql`
+    INSERT INTO reservations (name, phone, email, visit_date, tree_count, notes, status)
+    VALUES (${data.name}, ${data.phone}, ${data.email || null}, ${data.visitDate}, ${data.treeCount}, ${data.notes || null}, ${ReservationStatus.BOOKED})
+    RETURNING *
+  `
+
+  const row = rows[0]
   const reservation: Reservation = {
-    id: nextId++,
-    ...data,
-    status: ReservationStatus.BOOKED,
-    createdAt: new Date().toISOString(),
+    id: row.id,
+    name: row.name,
+    phone: row.phone,
+    email: row.email || undefined,
+    visitDate: row.visit_date,
+    treeCount: row.tree_count,
+    notes: row.notes || undefined,
+    treeNumbers: row.tree_numbers || undefined,
+    status: row.status as ReservationStatus,
+    paidTo: row.paid_to || undefined,
+    createdAt: row.created_at,
   }
 
-  reservations.push(reservation)
   return { success: true, data: reservation }
 }
 
@@ -89,26 +112,93 @@ export async function updateReservation(
   id: number,
   data: UpdateReservationData,
 ): Promise<{ success: boolean; data?: Reservation; error?: string }> {
-  const index = reservations.findIndex((r) => r.id === id)
-  if (index === -1) {
+  // First check if reservation exists
+  const existing = await getReservationById(id)
+  if (!existing) {
     return { success: false, error: "Foglalás nem található" }
   }
 
+  // Validate if core fields are being updated
   if (data.name !== undefined || data.phone !== undefined || data.treeCount !== undefined) {
     const errors = validateReservationData({
-      name: data.name ?? reservations[index].name,
-      phone: data.phone ?? reservations[index].phone,
-      email: data.email ?? reservations[index].email,
-      visitDate: data.visitDate ?? reservations[index].visitDate,
-      treeCount: data.treeCount ?? reservations[index].treeCount,
+      name: data.name ?? existing.name,
+      phone: data.phone ?? existing.phone,
+      email: data.email ?? existing.email,
+      visitDate: data.visitDate ?? existing.visitDate,
+      treeCount: data.treeCount ?? existing.treeCount,
     })
     if (errors.length > 0) {
       return { success: false, error: errors[0] }
     }
   }
 
-  reservations[index] = { ...reservations[index], ...data }
-  return { success: true, data: reservations[index] }
+  // Build update query dynamically
+  const updates: string[] = []
+  const values: any[] = []
+  let paramIndex = 1
+
+  if (data.name !== undefined) {
+    updates.push(`name = $${paramIndex++}`)
+    values.push(data.name)
+  }
+  if (data.phone !== undefined) {
+    updates.push(`phone = $${paramIndex++}`)
+    values.push(data.phone)
+  }
+  if (data.email !== undefined) {
+    updates.push(`email = $${paramIndex++}`)
+    values.push(data.email || null)
+  }
+  if (data.visitDate !== undefined) {
+    updates.push(`visit_date = $${paramIndex++}`)
+    values.push(data.visitDate)
+  }
+  if (data.treeCount !== undefined) {
+    updates.push(`tree_count = $${paramIndex++}`)
+    values.push(data.treeCount)
+  }
+  if (data.notes !== undefined) {
+    updates.push(`notes = $${paramIndex++}`)
+    values.push(data.notes || null)
+  }
+  if (data.treeNumbers !== undefined) {
+    updates.push(`tree_numbers = $${paramIndex++}`)
+    values.push(data.treeNumbers || null)
+  }
+  if (data.status !== undefined) {
+    updates.push(`status = $${paramIndex++}`)
+    values.push(data.status)
+  }
+  if (data.paidTo !== undefined) {
+    updates.push(`paid_to = $${paramIndex++}`)
+    values.push(data.paidTo || null)
+  }
+
+  if (updates.length === 0) {
+    return { success: true, data: existing }
+  }
+
+  values.push(id)
+  const query = `UPDATE reservations SET ${updates.join(", ")} WHERE id = $${paramIndex} RETURNING *`
+
+  const rows = await sql.query(query, values)
+  const row = rows[0]
+
+  const updated: Reservation = {
+    id: row.id,
+    name: row.name,
+    phone: row.phone,
+    email: row.email || undefined,
+    visitDate: row.visit_date,
+    treeCount: row.tree_count,
+    notes: row.notes || undefined,
+    treeNumbers: row.tree_numbers || undefined,
+    status: row.status as ReservationStatus,
+    paidTo: row.paid_to || undefined,
+    createdAt: row.created_at,
+  }
+
+  return { success: true, data: updated }
 }
 
 // Get stats
@@ -120,27 +210,54 @@ export async function getReservationStats(): Promise<{
   revenueSanyi: number
   totalRevenue: number
 }> {
-  const today = new Date()
-  const upcomingWeekend = reservations.filter((r) => {
-    const date = new Date(r.visitDate)
-    return date >= today && (date.getDay() === 0 || date.getDay() === 6)
-  }).length
+  // Get totals
+  const totalsRows = await sql`
+    SELECT 
+      COUNT(*) as total_reservations,
+      COALESCE(SUM(tree_count), 0) as total_trees
+    FROM reservations
+  `
 
-  // Calculate revenue from paid reservations
-  const paidReservations = reservations.filter((r) => r.status === ReservationStatus.PICKED_UP_PAID)
+  // Get upcoming weekend count (Saturday = 6, Sunday = 0 in SQL)
+  const today = new Date().toISOString().split("T")[0]
+  const upcomingRows = await sql`
+    SELECT COUNT(*) as upcoming_weekend
+    FROM reservations
+    WHERE visit_date >= ${today}
+    AND EXTRACT(DOW FROM visit_date) IN (0, 6)
+  `
 
-  const revenueJanos = paidReservations
-    .filter((r) => r.paidTo === "János")
-    .reduce((sum, r) => sum + r.treeCount * 8000, 0)
+  // Get revenue per person from paid reservations
+  const revenueRows = await sql`
+    SELECT 
+      paid_to,
+      SUM(tree_count) as total_trees
+    FROM reservations
+    WHERE status = ${ReservationStatus.PICKED_UP_PAID}
+    AND paid_to IS NOT NULL
+    GROUP BY paid_to
+  `
 
-  const revenueSanyi = paidReservations
-    .filter((r) => r.paidTo === "Sanyi")
-    .reduce((sum, r) => sum + r.treeCount * 8000, 0)
+  // Get price from settings
+  const settingsRows = await sql`SELECT price FROM settings WHERE id = 1`
+  const price = settingsRows[0]?.price || 8000
+
+  let revenueJanos = 0
+  let revenueSanyi = 0
+
+  for (const row of revenueRows) {
+    const revenue = Number(row.total_trees) * price
+    if (row.paid_to === "János") {
+      revenueJanos = revenue
+    } else if (row.paid_to === "Sanyi") {
+      revenueSanyi = revenue
+    }
+  }
 
   return {
-    totalReservations: reservations.length,
-    totalTrees: reservations.reduce((sum, r) => sum + r.treeCount, 0),
-    upcomingWeekend,
+    totalReservations: Number(totalsRows[0].total_reservations),
+    totalTrees: Number(totalsRows[0].total_trees),
+    upcomingWeekend: Number(upcomingRows[0].upcoming_weekend),
     revenueJanos,
     revenueSanyi,
     totalRevenue: revenueJanos + revenueSanyi,

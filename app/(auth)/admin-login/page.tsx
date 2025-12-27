@@ -3,13 +3,11 @@
 import type React from "react"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { AlertCircle } from "lucide-react"
 
 export default function LoginPage() {
-  const router = useRouter()
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
@@ -33,8 +31,7 @@ export default function LoginPage() {
       const data = await response.json()
 
       if (data.success) {
-        router.push("/admin")
-        router.refresh()
+        window.location.href = "/admin"
       } else {
         setError(data.error || "Hibás felhasználónév vagy jelszó")
       }

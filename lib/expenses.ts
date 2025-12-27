@@ -1,19 +1,28 @@
+import { sql } from "./db"
 import type { Expense, CreateExpenseData } from "./types"
-
-// In-memory expenses storage - replace with real database
-const expenses: Expense[] = []
-
-let nextId = 1
 
 // List expenses with optional filters
 export async function listExpenses(filters?: { person?: "János" | "Sanyi" }): Promise<Expense[]> {
-  let result = [...expenses]
+  let query = "SELECT * FROM expenses WHERE 1=1"
+  const params: any[] = []
 
   if (filters?.person) {
-    result = result.filter((e) => e.person === filters.person)
+    params.push(filters.person)
+    query += ` AND person = $${params.length}`
   }
 
-  return result.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+  query += " ORDER BY date DESC, created_at DESC"
+
+  const rows = await sql.query(query, params)
+
+  return rows.map((row: any) => ({
+    id: row.id,
+    description: row.description,
+    amount: row.amount,
+    person: row.person as "János" | "Sanyi",
+    date: row.date,
+    createdAt: row.created_at,
+  }))
 }
 
 // Create expense
@@ -28,24 +37,33 @@ export async function createExpense(
     return { success: false, error: "Az összeg pozitív szám kell legyen" }
   }
 
+  const rows = await sql`
+    INSERT INTO expenses (description, amount, person, date)
+    VALUES (${data.description}, ${data.amount}, ${data.person}, ${data.date})
+    RETURNING *
+  `
+
+  const row = rows[0]
   const expense: Expense = {
-    id: nextId++,
-    ...data,
-    createdAt: new Date().toISOString(),
+    id: row.id,
+    description: row.description,
+    amount: row.amount,
+    person: row.person as "János" | "Sanyi",
+    date: row.date,
+    createdAt: row.created_at,
   }
 
-  expenses.push(expense)
   return { success: true, data: expense }
 }
 
 // Delete expense
 export async function deleteExpense(id: number): Promise<{ success: boolean; error?: string }> {
-  const index = expenses.findIndex((e) => e.id === id)
-  if (index === -1) {
+  const rows = await sql`DELETE FROM expenses WHERE id = ${id} RETURNING id`
+
+  if (rows.length === 0) {
     return { success: false, error: "Kiadás nem található" }
   }
 
-  expenses.splice(index, 1)
   return { success: true }
 }
 
@@ -55,8 +73,24 @@ export async function getExpensesSummary(): Promise<{
   sanyi: number
   total: number
 }> {
-  const janos = expenses.filter((e) => e.person === "János").reduce((sum, e) => sum + e.amount, 0)
-  const sanyi = expenses.filter((e) => e.person === "Sanyi").reduce((sum, e) => sum + e.amount, 0)
+  const rows = await sql`
+    SELECT 
+      person,
+      COALESCE(SUM(amount), 0) as total_amount
+    FROM expenses
+    GROUP BY person
+  `
+
+  let janos = 0
+  let sanyi = 0
+
+  for (const row of rows) {
+    if (row.person === "János") {
+      janos = Number(row.total_amount)
+    } else if (row.person === "Sanyi") {
+      sanyi = Number(row.total_amount)
+    }
+  }
 
   return {
     janos,
