@@ -2,7 +2,7 @@ import { neon } from "@neondatabase/serverless"
 import { hashPassword } from "../lib/auth"
 
 async function seed() {
-  const sql = neon(process.env.POSTGRES_URL!)
+  const sql = neon(process.env.DATABASE_URL!)
 
   const username = "admin"
   const password = "admin-password-change-me" // User should change this immediately
