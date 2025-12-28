@@ -29,14 +29,14 @@ export default function CalendarPicker({
     fetch("/api/admin/settings")
       .then((res) => res.json())
       .then((data) => {
-        if (data.data?.unavailableDays) {
-          setUnavailable(data.data.unavailableDays)
+        if (data.settings?.unavailableDays) {
+          setUnavailable(data.settings.unavailableDays)
         }
-        if (data.data?.seasonStart) {
-          setSeasonStart(new Date(data.data.seasonStart))
+        if (data.settings?.seasonStart) {
+          setSeasonStart(new Date(data.settings.seasonStart))
         }
-        if (data.data?.seasonEnd) {
-          setSeasonEnd(new Date(data.data.seasonEnd))
+        if (data.settings?.seasonEnd) {
+          setSeasonEnd(new Date(data.settings.seasonEnd))
         }
       })
       .catch(() => {})
@@ -97,7 +97,7 @@ export default function CalendarPicker({
     "december",
   ]
 
-  const dayNames = ["V", "H", "K", "Sz", "Cs", "P", "Sz"]
+  const dayNames = ["V", "H", "K", "Sze", "Cs", "P", "Szo"]
 
   const daysInMonth = getDaysInMonth(currentMonth)
   const firstDay = getFirstDayOfMonth(currentMonth)
@@ -133,8 +133,8 @@ export default function CalendarPicker({
       </div>
 
       <div className="grid grid-cols-7 gap-2 mb-2">
-        {dayNames.map((day) => (
-          <div key={day} className="text-center text-xs font-semibold text-foreground/60 py-2">
+        {dayNames.map((day, index) => (
+          <div key={`day-${index}`} className="text-center text-xs font-semibold text-foreground/60 py-2">
             {day}
           </div>
         ))}

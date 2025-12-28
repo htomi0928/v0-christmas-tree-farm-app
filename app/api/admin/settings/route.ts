@@ -19,10 +19,17 @@ export async function GET(request: Request) {
 
     const settings = await getSettings()
 
-    return Response.json({
-      success: true,
-      settings,
-    })
+    return Response.json(
+      {
+        success: true,
+        settings,
+      },
+      {
+        headers: {
+          "Cache-Control": "no-store, max-age=0",
+        },
+      },
+    )
   } catch (error) {
     return Response.json(
       {
@@ -52,11 +59,19 @@ export async function PATCH(request: Request) {
     const body = await request.json()
     const settings = await updateSettings(body)
 
-    return Response.json({
-      success: true,
-      settings,
-    })
+    return Response.json(
+      {
+        success: true,
+        settings,
+      },
+      {
+        headers: {
+          "Cache-Control": "no-store, max-age=0",
+        },
+      },
+    )
   } catch (error) {
+    console.error("[v0] Settings update error:", error)
     return Response.json(
       {
         success: false,
