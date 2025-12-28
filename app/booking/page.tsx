@@ -43,8 +43,8 @@ export default function BookingPage() {
     fetch("/api/admin/settings")
       .then((res) => res.json())
       .then((data) => {
-        if (data.data) {
-          setSettings(data.data)
+        if (data.success) {
+          setSettings(data.settings)
         }
       })
       .catch(() => {})
