@@ -4,19 +4,6 @@ import { validateSession } from "@/lib/auth"
 
 export async function GET(request: Request) {
   try {
-    const cookieStore = await cookies()
-    const sessionId = cookieStore.get("admin_session")?.value
-
-    if (!sessionId || !validateSession(sessionId)) {
-      return Response.json(
-        {
-          success: false,
-          error: "Nincs hitelesítés",
-        },
-        { status: 401 },
-      )
-    }
-
     const settings = await getSettings()
 
     return Response.json(
