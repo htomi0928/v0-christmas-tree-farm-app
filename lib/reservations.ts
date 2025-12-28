@@ -1,3 +1,4 @@
+import "server-only"
 import { sql } from "./db"
 import { type Reservation, ReservationStatus, type CreateReservationData, type UpdateReservationData } from "./types"
 

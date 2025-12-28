@@ -1,3 +1,4 @@
+import "server-only"
 import { deleteExpense } from "@/lib/expenses"
 import { getSessionUser } from "@/lib/auth"
 import { cookies } from "next/headers"

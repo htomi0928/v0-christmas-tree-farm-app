@@ -1,3 +1,4 @@
+import "server-only"
 import { cookies } from "next/headers"
 import { getSettings, updateSettings } from "@/lib/settings"
 import { validateSession } from "@/lib/auth"

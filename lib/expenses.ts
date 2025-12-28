@@ -1,3 +1,4 @@
+import "server-only"
 import { sql } from "./db"
 import type { Expense, CreateExpenseData } from "./types"
 

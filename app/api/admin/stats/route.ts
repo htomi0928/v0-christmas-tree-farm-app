@@ -1,3 +1,4 @@
+import "server-only"
 import { getReservationStats } from "@/lib/reservations"
 import { getSessionUser } from "@/lib/auth"
 

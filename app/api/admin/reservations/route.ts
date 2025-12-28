@@ -1,3 +1,4 @@
+import "server-only"
 import { cookies } from "next/headers"
 import { listReservations } from "@/lib/reservations"
 import type { ReservationStatus } from "@/lib/types"

@@ -1,4 +1,4 @@
-// Simple in-memory session store
+import "server-only"
 import { sql } from "./db"
 
 // AUTH_SECRET should be a long, random string stored in Vercel environment variables
