@@ -1,3 +1,4 @@
+import "server-only"
 import { neon } from "@neondatabase/serverless"
 
 // POSTGRES_URL is provided by Vercel/Neon integration
@@ -10,6 +11,4 @@ if (!connectionString) {
 }
 
 // Initialize Neon SQL client - ensure it's not exported to client components
-export const sql = neon(connectionString!, {
-  disableWarningInBrowsers: true
-})
+export const sql = neon(connectionString!)
