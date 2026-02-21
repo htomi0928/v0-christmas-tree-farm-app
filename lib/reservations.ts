@@ -2,6 +2,13 @@ import "server-only"
 import { sql } from "./db"
 import { type Reservation, ReservationStatus, type CreateReservationData, type UpdateReservationData } from "./types"
 
+// Format a database date value to YYYY-MM-DD string
+function formatDate(value: any): string {
+  if (!value) return ""
+  const d = new Date(value)
+  return d.toISOString().split("T")[0]
+}
+
 // Validation
 function validateReservationData(data: CreateReservationData): string[] {
   const errors: string[] = []
@@ -43,7 +50,7 @@ export async function listReservations(filters?: { visitDate?: string; status?: 
     name: row.name,
     phone: row.phone,
     email: row.email || undefined,
-    visitDate: row.visit_date,
+    visitDate: formatDate(row.visit_date),
     treeCount: row.tree_count,
     notes: row.notes || undefined,
     treeNumbers: row.tree_numbers || undefined,
@@ -65,7 +72,7 @@ export async function getReservationById(id: number): Promise<Reservation | null
     name: row.name,
     phone: row.phone,
     email: row.email || undefined,
-    visitDate: row.visit_date,
+    visitDate: formatDate(row.visit_date),
     treeCount: row.tree_count,
     notes: row.notes || undefined,
     treeNumbers: row.tree_numbers || undefined,
@@ -96,7 +103,7 @@ export async function createReservation(
     name: row.name,
     phone: row.phone,
     email: row.email || undefined,
-    visitDate: row.visit_date,
+    visitDate: formatDate(row.visit_date),
     treeCount: row.tree_count,
     notes: row.notes || undefined,
     treeNumbers: row.tree_numbers || undefined,
@@ -190,7 +197,7 @@ export async function updateReservation(
     name: row.name,
     phone: row.phone,
     email: row.email || undefined,
-    visitDate: row.visit_date,
+    visitDate: formatDate(row.visit_date),
     treeCount: row.tree_count,
     notes: row.notes || undefined,
     treeNumbers: row.tree_numbers || undefined,
