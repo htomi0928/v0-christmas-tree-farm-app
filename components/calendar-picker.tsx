@@ -9,7 +9,6 @@ interface CalendarPickerProps {
   onDateSelect: (date: string) => void
   minDate?: Date
   maxDate?: Date
-  unavailableDates?: string[]
 }
 
 export default function CalendarPicker({
@@ -17,31 +16,22 @@ export default function CalendarPicker({
   onDateSelect,
   minDate,
   maxDate,
-  unavailableDates = [],
 }: CalendarPickerProps) {
   const [currentMonth, setCurrentMonth] = useState(new Date(new Date().getFullYear(), new Date().getMonth(), 1))
-  const [unavailable, setUnavailable] = useState<string[]>(unavailableDates)
-  const [isLoading, setIsLoading] = useState(!unavailableDates.length)
-  const [seasonStart, setSeasonStart] = useState<Date | null>(null)
-  const [seasonEnd, setSeasonEnd] = useState<Date | null>(null)
+  const [availableDays, setAvailableDays] = useState<string[]>([])
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     fetch("/api/admin/settings")
       .then((res) => res.json())
       .then((data) => {
-        if (data.settings?.unavailableDays) {
-          setUnavailable(data.settings.unavailableDays)
-        }
-        if (data.settings?.seasonStart) {
-          setSeasonStart(new Date(data.settings.seasonStart))
-        }
-        if (data.settings?.seasonEnd) {
-          setSeasonEnd(new Date(data.settings.seasonEnd))
+        if (data.settings?.availableDays) {
+          setAvailableDays(data.settings.availableDays)
         }
       })
       .catch(() => {})
       .finally(() => setIsLoading(false))
-  }, [unavailableDates])
+  }, [])
 
   const getDaysInMonth = (date: Date) => {
     return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate()
@@ -55,13 +45,11 @@ export default function CalendarPicker({
     const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day)
     const dateStr = date.toISOString().split("T")[0]
 
-    if (seasonStart && date < seasonStart) return false
-    if (seasonEnd && date > seasonEnd) return false
-
     if (minDate && date < minDate) return false
     if (maxDate && date > maxDate) return false
 
-    if (unavailable.includes(dateStr)) return false
+    // Only allow selection if the day is in availableDays
+    if (availableDays.length > 0 && !availableDays.includes(dateStr)) return false
 
     return true
   }
@@ -83,16 +71,16 @@ export default function CalendarPicker({
   }
 
   const monthNames = [
-    "január",
-    "február",
-    "március",
-    "április",
-    "május",
-    "június",
-    "július",
+    "januar",
+    "februar",
+    "marcius",
+    "aprilis",
+    "majus",
+    "junius",
+    "julius",
     "augusztus",
     "szeptember",
-    "október",
+    "oktober",
     "november",
     "december",
   ]
@@ -101,7 +89,7 @@ export default function CalendarPicker({
 
   const daysInMonth = getDaysInMonth(currentMonth)
   const firstDay = getFirstDayOfMonth(currentMonth)
-  const days = []
+  const days: (number | null)[] = []
 
   for (let i = 0; i < firstDay; i++) {
     days.push(null)
@@ -111,7 +99,7 @@ export default function CalendarPicker({
     days.push(i)
   }
 
-  const weeks = []
+  const weeks: (number | null)[][] = []
   for (let i = 0; i < days.length; i += 7) {
     weeks.push(days.slice(i, i + 7))
   }
@@ -142,28 +130,30 @@ export default function CalendarPicker({
 
       <div className="space-y-2">
         {weeks.map((week, weekIndex) => (
-          <div key={weekIndex} className="grid grid-cols-7 gap-2">
+          <div key={`week-${weekIndex}`} className="grid grid-cols-7 gap-2">
             {week.map((day, dayIndex) => {
-              const dateStr =
-                day && new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day).toISOString().split("T")[0]
-              const isSelected = day && selectedDate === dateStr
-              const canSelect = day && isSelectable(day)
-              const isUnavailable = day && unavailable.includes(dateStr)
+              if (!day) {
+                return <div key={`empty-${weekIndex}-${dayIndex}`} className="py-2" />
+              }
+
+              const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day)
+              const dateStr = date.toISOString().split("T")[0]
+              const isSelected = selectedDate === dateStr
+              const canSelect = isSelectable(day)
+              const isAvailable = availableDays.includes(dateStr)
 
               return (
                 <button
-                  key={dayIndex}
+                  key={dateStr}
                   type="button"
-                  onClick={() => day && handleDayClick(day)}
+                  onClick={() => handleDayClick(day)}
                   disabled={!canSelect}
                   className={`
                     py-2 rounded-lg font-medium transition-colors text-sm
-                    ${!day ? "bg-transparent" : ""}
                     ${canSelect ? "cursor-pointer" : "cursor-not-allowed opacity-30"}
                     ${isSelected ? "bg-accent text-accent-foreground font-bold" : ""}
-                    ${isUnavailable ? "bg-destructive/20 text-destructive/70 line-through" : ""}
-                    ${!isSelected && canSelect && !isUnavailable ? "bg-primary/10 hover:bg-primary/20 text-foreground" : ""}
-                    ${!canSelect && day && !isUnavailable ? "text-foreground/40" : ""}
+                    ${!isSelected && canSelect && isAvailable ? "bg-green-100 hover:bg-green-200 text-green-900" : ""}
+                    ${!canSelect && !isAvailable ? "bg-secondary/20 text-foreground/30" : ""}
                   `}
                 >
                   {day}
@@ -175,14 +165,15 @@ export default function CalendarPicker({
       </div>
 
       <div className="mt-4 pt-4 border-t border-border text-xs text-foreground/60 space-y-1">
-        <p>Az adminisztrator beállítja, mely napok nem érhetők el (piros, áthúzott).</p>
         {isLoading ? (
-          <p className="text-foreground/50">Elérhetőség betöltése...</p>
-        ) : unavailable.length > 0 ? (
-          <p className="text-destructive/70">
-            <span className="font-semibold">Megjegyzés:</span> Az áthúzott dátumok nem érhetők el.
+          <p className="text-foreground/50">Elerhetoseg betoltese...</p>
+        ) : availableDays.length > 0 ? (
+          <p>
+            <span className="text-green-700 font-semibold">Zold napok:</span> Elerheto foglalashoz
           </p>
-        ) : null}
+        ) : (
+          <p className="text-amber-600">Nincs elerheto nap beallitva. Kerlek, kerj meg az adminisztratort.</p>
+        )}
       </div>
     </Card>
   )

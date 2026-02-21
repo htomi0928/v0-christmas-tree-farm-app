@@ -308,11 +308,9 @@ export default function BookingPage() {
               <CalendarPicker
                 selectedDate={formData.visitDate}
                 onDateSelect={handleDateSelect}
-                minDate={new Date()}
-                maxDate={new Date(new Date().getFullYear(), 11, 31)}
-                unavailableDates={settings?.unavailableDays}
+                availableDates={settings?.availableDays}
               />
-              <p className="text-muted-foreground text-xs mt-1">Szombat vagy vasárnap, november-december között</p>
+              <p className="text-muted-foreground text-xs mt-1">Válassz egy elérhető napot</p>
               {errors.visitDate && <p className="text-destructive text-sm mt-2">{errors.visitDate}</p>}
             </div>
 

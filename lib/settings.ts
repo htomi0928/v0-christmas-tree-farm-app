@@ -8,12 +8,10 @@ export async function getSettings(): Promise<Settings> {
   if (rows.length === 0) {
     // Return defaults if no settings exist
     return {
-      seasonStart: `${new Date().getFullYear()}-11-01`,
-      seasonEnd: `${new Date().getFullYear()}-12-24`,
+      availableDays: [],
       maxBookingsPerDay: 20,
       unavailableDays: [],
-      retrievalStart: `${new Date().getFullYear()}-12-20`,
-      retrievalEnd: `${new Date().getFullYear()}-12-22`,
+      retrievalDays: [],
       pricePerTree: 8000,
     }
   }
@@ -21,12 +19,10 @@ export async function getSettings(): Promise<Settings> {
   const row = rows[0]
 
   return {
-    seasonStart: row.season_start,
-    seasonEnd: row.season_end,
+    availableDays: row.available_days ? row.available_days.split(",").filter(Boolean) : [],
     maxBookingsPerDay: row.max_bookings_per_day,
     unavailableDays: row.unavailable_days ? row.unavailable_days.split(",").filter(Boolean) : [],
-    retrievalStart: row.retrieval_start || `${new Date().getFullYear()}-12-20`,
-    retrievalEnd: row.retrieval_end || `${new Date().getFullYear()}-12-22`,
+    retrievalDays: row.retrieval_days ? row.retrieval_days.split(",").filter(Boolean) : [],
     pricePerTree: row.price,
   }
 }
@@ -38,13 +34,9 @@ export async function updateSettings(newSettings: Partial<Settings>): Promise<Se
   const values: any[] = []
   let paramIndex = 1
 
-  if (newSettings.seasonStart !== undefined) {
-    updates.push(`season_start = $${paramIndex++}`)
-    values.push(newSettings.seasonStart)
-  }
-  if (newSettings.seasonEnd !== undefined) {
-    updates.push(`season_end = $${paramIndex++}`)
-    values.push(newSettings.seasonEnd)
+  if (newSettings.availableDays !== undefined) {
+    updates.push(`available_days = $${paramIndex++}`)
+    values.push(newSettings.availableDays.join(","))
   }
   if (newSettings.maxBookingsPerDay !== undefined) {
     updates.push(`max_bookings_per_day = $${paramIndex++}`)
@@ -54,13 +46,9 @@ export async function updateSettings(newSettings: Partial<Settings>): Promise<Se
     updates.push(`unavailable_days = $${paramIndex++}`)
     values.push(newSettings.unavailableDays.join(","))
   }
-  if (newSettings.retrievalStart !== undefined) {
-    updates.push(`retrieval_start = $${paramIndex++}`)
-    values.push(newSettings.retrievalStart)
-  }
-  if (newSettings.retrievalEnd !== undefined) {
-    updates.push(`retrieval_end = $${paramIndex++}`)
-    values.push(newSettings.retrievalEnd)
+  if (newSettings.retrievalDays !== undefined) {
+    updates.push(`retrieval_days = $${paramIndex++}`)
+    values.push(newSettings.retrievalDays.join(","))
   }
   if (newSettings.pricePerTree !== undefined) {
     updates.push(`price = $${paramIndex++}`)
@@ -78,12 +66,10 @@ export async function updateSettings(newSettings: Partial<Settings>): Promise<Se
   const row = rows[0]
 
   return {
-    seasonStart: row.season_start,
-    seasonEnd: row.season_end,
+    availableDays: row.available_days ? row.available_days.split(",").filter(Boolean) : [],
     maxBookingsPerDay: row.max_bookings_per_day,
     unavailableDays: row.unavailable_days ? row.unavailable_days.split(",").filter(Boolean) : [],
-    retrievalStart: row.retrieval_start,
-    retrievalEnd: row.retrieval_end,
+    retrievalDays: row.retrieval_days ? row.retrieval_days.split(",").filter(Boolean) : [],
     pricePerTree: row.price,
   }
 }
