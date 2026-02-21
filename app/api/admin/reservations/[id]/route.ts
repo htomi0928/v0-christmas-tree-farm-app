@@ -4,7 +4,7 @@ import { getReservationById, updateReservation } from "@/lib/reservations"
 import type { UpdateReservationData } from "@/lib/types"
 import { validateSession } from "@/lib/auth"
 
-export async function GET(request: Request, { params }: { params: { id: string } }) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const cookieStore = await cookies()
     const sessionId = cookieStore.get("admin_session")?.value
@@ -19,7 +19,8 @@ export async function GET(request: Request, { params }: { params: { id: string }
       )
     }
 
-    const reservation = await getReservationById(Number.parseInt(params.id))
+    const { id } = await params
+    const reservation = await getReservationById(Number.parseInt(id))
 
     if (!reservation) {
       return Response.json(
@@ -46,7 +47,7 @@ export async function GET(request: Request, { params }: { params: { id: string }
   }
 }
 
-export async function PATCH(request: Request, { params }: { params: { id: string } }) {
+export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const cookieStore = await cookies()
     const sessionId = cookieStore.get("admin_session")?.value
@@ -61,6 +62,7 @@ export async function PATCH(request: Request, { params }: { params: { id: string
       )
     }
 
+    const { id } = await params
     const body = await request.json()
     const updateData: UpdateReservationData = {
       name: body.name,
@@ -71,9 +73,10 @@ export async function PATCH(request: Request, { params }: { params: { id: string
       status: body.status,
       treeNumbers: body.treeNumbers,
       notes: body.notes,
+      paidTo: body.paidTo,
     }
 
-    const result = await updateReservation(Number.parseInt(params.id), updateData)
+    const result = await updateReservation(Number.parseInt(id), updateData)
 
     if (!result.success) {
       return Response.json(
