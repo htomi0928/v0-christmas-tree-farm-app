@@ -11,6 +11,11 @@ interface CalendarPickerProps {
   maxDate?: Date
 }
 
+// Helper to format date as YYYY-MM-DD without timezone shift
+function toDateStr(year: number, month: number, day: number): string {
+  return `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
+}
+
 export default function CalendarPicker({
   selectedDate,
   onDateSelect,
@@ -42,11 +47,7 @@ export default function CalendarPicker({
   }
 
   const isSelectable = (day: number) => {
-    const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day)
-    const dateStr = date.toISOString().split("T")[0]
-
-    if (minDate && date < minDate) return false
-    if (maxDate && date > maxDate) return false
+    const dateStr = toDateStr(currentMonth.getFullYear(), currentMonth.getMonth(), day)
 
     // Only allow selection if the day is in availableDays
     if (availableDays.length > 0 && !availableDays.includes(dateStr)) return false
@@ -64,9 +65,7 @@ export default function CalendarPicker({
 
   const handleDayClick = (day: number) => {
     if (!isSelectable(day)) return
-
-    const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day)
-    const dateStr = date.toISOString().split("T")[0]
+    const dateStr = toDateStr(currentMonth.getFullYear(), currentMonth.getMonth(), day)
     onDateSelect(dateStr)
   }
 
@@ -136,8 +135,7 @@ export default function CalendarPicker({
                 return <div key={`empty-${weekIndex}-${dayIndex}`} className="py-2" />
               }
 
-              const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day)
-              const dateStr = date.toISOString().split("T")[0]
+              const dateStr = toDateStr(currentMonth.getFullYear(), currentMonth.getMonth(), day)
               const isSelected = selectedDate === dateStr
               const canSelect = isSelectable(day)
               const isAvailable = availableDays.includes(dateStr)

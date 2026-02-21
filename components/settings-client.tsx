@@ -18,13 +18,18 @@ export default function SettingsClient({ initialSettings }: Props) {
   const [formData, setFormData] = useState({
     availableDays: initialSettings.availableDays || [],
     maxBookingsPerDay: initialSettings.maxBookingsPerDay,
-    unavailableDays: initialSettings.unavailableDays || [],
     retrievalDays: initialSettings.retrievalDays || [],
     pricePerTree: initialSettings.pricePerTree,
   })
 
-  // Calendar state
-  const [currentMonth, setCurrentMonth] = useState(new Date(new Date().getFullYear(), 10, 1)) // November
+  // Independent calendar states for each calendar
+  const [availableMonth, setAvailableMonth] = useState(new Date(new Date().getFullYear(), 10, 1)) // November
+  const [retrievalMonth, setRetrievalMonth] = useState(new Date(new Date().getFullYear(), 11, 1)) // December
+
+  // Helper to format date as YYYY-MM-DD without timezone shift
+  const toDateStr = (year: number, month: number, day: number): string => {
+    return `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
+  }
 
   const handleToggleAvailableDay = (dateStr: string) => {
     setFormData((prev) => ({
@@ -82,14 +87,6 @@ export default function SettingsClient({ initialSettings }: Props) {
     return new Date(date.getFullYear(), date.getMonth(), 1).getDay()
   }
 
-  const handlePrevMonth = () => {
-    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1))
-  }
-
-  const handleNextMonth = () => {
-    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1))
-  }
-
   const monthNames = [
     "januar",
     "februar",
@@ -107,22 +104,19 @@ export default function SettingsClient({ initialSettings }: Props) {
 
   const dayNames = ["V", "H", "K", "Sze", "Cs", "P", "Szo"]
 
-  const daysInMonth = getDaysInMonth(currentMonth)
-  const firstDay = getFirstDayOfMonth(currentMonth)
-  const days: (number | null)[] = []
-
-  for (let i = 0; i < firstDay; i++) {
-    days.push(null)
+  const buildWeeks = (monthDate: Date) => {
+    const daysInMonth = getDaysInMonth(monthDate)
+    const firstDay = getFirstDayOfMonth(monthDate)
+    const days: (number | null)[] = []
+    for (let i = 0; i < firstDay; i++) days.push(null)
+    for (let i = 1; i <= daysInMonth; i++) days.push(i)
+    const weeks: (number | null)[][] = []
+    for (let i = 0; i < days.length; i += 7) weeks.push(days.slice(i, i + 7))
+    return weeks
   }
 
-  for (let i = 1; i <= daysInMonth; i++) {
-    days.push(i)
-  }
-
-  const weeks: (number | null)[][] = []
-  for (let i = 0; i < days.length; i += 7) {
-    weeks.push(days.slice(i, i + 7))
-  }
+  const availableWeeks = buildWeeks(availableMonth)
+  const retrievalWeeks = buildWeeks(retrievalMonth)
 
   const clearAllAvailable = () => {
     setFormData((prev) => ({ ...prev, availableDays: [] }))
@@ -237,15 +231,15 @@ export default function SettingsClient({ initialSettings }: Props) {
 
           {/* Month/Year Navigation */}
           <div className="flex items-center justify-between mb-4">
-            <button onClick={handlePrevMonth} className="p-2 hover:bg-secondary rounded-lg transition-colors" type="button">
+            <button onClick={() => setAvailableMonth(new Date(availableMonth.getFullYear(), availableMonth.getMonth() - 1, 1))} className="p-2 hover:bg-secondary rounded-lg transition-colors" type="button">
               <ChevronLeft className="h-5 w-5 text-foreground" />
             </button>
 
             <h3 className="font-semibold text-foreground">
-              {currentMonth.getFullYear()}. {monthNames[currentMonth.getMonth()]}
+              {availableMonth.getFullYear()}. {monthNames[availableMonth.getMonth()]}
             </h3>
 
-            <button onClick={handleNextMonth} className="p-2 hover:bg-secondary rounded-lg transition-colors" type="button">
+            <button onClick={() => setAvailableMonth(new Date(availableMonth.getFullYear(), availableMonth.getMonth() + 1, 1))} className="p-2 hover:bg-secondary rounded-lg transition-colors" type="button">
               <ChevronRight className="h-5 w-5 text-foreground" />
             </button>
           </div>
@@ -261,15 +255,14 @@ export default function SettingsClient({ initialSettings }: Props) {
 
           {/* Calendar grid */}
           <div className="space-y-1">
-            {weeks.map((week, weekIndex) => (
+            {availableWeeks.map((week, weekIndex) => (
               <div key={`avail-week-${weekIndex}`} className="grid grid-cols-7 gap-1">
                 {week.map((day, dayIndex) => {
                   if (!day) {
                     return <div key={`avail-empty-${weekIndex}-${dayIndex}`} className="h-10" />
                   }
 
-                  const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day)
-                  const dateStr = date.toISOString().split("T")[0]
+                  const dateStr = toDateStr(availableMonth.getFullYear(), availableMonth.getMonth(), day)
                   const isAvailable = formData.availableDays.includes(dateStr)
 
                   return (
@@ -325,15 +318,15 @@ export default function SettingsClient({ initialSettings }: Props) {
 
           {/* Month/Year Navigation */}
           <div className="flex items-center justify-between mb-4">
-            <button onClick={handlePrevMonth} className="p-2 hover:bg-secondary rounded-lg transition-colors" type="button">
+            <button onClick={() => setRetrievalMonth(new Date(retrievalMonth.getFullYear(), retrievalMonth.getMonth() - 1, 1))} className="p-2 hover:bg-secondary rounded-lg transition-colors" type="button">
               <ChevronLeft className="h-5 w-5 text-foreground" />
             </button>
 
             <h3 className="font-semibold text-foreground">
-              {currentMonth.getFullYear()}. {monthNames[currentMonth.getMonth()]}
+              {retrievalMonth.getFullYear()}. {monthNames[retrievalMonth.getMonth()]}
             </h3>
 
-            <button onClick={handleNextMonth} className="p-2 hover:bg-secondary rounded-lg transition-colors" type="button">
+            <button onClick={() => setRetrievalMonth(new Date(retrievalMonth.getFullYear(), retrievalMonth.getMonth() + 1, 1))} className="p-2 hover:bg-secondary rounded-lg transition-colors" type="button">
               <ChevronRight className="h-5 w-5 text-foreground" />
             </button>
           </div>
@@ -349,15 +342,14 @@ export default function SettingsClient({ initialSettings }: Props) {
 
           {/* Calendar grid */}
           <div className="space-y-1">
-            {weeks.map((week, weekIndex) => (
+            {retrievalWeeks.map((week, weekIndex) => (
               <div key={`retr-week-${weekIndex}`} className="grid grid-cols-7 gap-1">
                 {week.map((day, dayIndex) => {
                   if (!day) {
                     return <div key={`retr-empty-${weekIndex}-${dayIndex}`} className="h-10" />
                   }
 
-                  const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day)
-                  const dateStr = date.toISOString().split("T")[0]
+                  const dateStr = toDateStr(retrievalMonth.getFullYear(), retrievalMonth.getMonth(), day)
                   const isRetrieval = formData.retrievalDays.includes(dateStr)
 
                   return (
