@@ -13,6 +13,7 @@ interface FormData {
   phone: string
   email: string
   visitDate: string
+  pickupDate: string
   treeCount: string
   notes: string
   acceptTerms: boolean
@@ -28,6 +29,7 @@ export default function BookingPage() {
     phone: "",
     email: "",
     visitDate: "",
+    pickupDate: "",
     treeCount: "1",
     notes: "",
     acceptTerms: false,
@@ -308,13 +310,47 @@ export default function BookingPage() {
               <CalendarPicker
                 selectedDate={formData.visitDate}
                 onDateSelect={handleDateSelect}
-                minDate={new Date()}
-                maxDate={new Date(new Date().getFullYear(), 11, 31)}
-                unavailableDates={settings?.unavailableDays}
+                availableDates={settings?.availableDays}
               />
-              <p className="text-muted-foreground text-xs mt-1">Szombat vagy vasárnap, november-december között</p>
+              <p className="text-muted-foreground text-xs mt-1">Válassz egy elérhető napot</p>
               {errors.visitDate && <p className="text-destructive text-sm mt-2">{errors.visitDate}</p>}
             </div>
+
+            {settings?.retrievalDays && settings.retrievalDays.length > 0 && (
+              <div>
+                <label htmlFor="pickupDate" className="block text-sm font-semibold text-foreground mb-2">
+                  Átvételi nap <span className="text-accent">*</span>
+                </label>
+                <select
+                  id="pickupDate"
+                  name="pickupDate"
+                  value={formData.pickupDate}
+                  onChange={handleChange}
+                  className={`w-full px-4 py-2 rounded-lg border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary ${
+                    errors.pickupDate ? "border-destructive" : "border-border"
+                  }`}
+                >
+                  <option value="">Válassz átvételi napot...</option>
+                  {settings.retrievalDays.sort().map((day: string) => {
+                    const [y, m, d] = day.split("-")
+                    const date = new Date(Number(y), Number(m) - 1, Number(d))
+                    const formatted = date.toLocaleDateString("hu-HU", {
+                      weekday: "long",
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })
+                    return (
+                      <option key={day} value={day}>
+                        {formatted}
+                      </option>
+                    )
+                  })}
+                </select>
+                <p className="text-muted-foreground text-xs mt-1">Mikor szeretnéd átvenni a fát?</p>
+                {errors.pickupDate && <p className="text-destructive text-sm mt-1">{errors.pickupDate}</p>}
+              </div>
+            )}
 
             <div>
               <label htmlFor="treeCount" className="block text-sm font-semibold text-foreground mb-2">

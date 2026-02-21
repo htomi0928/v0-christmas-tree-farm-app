@@ -10,7 +10,7 @@ export default async function SettingsPage() {
 
   // Server-side auth check
   if (!sessionId || !validateSession(sessionId)) {
-    redirect("/admin/login")
+    redirect("/admin-login")
   }
 
   const settings = await getSettings()

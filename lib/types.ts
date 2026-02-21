@@ -58,11 +58,8 @@ export interface CreateExpenseData {
 }
 
 export interface Settings {
-  seasonStart: string // ISO date
-  seasonEnd: string // ISO date
+  availableDays: string[] // Array of ISO date strings - days when booking is available
   maxBookingsPerDay: number
-  unavailableDays: string[] // Array of ISO date strings
-  retrievalStart: string // ISO date - first day customers can pick up
-  retrievalEnd: string // ISO date - last day customers can pick up
+  retrievalDays: string[] // Array of ISO date strings - days when customers can pick up trees
   pricePerTree: number // Price in HUF
 }

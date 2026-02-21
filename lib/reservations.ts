@@ -2,6 +2,21 @@ import "server-only"
 import { sql } from "./db"
 import { type Reservation, ReservationStatus, type CreateReservationData, type UpdateReservationData } from "./types"
 
+// Format a database date value to YYYY-MM-DD string without timezone shift
+function formatDate(value: any): string {
+  if (!value) return ""
+  // If it's already a YYYY-MM-DD string, return as-is
+  if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value)) return value
+  // If it's an ISO string like "2025-12-06T00:00:00.000Z", extract the date part
+  if (typeof value === "string" && value.includes("T")) return value.split("T")[0]
+  // For Date objects, use local date parts to avoid UTC shift
+  const d = new Date(value)
+  const year = d.getFullYear()
+  const month = String(d.getMonth() + 1).padStart(2, "0")
+  const day = String(d.getDate()).padStart(2, "0")
+  return `${year}-${month}-${day}`
+}
+
 // Validation
 function validateReservationData(data: CreateReservationData): string[] {
   const errors: string[] = []
@@ -43,7 +58,7 @@ export async function listReservations(filters?: { visitDate?: string; status?: 
     name: row.name,
     phone: row.phone,
     email: row.email || undefined,
-    visitDate: row.visit_date,
+    visitDate: formatDate(row.visit_date),
     treeCount: row.tree_count,
     notes: row.notes || undefined,
     treeNumbers: row.tree_numbers || undefined,
@@ -65,7 +80,7 @@ export async function getReservationById(id: number): Promise<Reservation | null
     name: row.name,
     phone: row.phone,
     email: row.email || undefined,
-    visitDate: row.visit_date,
+    visitDate: formatDate(row.visit_date),
     treeCount: row.tree_count,
     notes: row.notes || undefined,
     treeNumbers: row.tree_numbers || undefined,
@@ -96,7 +111,7 @@ export async function createReservation(
     name: row.name,
     phone: row.phone,
     email: row.email || undefined,
-    visitDate: row.visit_date,
+    visitDate: formatDate(row.visit_date),
     treeCount: row.tree_count,
     notes: row.notes || undefined,
     treeNumbers: row.tree_numbers || undefined,
@@ -190,7 +205,7 @@ export async function updateReservation(
     name: row.name,
     phone: row.phone,
     email: row.email || undefined,
-    visitDate: row.visit_date,
+    visitDate: formatDate(row.visit_date),
     treeCount: row.tree_count,
     notes: row.notes || undefined,
     treeNumbers: row.tree_numbers || undefined,
