@@ -56,8 +56,6 @@ export async function hashPassword(password: string, saltHex?: string): Promise<
 export async function verifyPassword(password: string, storedHash: string): Promise<boolean> {
   const [saltHex, _] = storedHash.split(":")
   const newHash = await hashPassword(password, saltHex)
-  console.log("NewHash: " + newHash)
-  console.log("StoredHash: " + storedHash)
   return newHash === storedHash
 }
 
