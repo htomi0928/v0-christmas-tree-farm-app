@@ -10,7 +10,6 @@ export async function getSettings(): Promise<Settings> {
     return {
       availableDays: [],
       maxBookingsPerDay: 20,
-      unavailableDays: [],
       retrievalDays: [],
       pricePerTree: 8000,
     }
@@ -21,7 +20,6 @@ export async function getSettings(): Promise<Settings> {
   return {
     availableDays: row.available_days ? row.available_days.split(",").filter(Boolean) : [],
     maxBookingsPerDay: row.max_bookings_per_day,
-    unavailableDays: row.unavailable_days ? row.unavailable_days.split(",").filter(Boolean) : [],
     retrievalDays: row.retrieval_days ? row.retrieval_days.split(",").filter(Boolean) : [],
     pricePerTree: row.price,
   }
@@ -41,10 +39,6 @@ export async function updateSettings(newSettings: Partial<Settings>): Promise<Se
   if (newSettings.maxBookingsPerDay !== undefined) {
     updates.push(`max_bookings_per_day = $${paramIndex++}`)
     values.push(newSettings.maxBookingsPerDay)
-  }
-  if (newSettings.unavailableDays !== undefined) {
-    updates.push(`unavailable_days = $${paramIndex++}`)
-    values.push(newSettings.unavailableDays.join(","))
   }
   if (newSettings.retrievalDays !== undefined) {
     updates.push(`retrieval_days = $${paramIndex++}`)
@@ -68,7 +62,6 @@ export async function updateSettings(newSettings: Partial<Settings>): Promise<Se
   return {
     availableDays: row.available_days ? row.available_days.split(",").filter(Boolean) : [],
     maxBookingsPerDay: row.max_bookings_per_day,
-    unavailableDays: row.unavailable_days ? row.unavailable_days.split(",").filter(Boolean) : [],
     retrievalDays: row.retrieval_days ? row.retrieval_days.split(",").filter(Boolean) : [],
     pricePerTree: row.price,
   }

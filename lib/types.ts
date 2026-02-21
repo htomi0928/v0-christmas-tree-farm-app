@@ -60,7 +60,6 @@ export interface CreateExpenseData {
 export interface Settings {
   availableDays: string[] // Array of ISO date strings - days when booking is available
   maxBookingsPerDay: number
-  unavailableDays: string[] // Array of ISO date strings - legacy, kept for backward compatibility
   retrievalDays: string[] // Array of ISO date strings - days when customers can pick up trees
   pricePerTree: number // Price in HUF
 }
