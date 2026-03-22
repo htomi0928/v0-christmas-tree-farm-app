@@ -59,6 +59,7 @@ export async function listReservations(filters?: { visitDate?: string; status?: 
     phone: row.phone,
     email: row.email || undefined,
     visitDate: formatDate(row.visit_date),
+    pickupDate: row.pickup_date ? formatDate(row.pickup_date) : undefined,
     treeCount: row.tree_count,
     notes: row.notes || undefined,
     treeNumbers: row.tree_numbers || undefined,
@@ -81,6 +82,7 @@ export async function getReservationById(id: number): Promise<Reservation | null
     phone: row.phone,
     email: row.email || undefined,
     visitDate: formatDate(row.visit_date),
+    pickupDate: row.pickup_date ? formatDate(row.pickup_date) : undefined,
     treeCount: row.tree_count,
     notes: row.notes || undefined,
     treeNumbers: row.tree_numbers || undefined,
@@ -112,6 +114,7 @@ export async function createReservation(
     phone: row.phone,
     email: row.email || undefined,
     visitDate: formatDate(row.visit_date),
+    pickupDate: row.pickup_date ? formatDate(row.pickup_date) : undefined,
     treeCount: row.tree_count,
     notes: row.notes || undefined,
     treeNumbers: row.tree_numbers || undefined,
@@ -169,6 +172,10 @@ export async function updateReservation(
     updates.push(`visit_date = $${paramIndex++}`)
     values.push(data.visitDate)
   }
+  if (data.pickupDate !== undefined) {
+    updates.push(`pickup_date = $${paramIndex++}`)
+    values.push(data.pickupDate || null)
+  }
   if (data.treeCount !== undefined) {
     updates.push(`tree_count = $${paramIndex++}`)
     values.push(data.treeCount)
@@ -206,6 +213,7 @@ export async function updateReservation(
     phone: row.phone,
     email: row.email || undefined,
     visitDate: formatDate(row.visit_date),
+    pickupDate: row.pickup_date ? formatDate(row.pickup_date) : undefined,
     treeCount: row.tree_count,
     notes: row.notes || undefined,
     treeNumbers: row.tree_numbers || undefined,
@@ -215,6 +223,16 @@ export async function updateReservation(
   }
 
   return { success: true, data: updated }
+}
+
+// Delete reservation
+export async function deleteReservation(id: number): Promise<{ success: boolean; error?: string }> {
+  const existing = await getReservationById(id)
+  if (!existing) {
+    return { success: false, error: "Foglalás nem található" }
+  }
+  await sql`DELETE FROM reservations WHERE id = ${id}`
+  return { success: true }
 }
 
 // Get stats

@@ -1,11 +1,12 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { type Reservation, ReservationStatus } from "@/lib/types"
-import { ArrowLeft, AlertCircle, CheckCircle2 } from "lucide-react"
+import { ArrowLeft, AlertCircle, CheckCircle2, Trash2 } from "lucide-react"
 
 const statusLabels: Record<ReservationStatus, string> = {
   [ReservationStatus.BOOKED]: "Foglalt",
@@ -20,22 +21,39 @@ interface Props {
 }
 
 export default function ReservationDetailClient({ reservation: initialReservation }: Props) {
+  const router = useRouter()
   const [reservation, setReservation] = useState(initialReservation)
   const [isSaving, setIsSaving] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
+  const [retrievalDays, setRetrievalDays] = useState<string[]>([])
 
   const [formData, setFormData] = useState({
     name: initialReservation.name,
     phone: initialReservation.phone,
     email: initialReservation.email || "",
     visitDate: initialReservation.visitDate,
+    pickupDate: initialReservation.pickupDate || "",
     treeCount: initialReservation.treeCount,
     status: initialReservation.status,
     treeNumbers: initialReservation.treeNumbers || "",
     notes: initialReservation.notes || "",
     paidTo: initialReservation.paidTo || "",
   })
+
+  // Load retrieval days from settings
+  useEffect(() => {
+    fetch("/api/admin/settings")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.settings?.retrievalDays) {
+          setRetrievalDays(data.settings.retrievalDays.sort())
+        }
+      })
+      .catch(() => {})
+  }, [])
 
   const handleSave = async () => {
     setIsSaving(true)
@@ -45,9 +63,7 @@ export default function ReservationDetailClient({ reservation: initialReservatio
     try {
       const response = await fetch(`/api/admin/reservations/${initialReservation.id}`, {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       })
 
@@ -56,18 +72,47 @@ export default function ReservationDetailClient({ reservation: initialReservatio
       if (data.success) {
         setSuccess("Foglalás sikeresen mentve")
         setReservation(data.reservation)
-        setTimeout(() => {
-          setSuccess("")
-        }, 3000)
+        setTimeout(() => setSuccess(""), 3000)
       } else {
         setError(data.error || "Hiba a mentés során")
       }
-    } catch (error) {
+    } catch {
       setError("Hálózati hiba")
-      console.error("Error:", error)
     } finally {
       setIsSaving(false)
     }
+  }
+
+  const handleDelete = async () => {
+    setIsDeleting(true)
+    setError("")
+
+    try {
+      const response = await fetch(`/api/admin/reservations/${initialReservation.id}`, {
+        method: "DELETE",
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        router.push("/admin/reservations")
+      } else {
+        setError(data.error || "Hiba a törlés során")
+        setShowDeleteConfirm(false)
+      }
+    } catch {
+      setError("Hálózati hiba")
+      setShowDeleteConfirm(false)
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
+  const formatDateHu = (dateStr: string) => {
+    if (!dateStr) return ""
+    const [y, m, d] = dateStr.split("-")
+    const date = new Date(Number(y), Number(m) - 1, Number(d))
+    return date.toLocaleDateString("hu-HU", { weekday: "long", year: "numeric", month: "long", day: "numeric" })
   }
 
   return (
@@ -96,13 +141,34 @@ export default function ReservationDetailClient({ reservation: initialReservatio
           </div>
         )}
 
+        {/* Delete confirmation */}
+        {showDeleteConfirm && (
+          <div className="mb-6 p-4 bg-destructive/10 border border-destructive rounded-lg">
+            <p className="text-destructive font-semibold mb-3">Biztosan törlöd ezt a foglalást? Ez nem vonható vissza.</p>
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                onClick={() => setShowDeleteConfirm(false)}
+                disabled={isDeleting}
+                className="bg-transparent"
+              >
+                Mégsem
+              </Button>
+              <Button
+                onClick={handleDelete}
+                disabled={isDeleting}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                {isDeleting ? "Törlés..." : "Igen, törlöm"}
+              </Button>
+            </div>
+          </div>
+        )}
+
         {/* Editable Fields */}
         <div className="space-y-6 mb-8">
-          {/* Editable name field */}
           <div>
-            <label htmlFor="name" className="block text-sm font-semibold text-foreground mb-2">
-              Név
-            </label>
+            <label htmlFor="name" className="block text-sm font-semibold text-foreground mb-2">Név</label>
             <input
               id="name"
               type="text"
@@ -112,11 +178,8 @@ export default function ReservationDetailClient({ reservation: initialReservatio
             />
           </div>
 
-          {/* Editable phone field */}
           <div>
-            <label htmlFor="phone" className="block text-sm font-semibold text-foreground mb-2">
-              Telefonszám
-            </label>
+            <label htmlFor="phone" className="block text-sm font-semibold text-foreground mb-2">Telefonszám</label>
             <input
               id="phone"
               type="tel"
@@ -126,11 +189,8 @@ export default function ReservationDetailClient({ reservation: initialReservatio
             />
           </div>
 
-          {/* Editable email field */}
           <div>
-            <label htmlFor="email" className="block text-sm font-semibold text-foreground mb-2">
-              E-mail
-            </label>
+            <label htmlFor="email" className="block text-sm font-semibold text-foreground mb-2">E-mail</label>
             <input
               id="email"
               type="email"
@@ -140,11 +200,8 @@ export default function ReservationDetailClient({ reservation: initialReservatio
             />
           </div>
 
-          {/* Editable visitDate field */}
           <div>
-            <label htmlFor="visitDate" className="block text-sm font-semibold text-foreground mb-2">
-              Nap
-            </label>
+            <label htmlFor="visitDate" className="block text-sm font-semibold text-foreground mb-2">Látogatás napja</label>
             <input
               id="visitDate"
               type="date"
@@ -154,11 +211,35 @@ export default function ReservationDetailClient({ reservation: initialReservatio
             />
           </div>
 
-          {/* Editable treeCount field */}
           <div>
-            <label htmlFor="treeCount" className="block text-sm font-semibold text-foreground mb-2">
-              Várható fák száma
-            </label>
+            <label htmlFor="pickupDate" className="block text-sm font-semibold text-foreground mb-2">Átvételi nap</label>
+            {retrievalDays.length > 0 ? (
+              <select
+                id="pickupDate"
+                value={formData.pickupDate}
+                onChange={(e) => setFormData({ ...formData, pickupDate: e.target.value })}
+                className="w-full px-4 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+              >
+                <option value="">-- Nincs megadva --</option>
+                {retrievalDays.map((day) => (
+                  <option key={day} value={day}>
+                    {formatDateHu(day)}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <input
+                id="pickupDate"
+                type="date"
+                value={formData.pickupDate}
+                onChange={(e) => setFormData({ ...formData, pickupDate: e.target.value })}
+                className="w-full px-4 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+            )}
+          </div>
+
+          <div>
+            <label htmlFor="treeCount" className="block text-sm font-semibold text-foreground mb-2">Várható fák száma</label>
             <input
               id="treeCount"
               type="number"
@@ -172,32 +253,21 @@ export default function ReservationDetailClient({ reservation: initialReservatio
           </div>
 
           <div>
-            <label htmlFor="status" className="block text-sm font-semibold text-foreground mb-2">
-              Státusz
-            </label>
+            <label htmlFor="status" className="block text-sm font-semibold text-foreground mb-2">Státusz</label>
             <select
               id="status"
               value={formData.status}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  status: e.target.value as ReservationStatus,
-                })
-              }
+              onChange={(e) => setFormData({ ...formData, status: e.target.value as ReservationStatus })}
               className="w-full px-4 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             >
               {Object.entries(statusLabels).map(([key, label]) => (
-                <option key={key} value={key}>
-                  {label}
-                </option>
+                <option key={key} value={key}>{label}</option>
               ))}
             </select>
           </div>
 
           <div>
-            <label htmlFor="treeNumbers" className="block text-sm font-semibold text-foreground mb-2">
-              Fa sorszámok (pl. 12,13,14)
-            </label>
+            <label htmlFor="treeNumbers" className="block text-sm font-semibold text-foreground mb-2">Fa sorszámok (pl. 12,13,14)</label>
             <input
               id="treeNumbers"
               type="text"
@@ -209,9 +279,7 @@ export default function ReservationDetailClient({ reservation: initialReservatio
           </div>
 
           <div>
-            <label htmlFor="notes" className="block text-sm font-semibold text-foreground mb-2">
-              Megjegyzések
-            </label>
+            <label htmlFor="notes" className="block text-sm font-semibold text-foreground mb-2">Megjegyzések</label>
             <textarea
               id="notes"
               value={formData.notes}
@@ -222,9 +290,7 @@ export default function ReservationDetailClient({ reservation: initialReservatio
           </div>
 
           <div>
-            <label htmlFor="paidTo" className="block text-sm font-semibold text-foreground mb-2">
-              Kinek fizettek?
-            </label>
+            <label htmlFor="paidTo" className="block text-sm font-semibold text-foreground mb-2">Kinek fizettek?</label>
             <select
               id="paidTo"
               value={formData.paidTo}
@@ -239,13 +305,25 @@ export default function ReservationDetailClient({ reservation: initialReservatio
         </div>
 
         {/* Action Buttons */}
-        <div className="flex gap-3 justify-end">
-          <Link href="/admin/reservations">
-            <Button variant="outline">Vissza</Button>
-          </Link>
-          <Button onClick={handleSave} disabled={isSaving} className="bg-primary hover:bg-primary/90">
-            {isSaving ? "Mentés..." : "Mentés"}
+        <div className="flex gap-3 justify-between">
+          <Button
+            variant="outline"
+            onClick={() => setShowDeleteConfirm(true)}
+            disabled={isSaving || isDeleting || showDeleteConfirm}
+            className="bg-transparent border-destructive text-destructive hover:bg-destructive/10"
+          >
+            <Trash2 className="h-4 w-4 mr-2" />
+            Törlés
           </Button>
+
+          <div className="flex gap-3">
+            <Link href="/admin/reservations">
+              <Button variant="outline" className="bg-transparent">Vissza</Button>
+            </Link>
+            <Button onClick={handleSave} disabled={isSaving} className="bg-primary hover:bg-primary/90">
+              {isSaving ? "Mentés..." : "Mentés"}
+            </Button>
+          </div>
         </div>
       </Card>
     </div>
