@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { type Reservation, ReservationStatus } from "@/lib/types"
 import { ArrowLeft, AlertCircle, CheckCircle2, Trash2 } from "lucide-react"
+import AdminDatePicker from "@/components/admin-date-picker"
 
 const statusLabels: Record<ReservationStatus, string> = {
   [ReservationStatus.BOOKED]: "Foglalt",
@@ -29,28 +30,15 @@ export default function ReservationDetailClient({ reservation: initialReservatio
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
   const [retrievalDays, setRetrievalDays] = useState<string[]>([])
+  const [availableDays, setAvailableDays] = useState<string[]>([])
 
-  const [formData, setFormData] = useState({
-    name: initialReservation.name,
-    phone: initialReservation.phone,
-    email: initialReservation.email || "",
-    visitDate: initialReservation.visitDate,
-    pickupDate: initialReservation.pickupDate || "",
-    treeCount: initialReservation.treeCount,
-    status: initialReservation.status,
-    treeNumbers: initialReservation.treeNumbers || "",
-    notes: initialReservation.notes || "",
-    paidTo: initialReservation.paidTo || "",
-  })
-
-  // Load retrieval days from settings
+  // Load retrieval days and available days from settings
   useEffect(() => {
     fetch("/api/admin/settings")
       .then((r) => r.json())
       .then((data) => {
-        if (data.settings?.retrievalDays) {
-          setRetrievalDays(data.settings.retrievalDays.sort())
-        }
+        if (data.settings?.retrievalDays) setRetrievalDays(data.settings.retrievalDays.sort())
+        if (data.settings?.availableDays) setAvailableDays(data.settings.availableDays.sort())
       })
       .catch(() => {})
   }, [])
@@ -106,13 +94,6 @@ export default function ReservationDetailClient({ reservation: initialReservatio
     } finally {
       setIsDeleting(false)
     }
-  }
-
-  const formatDateHu = (dateStr: string) => {
-    if (!dateStr) return ""
-    const [y, m, d] = dateStr.split("-")
-    const date = new Date(Number(y), Number(m) - 1, Number(d))
-    return date.toLocaleDateString("hu-HU", { weekday: "long", year: "numeric", month: "long", day: "numeric" })
   }
 
   return (
@@ -201,41 +182,21 @@ export default function ReservationDetailClient({ reservation: initialReservatio
           </div>
 
           <div>
-            <label htmlFor="visitDate" className="block text-sm font-semibold text-foreground mb-2">Látogatás napja</label>
-            <input
-              id="visitDate"
-              type="date"
-              value={formData.visitDate}
-              onChange={(e) => setFormData({ ...formData, visitDate: e.target.value })}
-              className="w-full px-4 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+            <label className="block text-sm font-semibold text-foreground mb-2">Látogatás napja</label>
+            <AdminDatePicker
+              selectedDate={formData.visitDate}
+              onDateSelect={(d) => setFormData({ ...formData, visitDate: d })}
+              highlightDays={availableDays.length > 0 ? availableDays : undefined}
             />
           </div>
 
           <div>
-            <label htmlFor="pickupDate" className="block text-sm font-semibold text-foreground mb-2">Átvételi nap</label>
-            {retrievalDays.length > 0 ? (
-              <select
-                id="pickupDate"
-                value={formData.pickupDate}
-                onChange={(e) => setFormData({ ...formData, pickupDate: e.target.value })}
-                className="w-full px-4 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-              >
-                <option value="">-- Nincs megadva --</option>
-                {retrievalDays.map((day) => (
-                  <option key={day} value={day}>
-                    {formatDateHu(day)}
-                  </option>
-                ))}
-              </select>
-            ) : (
-              <input
-                id="pickupDate"
-                type="date"
-                value={formData.pickupDate}
-                onChange={(e) => setFormData({ ...formData, pickupDate: e.target.value })}
-                className="w-full px-4 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-              />
-            )}
+            <label className="block text-sm font-semibold text-foreground mb-2">Átvételi nap</label>
+            <AdminDatePicker
+              selectedDate={formData.pickupDate}
+              onDateSelect={(d) => setFormData({ ...formData, pickupDate: d })}
+              highlightDays={retrievalDays.length > 0 ? retrievalDays : undefined}
+            />
           </div>
 
           <div>
