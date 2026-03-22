@@ -10,6 +10,7 @@ export async function POST(request: Request) {
       phone: body.phone,
       email: body.email,
       visitDate: body.visitDate,
+      pickupDate: body.pickupDate,
       treeCount: body.treeCount,
       notes: body.notes,
     }

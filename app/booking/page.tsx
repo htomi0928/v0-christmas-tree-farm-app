@@ -128,6 +128,7 @@ export default function BookingPage() {
           phone: formData.phone,
           email: formData.email || undefined,
           visitDate: formData.visitDate,
+          pickupDate: formData.pickupDate || undefined,
           treeCount: Number.parseInt(formData.treeCount),
           notes: formData.notes || undefined,
         }),

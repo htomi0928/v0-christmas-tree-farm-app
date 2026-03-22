@@ -26,6 +26,7 @@ export interface CreateReservationData {
   phone: string
   email?: string
   visitDate: string
+  pickupDate?: string
   treeCount: number
   notes?: string
 }

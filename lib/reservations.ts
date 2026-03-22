@@ -102,8 +102,8 @@ export async function createReservation(
   }
 
   const rows = await sql`
-    INSERT INTO reservations (name, phone, email, visit_date, tree_count, notes, status)
-    VALUES (${data.name}, ${data.phone}, ${data.email || null}, ${data.visitDate}, ${data.treeCount}, ${data.notes || null}, ${ReservationStatus.BOOKED})
+    INSERT INTO reservations (name, phone, email, visit_date, pickup_date, tree_count, notes, status)
+    VALUES (${data.name}, ${data.phone}, ${data.email || null}, ${data.visitDate}, ${data.pickupDate || null}, ${data.treeCount}, ${data.notes || null}, ${ReservationStatus.BOOKED})
     RETURNING *
   `
 
