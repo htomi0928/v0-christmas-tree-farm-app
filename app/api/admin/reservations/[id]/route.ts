@@ -1,6 +1,6 @@
 import "server-only"
 import { cookies } from "next/headers"
-import { getReservationById, updateReservation } from "@/lib/reservations"
+import { getReservationById, updateReservation, deleteReservation } from "@/lib/reservations"
 import type { UpdateReservationData } from "@/lib/types"
 import { validateSession } from "@/lib/auth"
 
@@ -69,6 +69,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       phone: body.phone,
       email: body.email,
       visitDate: body.visitDate,
+      pickupDate: body.pickupDate,
       treeCount: body.treeCount,
       status: body.status,
       treeNumbers: body.treeNumbers,
@@ -100,5 +101,27 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       },
       { status: 500 },
     )
+  }
+}
+
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  try {
+    const cookieStore = await cookies()
+    const sessionId = cookieStore.get("admin_session")?.value
+
+    if (!sessionId || !validateSession(sessionId)) {
+      return Response.json({ success: false, error: "Nincs hitelesítés" }, { status: 401 })
+    }
+
+    const { id } = await params
+    const result = await deleteReservation(Number.parseInt(id))
+
+    if (!result.success) {
+      return Response.json({ success: false, error: result.error }, { status: 404 })
+    }
+
+    return Response.json({ success: true })
+  } catch (error) {
+    return Response.json({ success: false, error: "Szerver hiba" }, { status: 500 })
   }
 }

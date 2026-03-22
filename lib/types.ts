@@ -12,6 +12,7 @@ export interface Reservation {
   phone: string
   email?: string
   visitDate: string // ISO date string, day-only
+  pickupDate?: string // ISO date string, day-only
   treeCount: number
   notes?: string
   treeNumbers?: string // e.g. "12,13,14"
@@ -25,6 +26,7 @@ export interface CreateReservationData {
   phone: string
   email?: string
   visitDate: string
+  pickupDate?: string
   treeCount: number
   notes?: string
 }
@@ -37,6 +39,7 @@ export interface UpdateReservationData {
   phone?: string
   email?: string
   visitDate?: string
+  pickupDate?: string
   treeCount?: number
   paidTo?: "János" | "Sanyi"
 }

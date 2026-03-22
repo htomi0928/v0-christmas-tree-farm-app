@@ -22,7 +22,7 @@ export default function CalendarPicker({
   minDate,
   maxDate,
 }: CalendarPickerProps) {
-  const [currentMonth, setCurrentMonth] = useState(new Date(new Date().getFullYear(), new Date().getMonth(), 1))
+  const [currentMonth, setCurrentMonth] = useState(new Date(new Date().getFullYear(), 11, 1)) // default December
   const [availableDays, setAvailableDays] = useState<string[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
@@ -30,8 +30,13 @@ export default function CalendarPicker({
     fetch("/api/admin/settings")
       .then((res) => res.json())
       .then((data) => {
-        if (data.settings?.availableDays) {
-          setAvailableDays(data.settings.availableDays)
+        const days: string[] = data.settings?.availableDays ?? []
+        setAvailableDays(days)
+        // Jump to the month of the first available day, fallback to December
+        if (days.length > 0) {
+          const first = days.slice().sort()[0]
+          const [y, m] = first.split("-")
+          setCurrentMonth(new Date(Number(y), Number(m) - 1, 1))
         }
       })
       .catch(() => {})
