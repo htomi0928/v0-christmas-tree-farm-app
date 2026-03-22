@@ -27,13 +27,18 @@ export default function AdminDatePicker({
   highlightDays,
   label,
 }: AdminDatePickerProps) {
-  // Initialize to the selected date's month, or current month
+  // Initialize to: selected date's month → first highlighted day's month → current year December
   const initMonth = () => {
     if (selectedDate) {
       const [y, m] = selectedDate.split("-")
       return new Date(Number(y), Number(m) - 1, 1)
     }
-    return new Date(new Date().getFullYear(), new Date().getMonth(), 1)
+    if (highlightDays && highlightDays.length > 0) {
+      const first = highlightDays.slice().sort()[0]
+      const [y, m] = first.split("-")
+      return new Date(Number(y), Number(m) - 1, 1)
+    }
+    return new Date(new Date().getFullYear(), 11, 1) // December fallback
   }
   const [currentMonth, setCurrentMonth] = useState(initMonth)
 

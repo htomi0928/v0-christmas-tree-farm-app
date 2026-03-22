@@ -22,9 +22,19 @@ export default function SettingsClient({ initialSettings }: Props) {
     pricePerTree: initialSettings.pricePerTree,
   })
 
+  // Helper: pick the month of the first sorted date in a list, fallback to current year December
+  const firstDateMonth = (dates: string[]): Date => {
+    if (dates.length > 0) {
+      const first = dates.slice().sort()[0]
+      const [y, m] = first.split("-")
+      return new Date(Number(y), Number(m) - 1, 1)
+    }
+    return new Date(new Date().getFullYear(), 11, 1)
+  }
+
   // Independent calendar states for each calendar
-  const [availableMonth, setAvailableMonth] = useState(new Date(new Date().getFullYear(), 10, 1)) // November
-  const [retrievalMonth, setRetrievalMonth] = useState(new Date(new Date().getFullYear(), 11, 1)) // December
+  const [availableMonth, setAvailableMonth] = useState(() => firstDateMonth(initialSettings.availableDays || []))
+  const [retrievalMonth, setRetrievalMonth] = useState(() => firstDateMonth(initialSettings.retrievalDays || []))
 
   // Helper to format date as YYYY-MM-DD without timezone shift
   const toDateStr = (year: number, month: number, day: number): string => {
