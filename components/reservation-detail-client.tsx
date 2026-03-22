@@ -24,6 +24,18 @@ interface Props {
 export default function ReservationDetailClient({ reservation: initialReservation }: Props) {
   const router = useRouter()
   const [reservation, setReservation] = useState(initialReservation)
+  const [formData, setFormData] = useState({
+    name: initialReservation.name,
+    phone: initialReservation.phone,
+    email: initialReservation.email || "",
+    visitDate: initialReservation.visitDate,
+    pickupDate: initialReservation.pickupDate || "",
+    treeCount: initialReservation.treeCount,
+    status: initialReservation.status,
+    treeNumbers: initialReservation.treeNumbers || "",
+    notes: initialReservation.notes || "",
+    paidTo: initialReservation.paidTo || "",
+  })
   const [isSaving, setIsSaving] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
