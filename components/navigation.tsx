@@ -36,12 +36,13 @@ export function Navigation() {
               <Link
                 key={item.href}
                 href={item.href}
+                prefetch={false}
                 className="px-3 py-2 text-sm font-medium text-foreground hover:text-primary hover:bg-secondary/30 rounded-md transition-colors"
               >
                 {item.label}
               </Link>
             ))}
-            <Link href="/admin">
+            <Link href="/admin" prefetch={false}>
               <Button variant="outline" size="sm" className="ml-4 bg-transparent">
                 Admin
               </Button>
@@ -61,6 +62,7 @@ export function Navigation() {
               <Link
                 key={item.href}
                 href={item.href}
+                prefetch={false}
                 className="block px-3 py-2 rounded-md text-base font-medium text-foreground hover:bg-secondary/30 hover:text-primary"
                 onClick={() => setIsOpen(false)}
               >
@@ -68,7 +70,7 @@ export function Navigation() {
               </Link>
             ))}
             <div className="pt-2">
-              <Link href="/admin" onClick={() => setIsOpen(false)}>
+              <Link href="/admin" prefetch={false} onClick={() => setIsOpen(false)}>
                 <Button variant="outline" size="sm" className="w-full bg-transparent">
                   Admin
                 </Button>
