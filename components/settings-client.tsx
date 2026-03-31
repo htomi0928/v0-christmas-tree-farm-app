@@ -76,13 +76,13 @@ export default function SettingsClient({ initialSettings }: Props) {
       const data = await response.json()
 
       if (data.success) {
-        setSuccess("Beallitasok sikeresen mentve")
+        setSuccess("Beállítások sikeresen mentve")
         setTimeout(() => setSuccess(""), 3000)
       } else {
-        setError(data.error || "Hiba a mentes soran")
+        setError(data.error || "Hiba a mentés során")
       }
     } catch (error) {
-      setError("Halozati hiba")
+      setError("Hálózati hiba")
       console.error("Error:", error)
     } finally {
       setIsSaving(false)
@@ -98,16 +98,16 @@ export default function SettingsClient({ initialSettings }: Props) {
   }
 
   const monthNames = [
-    "januar",
-    "februar",
-    "marcius",
-    "aprilis",
-    "majus",
-    "junius",
+    "január",
+    "február",
+    "március",
+    "április",
+    "május",
+    "június",
     "julius",
     "augusztus",
     "szeptember",
-    "oktober",
+    "október",
     "november",
     "december",
   ]
@@ -140,7 +140,7 @@ export default function SettingsClient({ initialSettings }: Props) {
     <div className="max-w-6xl">
       <h1 className="text-3xl font-bold text-primary mb-8 flex items-center gap-2">
         <SettingsIcon className="h-8 w-8" />
-        Beallitasok
+        Beállítások
       </h1>
 
       {error && (
@@ -161,13 +161,13 @@ export default function SettingsClient({ initialSettings }: Props) {
         {/* Left column - Basic settings */}
         <div className="space-y-6">
           <Card className="p-6 sm:p-8">
-            <h2 className="text-lg font-semibold text-foreground mb-6">Altalanos beallitasok</h2>
+            <h2 className="text-lg font-semibold text-foreground mb-6">Általános beállítások</h2>
 
             <div className="space-y-6">
               {/* Max Bookings Per Day */}
               <div>
                 <label htmlFor="maxBookingsPerDay" className="block text-sm font-semibold text-foreground mb-2">
-                  Maximalis foglalas naponta
+                  Maximális foglalás naponta
                 </label>
                 <input
                   id="maxBookingsPerDay"
@@ -182,13 +182,13 @@ export default function SettingsClient({ initialSettings }: Props) {
                   min="1"
                   className="w-full px-4 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 />
-                <p className="text-xs text-foreground/60 mt-1">Hany foglalas megengedett naponta</p>
+                <p className="text-xs text-foreground/60 mt-1">Hány foglalás megengedett naponta</p>
               </div>
 
               {/* Price per Tree */}
               <div>
                 <label htmlFor="pricePerTree" className="block text-sm font-semibold text-foreground mb-2">
-                  Ar per fa (Ft)
+                  Ár per fa (Ft)
                 </label>
                 <input
                   id="pricePerTree"
@@ -203,21 +203,21 @@ export default function SettingsClient({ initialSettings }: Props) {
                   min="1"
                   className="w-full px-4 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 />
-                <p className="text-xs text-foreground/60 mt-1">A fa egysegarai forintban (pl. 8000)</p>
+                <p className="text-xs text-foreground/60 mt-1">A fa egységára forintban (pl. 8000)</p>
               </div>
             </div>
           </Card>
 
           {/* Selected days summary */}
           <Card className="p-6 sm:p-8">
-            <h2 className="text-lg font-semibold text-foreground mb-4">Osszefoglalas</h2>
+            <h2 className="text-lg font-semibold text-foreground mb-4">Összefoglalás</h2>
             <div className="space-y-4 text-sm">
               <div>
-                <span className="font-semibold text-green-700">Elerheto napok:</span>
+                <span className="font-semibold text-green-700">Elérhető napok:</span>
                 <span className="ml-2">{formData.availableDays.length} nap</span>
               </div>
               <div>
-                <span className="font-semibold text-blue-700">Atveteli napok:</span>
+                <span className="font-semibold text-blue-700">Átvételi napok:</span>
                 <span className="ml-2">{formData.retrievalDays.length} nap</span>
               </div>
             </div>
@@ -227,16 +227,16 @@ export default function SettingsClient({ initialSettings }: Props) {
         {/* Middle column - Available Days Calendar */}
         <Card className="p-6 bg-background border border-border">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-foreground">Elerheto napok</h3>
+            <h3 className="text-lg font-semibold text-foreground">Elérhető napok</h3>
             {formData.availableDays.length > 0 && (
               <Button onClick={clearAllAvailable} variant="outline" size="sm" className="text-xs flex items-center gap-1 bg-transparent">
                 <X className="h-4 w-4" />
-                Torles
+                Törlés
               </Button>
             )}
           </div>
           <p className="text-xs text-foreground/60 mb-4">
-            Kattints a napokra a foglalashoz elerheto napok megjelolesehez (zold)
+            Kattints a napokra a foglaláshoz elérhető napok megjelöléséhez (zöld)
           </p>
 
           {/* Month/Year Navigation */}
@@ -314,16 +314,16 @@ export default function SettingsClient({ initialSettings }: Props) {
         {/* Right column - Retrieval Days Calendar */}
         <Card className="p-6 bg-background border border-border">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-foreground">Atveteli napok</h3>
+            <h3 className="text-lg font-semibold text-foreground">Átvételi napok</h3>
             {formData.retrievalDays.length > 0 && (
               <Button onClick={clearAllRetrieval} variant="outline" size="sm" className="text-xs flex items-center gap-1 bg-transparent">
                 <X className="h-4 w-4" />
-                Torles
+                Törlés
               </Button>
             )}
           </div>
           <p className="text-xs text-foreground/60 mb-4">
-            Kattints a napokra az atveteli napok megjelolesehez (kek)
+            Kattints a napokra az átvételi napok megjelöléséhez (kék)
           </p>
 
           {/* Month/Year Navigation */}
@@ -402,14 +402,14 @@ export default function SettingsClient({ initialSettings }: Props) {
       {/* Info Box */}
       <div className="mt-8 p-4 bg-secondary/20 rounded-lg">
         <p className="text-sm text-foreground/70">
-          <span className="font-semibold text-primary">Tipp:</span> Kattints egyszer egy napra az "Elerheto napok" vagy "Atveteli napok" naptarban a nap kijelolesehez/eltavolitasahoz. A zold napok a foglalashoz elerheto napok, a kek napok az atveteli napok.
+          <span className="font-semibold text-primary">Tipp:</span> Kattints egyszer egy napra az "Elérhető napok" vagy "Átvételi napok" naptárban a nap kijelöléséhez vagy eltávolításához. A zöld napok a foglaláshoz elérhető napok, a kék napok az átvételi napok.
         </p>
       </div>
 
       {/* Save Button */}
       <div className="mt-8">
         <Button onClick={handleSave} disabled={isSaving} className="bg-primary hover:bg-primary/90">
-          {isSaving ? "Mentes..." : "Beallitasok mentese"}
+          {isSaving ? "Mentés..." : "Beállítások mentése"}
         </Button>
       </div>
     </div>

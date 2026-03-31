@@ -1,21 +1,11 @@
-import "server-only"
+﻿import "server-only"
 import { getReservationStats } from "@/lib/reservations"
-import { getSessionUser } from "@/lib/auth"
+import { logApiError, requireAdminSessionResponse } from "@/lib/api"
 
-export async function GET(request: Request) {
+export async function GET(_request: Request) {
   try {
-    const authHeader = request.headers.get("authorization")
-    const sessionId = authHeader?.split(" ")[1]
-
-    if (!sessionId || !getSessionUser(sessionId)) {
-      return Response.json(
-        {
-          success: false,
-          error: "Nincs hitelesítés",
-        },
-        { status: 401 },
-      )
-    }
+    const authError = await requireAdminSessionResponse()
+    if (authError) return authError
 
     const stats = await getReservationStats()
 
@@ -24,6 +14,7 @@ export async function GET(request: Request) {
       stats,
     })
   } catch (error) {
+    logApiError("admin stats fetch failed", error)
     return Response.json(
       {
         success: false,
@@ -33,3 +24,4 @@ export async function GET(request: Request) {
     )
   }
 }
+

@@ -9,7 +9,7 @@ export default async function SettingsPage() {
   const sessionId = cookieStore.get("admin_session")?.value
 
   // Server-side auth check
-  if (!sessionId || !validateSession(sessionId)) {
+  if (!sessionId || !(await validateSession(sessionId))) {
     redirect("/admin-login")
   }
 

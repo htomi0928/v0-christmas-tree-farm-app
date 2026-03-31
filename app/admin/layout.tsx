@@ -13,7 +13,7 @@ export default async function AdminLayout({
   const cookieStore = await cookies()
   const adminSessionId = cookieStore.get("admin_session")?.value
 
-  if (!adminSessionId || !validateSession(adminSessionId)) {
+  if (!adminSessionId || !(await validateSession(adminSessionId))) {
     redirect("/admin-login")
   }
 
