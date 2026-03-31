@@ -1,36 +1,40 @@
-import "server-only"
-import { listExpenses, createExpense } from "@/lib/expenses"
-import { getSessionUser } from "@/lib/auth"
-import { cookies } from "next/headers"
+﻿import "server-only"
+import { z } from "zod"
+import { createExpense, listExpenses } from "@/lib/expenses"
+import { enforceSameOrigin, logApiError, parseJsonBody, requireAdminSessionResponse } from "@/lib/api"
+
+const createExpenseSchema = z.object({
+  person: z.union([z.literal("János"), z.literal("Sanyi")]),
+  amount: z.number().positive().max(100000000),
+  description: z.string().trim().min(1).max(200),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+})
 
 export async function GET() {
   try {
-    const cookieStore = await cookies()
-    const sessionId = cookieStore.get("admin_session")?.value
-
-    if (!sessionId || !getSessionUser(sessionId)) {
-      return Response.json({ success: false, error: "Nincs hitelesítés" }, { status: 401 })
-    }
+    const authError = await requireAdminSessionResponse()
+    if (authError) return authError
 
     const expenses = await listExpenses()
-
     return Response.json({ success: true, expenses })
   } catch (error) {
+    logApiError("admin expenses list failed", error)
     return Response.json({ success: false, error: "Szerver hiba" }, { status: 500 })
   }
 }
 
 export async function POST(request: Request) {
   try {
-    const cookieStore = await cookies()
-    const sessionId = cookieStore.get("admin_session")?.value
+    const originError = enforceSameOrigin(request)
+    if (originError) return originError
 
-    if (!sessionId || !getSessionUser(sessionId)) {
-      return Response.json({ success: false, error: "Nincs hitelesítés" }, { status: 401 })
-    }
+    const authError = await requireAdminSessionResponse()
+    if (authError) return authError
 
-    const body = await request.json()
-    const result = await createExpense(body)
+    const parsedBody = await parseJsonBody(request, createExpenseSchema)
+    if (!parsedBody.success) return parsedBody.response
+
+    const result = await createExpense(parsedBody.data)
 
     if (result.success) {
       return Response.json({ success: true, expense: result.data })
@@ -38,6 +42,8 @@ export async function POST(request: Request) {
 
     return Response.json({ success: false, error: result.error }, { status: 400 })
   } catch (error) {
+    logApiError("admin expense create failed", error)
     return Response.json({ success: false, error: "Szerver hiba" }, { status: 500 })
   }
 }
+

@@ -7,6 +7,7 @@ import { Card } from "@/components/ui/card"
 interface CalendarPickerProps {
   selectedDate: string
   onDateSelect: (date: string) => void
+  availableDates?: string[]
   minDate?: Date
   maxDate?: Date
 }
@@ -19,6 +20,7 @@ function toDateStr(year: number, month: number, day: number): string {
 export default function CalendarPicker({
   selectedDate,
   onDateSelect,
+  availableDates,
   minDate,
   maxDate,
 }: CalendarPickerProps) {
@@ -30,7 +32,7 @@ export default function CalendarPicker({
     fetch("/api/admin/settings")
       .then((res) => res.json())
       .then((data) => {
-        const days: string[] = data.settings?.availableDays ?? []
+        const days: string[] = availableDates ?? data.settings?.availableDays ?? []
         setAvailableDays(days)
         // Jump to the month of the first available day, fallback to December
         if (days.length > 0) {
@@ -41,7 +43,7 @@ export default function CalendarPicker({
       })
       .catch(() => {})
       .finally(() => setIsLoading(false))
-  }, [])
+  }, [availableDates])
 
   const getDaysInMonth = (date: Date) => {
     return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate()
@@ -75,16 +77,16 @@ export default function CalendarPicker({
   }
 
   const monthNames = [
-    "januar",
-    "februar",
-    "marcius",
-    "aprilis",
-    "majus",
-    "junius",
+    "január",
+    "február",
+    "március",
+    "április",
+    "május",
+    "június",
     "julius",
     "augusztus",
     "szeptember",
-    "oktober",
+    "október",
     "november",
     "december",
   ]
@@ -169,13 +171,13 @@ export default function CalendarPicker({
 
       <div className="mt-4 pt-4 border-t border-border text-xs text-foreground/60 space-y-1">
         {isLoading ? (
-          <p className="text-foreground/50">Elerhetoseg betoltese...</p>
+          <p className="text-foreground/50">Elérhetőség betöltése...</p>
         ) : availableDays.length > 0 ? (
           <p>
-            <span className="text-green-700 font-semibold">Zold napok:</span> Elerheto foglalashoz
+            <span className="text-green-700 font-semibold">Zöld napok:</span> Elérhető foglaláshoz
           </p>
         ) : (
-          <p className="text-amber-600">Nincs elerheto nap beallitva. Kerlek, kerj meg az adminisztratort.</p>
+          <p className="text-amber-600">Nincs elérhető nap beállítva. Kérlek, kérd meg az adminisztrátort.</p>
         )}
       </div>
     </Card>

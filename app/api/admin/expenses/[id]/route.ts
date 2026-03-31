@@ -1,19 +1,22 @@
-import "server-only"
+﻿import "server-only"
 import { deleteExpense } from "@/lib/expenses"
-import { getSessionUser } from "@/lib/auth"
-import { cookies } from "next/headers"
+import { enforceSameOrigin, logApiError, parseNumericId, requireAdminSessionResponse } from "@/lib/api"
 
 export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const cookieStore = await cookies()
-    const sessionId = cookieStore.get("admin_session")?.value
+    const originError = enforceSameOrigin(request)
+    if (originError) return originError
 
-    if (!sessionId || !getSessionUser(sessionId)) {
-      return Response.json({ success: false, error: "Nincs hitelesítés" }, { status: 401 })
-    }
+    const authError = await requireAdminSessionResponse()
+    if (authError) return authError
 
     const { id } = await params
-    const result = await deleteExpense(Number.parseInt(id))
+    const expenseId = parseNumericId(id)
+    if (!expenseId) {
+      return Response.json({ success: false, error: "Érvénytelen kiadás azonosító" }, { status: 400 })
+    }
+
+    const result = await deleteExpense(expenseId)
 
     if (result.success) {
       return Response.json({ success: true })
@@ -21,6 +24,8 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
 
     return Response.json({ success: false, error: result.error }, { status: 404 })
   } catch (error) {
+    logApiError("admin expense delete failed", error)
     return Response.json({ success: false, error: "Szerver hiba" }, { status: 500 })
   }
 }
+

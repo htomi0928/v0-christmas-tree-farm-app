@@ -1,26 +1,22 @@
-import "server-only"
-import { cookies } from "next/headers"
+﻿import "server-only"
 import { listReservations } from "@/lib/reservations"
-import type { ReservationStatus } from "@/lib/types"
-import { validateSession } from "@/lib/auth"
+import { ReservationStatus } from "@/lib/types"
+import { logApiError, requireAdminSessionResponse } from "@/lib/api"
 
 export async function GET(request: Request) {
   try {
-    const cookieStore = await cookies()
-    const sessionId = cookieStore.get("admin_session")?.value
-
-    if (!sessionId || !validateSession(sessionId)) {
-      return Response.json(
-        {
-          success: false,
-          error: "Nincs hitelesítés",
-        },
-        { status: 401 },
-      )
-    }
+    const authError = await requireAdminSessionResponse()
+    if (authError) return authError
 
     const { searchParams } = new URL(request.url)
-    const status = searchParams.get("status") as ReservationStatus | null
+    const statusParam = searchParams.get("status")
+    const status = statusParam && Object.values(ReservationStatus).includes(statusParam as ReservationStatus)
+      ? (statusParam as ReservationStatus)
+      : null
+
+    if (statusParam && !status) {
+      return Response.json({ success: false, error: "Érvénytelen státusz szűrő" }, { status: 400 })
+    }
 
     const filters = status ? { status } : undefined
     const reservations = await listReservations(filters)
@@ -30,6 +26,7 @@ export async function GET(request: Request) {
       reservations,
     })
   } catch (error) {
+    logApiError("admin reservations list failed", error)
     return Response.json(
       {
         success: false,
@@ -39,3 +36,4 @@ export async function GET(request: Request) {
     )
   }
 }
+
