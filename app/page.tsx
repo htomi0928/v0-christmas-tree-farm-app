@@ -88,7 +88,7 @@ export default function HomePage() {
         </div>
 
         {/* Hero content — bottom-left anchored */}
-        <div className="absolute z-10 bottom-0 left-0 right-0 pb-16 sm:pb-20">
+        <div className="absolute z-10 bottom-0 left-0 right-0 pb-10 sm:pb-14">
           <div className="max-w-7xl mx-auto px-6 sm:px-10 lg:px-16">
             <p
               className="text-xs font-medium tracking-[0.16em] uppercase text-white/50 mb-4"
@@ -156,11 +156,11 @@ export default function HomePage() {
       </section>
 
       {/* Why Choose Us Section */}
-      <section className="py-24 sm:py-32 bg-secondary/20">
+      <section className="py-14 sm:py-20 bg-secondary/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <AnimateOnScroll>
             <div className="section-label">Miért minket?</div>
-            <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-12 tracking-tight">A mi különlegességünk</h2>
+            <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-8 tracking-tight">A mi különlegességünk</h2>
           </AnimateOnScroll>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {cards.map((card, i) => (
@@ -177,7 +177,7 @@ export default function HomePage() {
       </section>
 
       {/* About Section */}
-      <section className="py-24 sm:py-32 bg-background">
+      <section className="py-14 sm:py-20 bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
             <AnimateOnScroll>
@@ -221,7 +221,7 @@ export default function HomePage() {
       </div>
 
       {/* CTA Section */}
-      <section className="py-24 sm:py-32 bg-secondary/20">
+      <section className="py-14 sm:py-20 bg-secondary/20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <AnimateOnScroll>
             <div className="section-label">Kövess minket</div>

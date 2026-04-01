@@ -36,7 +36,7 @@ export default function HowItWorksPage() {
   return (
     <div className="w-full">
       {/* Hero */}
-      <section className="py-24 sm:py-32 bg-secondary/20">
+      <section className="py-14 sm:py-20 bg-secondary/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <AnimateOnScroll>
             <div className="section-label">A folyamat</div>
@@ -51,7 +51,7 @@ export default function HowItWorksPage() {
       </section>
 
       {/* Steps */}
-      <section className="py-16 sm:py-24 bg-background">
+      <section className="py-10 sm:py-16 bg-background">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           {steps.map((step, index) => (
             <AnimateOnScroll key={step.number} delay={index * 80}>

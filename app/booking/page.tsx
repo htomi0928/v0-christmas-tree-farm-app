@@ -155,7 +155,7 @@ export default function BookingPage() {
 
   if (isSuccess && successData) {
     return (
-      <div className="min-h-screen bg-background py-24 sm:py-32">
+      <div className="min-h-screen bg-background py-14 sm:py-20">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="border border-border rounded-lg p-8 sm:p-12">
             <CheckCircle2 className="h-10 w-10 text-foreground mb-6" />
@@ -219,7 +219,7 @@ export default function BookingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background py-24 sm:py-32">
+    <div className="min-h-screen bg-background py-14 sm:py-20">
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-10">
           <div className="section-label">Foglalás</div>

@@ -6,7 +6,7 @@ export default function ContactPage() {
   return (
     <div className="w-full">
       {/* Hero */}
-      <section className="py-24 sm:py-32 bg-secondary/20">
+      <section className="py-14 sm:py-20 bg-secondary/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <AnimateOnScroll>
             <div className="section-label">Kapcsolat</div>
@@ -19,7 +19,7 @@ export default function ContactPage() {
       </section>
 
       {/* Contact Info */}
-      <section className="py-24 sm:py-32 bg-background">
+      <section className="py-14 sm:py-20 bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Phone */}
@@ -62,11 +62,11 @@ export default function ContactPage() {
       </section>
 
       {/* Map Section */}
-      <section className="py-24 sm:py-32 bg-secondary/20">
+      <section className="py-14 sm:py-20 bg-secondary/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <AnimateOnScroll>
             <div className="section-label">Megközelítés</div>
-            <h2 className="text-3xl font-bold text-foreground mb-12 tracking-tight">A helyszín</h2>
+            <h2 className="text-3xl font-bold text-foreground mb-8 tracking-tight">A helyszín</h2>
           </AnimateOnScroll>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
             {/* Map */}
