@@ -33,15 +33,15 @@ function FAQItem({ question, answer }: { question: string; answer: string }) {
     <div className="border-b border-border last:border-b-0">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full py-4 flex items-start justify-between text-left hover:text-foreground/80 transition-colors"
+        className="w-full py-5 flex items-start justify-between text-left hover:text-foreground/80 transition-colors"
       >
-        <h3 className="font-semibold text-foreground pr-4 tracking-tight text-sm">{question}</h3>
+        <h3 className="font-semibold text-foreground pr-4 tracking-tight text-base">{question}</h3>
         <ChevronDown
-          className={`h-4 w-4 text-muted-foreground flex-shrink-0 mt-0.5 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+          className={`h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
         />
       </button>
       {isOpen && (
-        <p className="pb-4 text-sm text-muted-foreground font-light leading-relaxed">{answer}</p>
+        <p className="pb-5 text-base text-muted-foreground font-light leading-relaxed">{answer}</p>
       )}
     </div>
   )
