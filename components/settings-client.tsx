@@ -1,9 +1,9 @@
-"use client"
+﻿"use client"
 
 import { useState } from "react"
+import { CheckCircle2, SettingsIcon, AlertCircle, ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { SettingsIcon, CheckCircle2, AlertCircle, X, ChevronLeft, ChevronRight } from "lucide-react"
 import type { Settings } from "@/lib/types"
 
 interface Props {
@@ -14,7 +14,6 @@ export default function SettingsClient({ initialSettings }: Props) {
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
-
   const [formData, setFormData] = useState({
     availableDays: initialSettings.availableDays || [],
     maxBookingsPerDay: initialSettings.maxBookingsPerDay,
@@ -22,40 +21,56 @@ export default function SettingsClient({ initialSettings }: Props) {
     pricePerTree: initialSettings.pricePerTree,
   })
 
-  // Helper: pick the month of the first sorted date in a list, fallback to current year December
-  const firstDateMonth = (dates: string[]): Date => {
+  const firstDateMonth = (dates: string[]) => {
     if (dates.length > 0) {
-      const first = dates.slice().sort()[0]
-      const [y, m] = first.split("-")
-      return new Date(Number(y), Number(m) - 1, 1)
+      const [year, month] = dates.slice().sort()[0].split("-")
+      return new Date(Number(year), Number(month) - 1, 1)
     }
     return new Date(new Date().getFullYear(), 11, 1)
   }
 
-  // Independent calendar states for each calendar
   const [availableMonth, setAvailableMonth] = useState(() => firstDateMonth(initialSettings.availableDays || []))
   const [retrievalMonth, setRetrievalMonth] = useState(() => firstDateMonth(initialSettings.retrievalDays || []))
 
-  // Helper to format date as YYYY-MM-DD without timezone shift
-  const toDateStr = (year: number, month: number, day: number): string => {
-    return `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
+  const toDateStr = (year: number, month: number, day: number) =>
+    `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
+
+  const monthNames = [
+    "január",
+    "február",
+    "március",
+    "április",
+    "május",
+    "június",
+    "július",
+    "augusztus",
+    "szeptember",
+    "október",
+    "november",
+    "december",
+  ]
+
+  const dayNames = ["V", "H", "K", "Sze", "Cs", "P", "Szo"]
+
+  const buildWeeks = (monthDate: Date) => {
+    const daysInMonth = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 0).getDate()
+    const firstDay = new Date(monthDate.getFullYear(), monthDate.getMonth(), 1).getDay()
+    const days: (number | null)[] = []
+
+    for (let i = 0; i < firstDay; i++) days.push(null)
+    for (let i = 1; i <= daysInMonth; i++) days.push(i)
+
+    const weeks: (number | null)[][] = []
+    for (let i = 0; i < days.length; i += 7) weeks.push(days.slice(i, i + 7))
+    return weeks
   }
 
-  const handleToggleAvailableDay = (dateStr: string) => {
+  const toggleDay = (key: "availableDays" | "retrievalDays", dateStr: string) => {
     setFormData((prev) => ({
       ...prev,
-      availableDays: prev.availableDays.includes(dateStr)
-        ? prev.availableDays.filter((d) => d !== dateStr)
-        : [...prev.availableDays, dateStr],
-    }))
-  }
-
-  const handleToggleRetrievalDay = (dateStr: string) => {
-    setFormData((prev) => ({
-      ...prev,
-      retrievalDays: prev.retrievalDays.includes(dateStr)
-        ? prev.retrievalDays.filter((d) => d !== dateStr)
-        : [...prev.retrievalDays, dateStr],
+      [key]: prev[key].includes(dateStr)
+        ? prev[key].filter((day) => day !== dateStr)
+        : [...prev[key], dateStr],
     }))
   }
 
@@ -67,348 +82,195 @@ export default function SettingsClient({ initialSettings }: Props) {
     try {
       const response = await fetch("/api/admin/settings", {
         method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       })
 
       const data = await response.json()
 
       if (data.success) {
-        setSuccess("Beállítások sikeresen mentve")
-        setTimeout(() => setSuccess(""), 3000)
+        setSuccess("A beállítások mentése sikerült.")
+        setTimeout(() => setSuccess(""), 2500)
       } else {
-        setError(data.error || "Hiba a mentés során")
+        setError(data.error || "A mentés nem sikerült.")
       }
-    } catch (error) {
-      setError("Hálózati hiba")
-      console.error("Error:", error)
+    } catch {
+      setError("Hálózati hiba történt.")
     } finally {
       setIsSaving(false)
     }
   }
 
-  const getDaysInMonth = (date: Date) => {
-    return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate()
-  }
+  const CalendarBlock = ({
+    title,
+    subtitle,
+    month,
+    onMonthChange,
+    dates,
+    dayKey,
+    colorClass,
+  }: {
+    title: string
+    subtitle: string
+    month: Date
+    onMonthChange: (date: Date) => void
+    dates: string[]
+    dayKey: "availableDays" | "retrievalDays"
+    colorClass: string
+  }) => (
+    <Card className="admin-card px-6 py-6">
+      <div className="space-y-4 px-6">
+        <div>
+          <h2 className="text-2xl font-semibold text-primary">{title}</h2>
+          <p className="mt-2 text-sm leading-6 text-foreground/66">{subtitle}</p>
+        </div>
 
-  const getFirstDayOfMonth = (date: Date) => {
-    return new Date(date.getFullYear(), date.getMonth(), 1).getDay()
-  }
+        <div className="flex items-center justify-between">
+          <button
+            type="button"
+            className="rounded-full border border-primary/10 p-2"
+            onClick={() => onMonthChange(new Date(month.getFullYear(), month.getMonth() - 1, 1))}
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
 
-  const monthNames = [
-    "január",
-    "február",
-    "március",
-    "április",
-    "május",
-    "június",
-    "julius",
-    "augusztus",
-    "szeptember",
-    "október",
-    "november",
-    "december",
-  ]
+          <p className="text-sm font-semibold uppercase tracking-[0.14em] text-primary">
+            {month.getFullYear()}. {monthNames[month.getMonth()]}
+          </p>
 
-  const dayNames = ["V", "H", "K", "Sze", "Cs", "P", "Szo"]
+          <button
+            type="button"
+            className="rounded-full border border-primary/10 p-2"
+            onClick={() => onMonthChange(new Date(month.getFullYear(), month.getMonth() + 1, 1))}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </button>
+        </div>
 
-  const buildWeeks = (monthDate: Date) => {
-    const daysInMonth = getDaysInMonth(monthDate)
-    const firstDay = getFirstDayOfMonth(monthDate)
-    const days: (number | null)[] = []
-    for (let i = 0; i < firstDay; i++) days.push(null)
-    for (let i = 1; i <= daysInMonth; i++) days.push(i)
-    const weeks: (number | null)[][] = []
-    for (let i = 0; i < days.length; i += 7) weeks.push(days.slice(i, i + 7))
-    return weeks
-  }
+        <div className="grid grid-cols-7 gap-2 text-center text-xs font-semibold text-foreground/48">
+          {dayNames.map((day) => (
+            <div key={day}>{day}</div>
+          ))}
+        </div>
 
-  const availableWeeks = buildWeeks(availableMonth)
-  const retrievalWeeks = buildWeeks(retrievalMonth)
+        <div className="space-y-2">
+          {buildWeeks(month).map((week, weekIndex) => (
+            <div key={weekIndex} className="grid grid-cols-7 gap-2">
+              {week.map((day, dayIndex) => {
+                if (!day) return <div key={`${weekIndex}-${dayIndex}`} className="h-10" />
 
-  const clearAllAvailable = () => {
-    setFormData((prev) => ({ ...prev, availableDays: [] }))
-  }
+                const dateStr = toDateStr(month.getFullYear(), month.getMonth(), day)
+                const active = dates.includes(dateStr)
 
-  const clearAllRetrieval = () => {
-    setFormData((prev) => ({ ...prev, retrievalDays: [] }))
-  }
+                return (
+                  <button
+                    key={dateStr}
+                    type="button"
+                    onClick={() => toggleDay(dayKey, dateStr)}
+                    className={`h-10 rounded-2xl text-sm font-semibold transition ${
+                      active ? colorClass : "bg-secondary/50 text-foreground/68 hover:bg-secondary"
+                    }`}
+                  >
+                    {day}
+                  </button>
+                )
+              })}
+            </div>
+          ))}
+        </div>
+      </div>
+    </Card>
+  )
 
   return (
-    <div className="max-w-6xl">
-      <h1 className="text-3xl font-bold text-primary mb-8 flex items-center gap-2">
-        <SettingsIcon className="h-8 w-8" />
-        Beállítások
-      </h1>
+    <div className="space-y-6 pb-24">
+      <section>
+        <p className="section-kicker">Beállítások</p>
+        <h1 className="admin-section-title flex items-center gap-3">
+          <SettingsIcon className="h-7 w-7" />
+          Szezon és foglalási szabályok
+        </h1>
+      </section>
 
       {error && (
-        <div className="mb-6 flex gap-3 p-4 bg-destructive/10 border border-destructive rounded-lg">
-          <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0" />
-          <p className="text-destructive text-sm">{error}</p>
+        <div className="rounded-2xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
+          <div className="flex gap-3">
+            <AlertCircle className="h-5 w-5" />
+            {error}
+          </div>
         </div>
       )}
 
       {success && (
-        <div className="mb-6 flex gap-3 p-4 bg-green-100 border border-green-600 rounded-lg">
-          <CheckCircle2 className="h-5 w-5 text-green-600 flex-shrink-0" />
-          <p className="text-green-800 text-sm">{success}</p>
+        <div className="rounded-2xl border border-[color:var(--mint-border)] bg-[color:var(--mint-soft)] p-4 text-sm text-[color:var(--mint-strong)]">
+          <div className="flex gap-3">
+            <CheckCircle2 className="h-5 w-5" />
+            {success}
+          </div>
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left column - Basic settings */}
-        <div className="space-y-6">
-          <Card className="p-6 sm:p-8">
-            <h2 className="text-lg font-semibold text-foreground mb-6">Általános beállítások</h2>
-
-            <div className="space-y-6">
-              {/* Max Bookings Per Day */}
-              <div>
-                <label htmlFor="maxBookingsPerDay" className="block text-sm font-semibold text-foreground mb-2">
-                  Maximális foglalás naponta
-                </label>
-                <input
-                  id="maxBookingsPerDay"
-                  type="number"
-                  value={formData.maxBookingsPerDay}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      maxBookingsPerDay: Number.parseInt(e.target.value) || 0,
-                    })
-                  }
-                  min="1"
-                  className="w-full px-4 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                />
-                <p className="text-xs text-foreground/60 mt-1">Hány foglalás megengedett naponta</p>
-              </div>
-
-              {/* Price per Tree */}
-              <div>
-                <label htmlFor="pricePerTree" className="block text-sm font-semibold text-foreground mb-2">
-                  Ár per fa (Ft)
-                </label>
-                <input
-                  id="pricePerTree"
-                  type="number"
-                  value={formData.pricePerTree}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      pricePerTree: Number.parseInt(e.target.value) || 0,
-                    })
-                  }
-                  min="1"
-                  className="w-full px-4 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                />
-                <p className="text-xs text-foreground/60 mt-1">A fa egységára forintban (pl. 8000)</p>
-              </div>
+      <div className="grid gap-5 xl:grid-cols-[0.9fr_1.1fr]">
+        <Card className="admin-card px-7 py-7">
+          <div className="space-y-5 px-6">
+            <div>
+              <label className="mb-2 block text-sm font-semibold text-foreground">Maximális foglalás naponta</label>
+              <input
+                type="number"
+                min="1"
+                value={formData.maxBookingsPerDay}
+                onChange={(e) => setFormData({ ...formData, maxBookingsPerDay: Number.parseInt(e.target.value) || 0 })}
+                className="input-base"
+              />
             </div>
-          </Card>
 
-          {/* Selected days summary */}
-          <Card className="p-6 sm:p-8">
-            <h2 className="text-lg font-semibold text-foreground mb-4">Összefoglalás</h2>
-            <div className="space-y-4 text-sm">
-              <div>
-                <span className="font-semibold text-green-700">Elérhető napok:</span>
-                <span className="ml-2">{formData.availableDays.length} nap</span>
-              </div>
-              <div>
-                <span className="font-semibold text-blue-700">Átvételi napok:</span>
-                <span className="ml-2">{formData.retrievalDays.length} nap</span>
-              </div>
+            <div>
+              <label className="mb-2 block text-sm font-semibold text-foreground">Ár fánként (Ft)</label>
+              <input
+                type="number"
+                min="1"
+                value={formData.pricePerTree}
+                onChange={(e) => setFormData({ ...formData, pricePerTree: Number.parseInt(e.target.value) || 0 })}
+                className="input-base"
+              />
             </div>
-          </Card>
+
+            <div className="rounded-[24px] border border-primary/10 bg-secondary/35 p-5 text-sm leading-7 text-foreground/70">
+              <p>
+                <span className="font-semibold text-primary">Elérhető napok:</span> {formData.availableDays.length}
+              </p>
+              <p>
+                <span className="font-semibold text-primary">Átvételi napok:</span> {formData.retrievalDays.length}
+              </p>
+            </div>
+          </div>
+        </Card>
+
+        <div className="grid gap-5">
+          <CalendarBlock
+            title="Foglalható napok"
+            subtitle="Ezek a napok jelennek meg a publikus foglalási naptárban."
+            month={availableMonth}
+            onMonthChange={setAvailableMonth}
+            dates={formData.availableDays}
+            dayKey="availableDays"
+            colorClass="bg-[color:var(--mint-soft)] text-[color:var(--mint-strong)]"
+          />
+
+          <CalendarBlock
+            title="Átvételi napok"
+            subtitle="Ezek a napok választhatók a későbbi átvételhez."
+            month={retrievalMonth}
+            onMonthChange={setRetrievalMonth}
+            dates={formData.retrievalDays}
+            dayKey="retrievalDays"
+            colorClass="bg-[color:var(--sky-soft)] text-[color:var(--sky-strong)]"
+          />
         </div>
-
-        {/* Middle column - Available Days Calendar */}
-        <Card className="p-6 bg-background border border-border">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-foreground">Elérhető napok</h3>
-            {formData.availableDays.length > 0 && (
-              <Button onClick={clearAllAvailable} variant="outline" size="sm" className="text-xs flex items-center gap-1 bg-transparent">
-                <X className="h-4 w-4" />
-                Törlés
-              </Button>
-            )}
-          </div>
-          <p className="text-xs text-foreground/60 mb-4">
-            Kattints a napokra a foglaláshoz elérhető napok megjelöléséhez (zöld)
-          </p>
-
-          {/* Month/Year Navigation */}
-          <div className="flex items-center justify-between mb-4">
-            <button onClick={() => setAvailableMonth(new Date(availableMonth.getFullYear(), availableMonth.getMonth() - 1, 1))} className="p-2 hover:bg-secondary rounded-lg transition-colors" type="button">
-              <ChevronLeft className="h-5 w-5 text-foreground" />
-            </button>
-
-            <h3 className="font-semibold text-foreground">
-              {availableMonth.getFullYear()}. {monthNames[availableMonth.getMonth()]}
-            </h3>
-
-            <button onClick={() => setAvailableMonth(new Date(availableMonth.getFullYear(), availableMonth.getMonth() + 1, 1))} className="p-2 hover:bg-secondary rounded-lg transition-colors" type="button">
-              <ChevronRight className="h-5 w-5 text-foreground" />
-            </button>
-          </div>
-
-          {/* Day names header */}
-          <div className="grid grid-cols-7 gap-1 mb-2">
-            {dayNames.map((day, index) => (
-              <div key={`avail-day-${index}`} className="text-center text-xs font-semibold text-foreground/60 py-2">
-                {day}
-              </div>
-            ))}
-          </div>
-
-          {/* Calendar grid */}
-          <div className="space-y-1">
-            {availableWeeks.map((week, weekIndex) => (
-              <div key={`avail-week-${weekIndex}`} className="grid grid-cols-7 gap-1">
-                {week.map((day, dayIndex) => {
-                  if (!day) {
-                    return <div key={`avail-empty-${weekIndex}-${dayIndex}`} className="h-10" />
-                  }
-
-                  const dateStr = toDateStr(availableMonth.getFullYear(), availableMonth.getMonth(), day)
-                  const isAvailable = formData.availableDays.includes(dateStr)
-
-                  return (
-                    <button
-                      key={`avail-${dateStr}`}
-                      type="button"
-                      onClick={() => handleToggleAvailableDay(dateStr)}
-                      className={`
-                        h-10 rounded-lg font-semibold transition-colors text-sm cursor-pointer
-                        ${isAvailable ? "bg-green-500 text-white hover:bg-green-600" : "bg-secondary/50 text-foreground/60 hover:bg-secondary"}
-                      `}
-                    >
-                      {day}
-                    </button>
-                  )
-                })}
-              </div>
-            ))}
-          </div>
-
-          {/* Selected days list */}
-          {formData.availableDays.length > 0 && (
-            <div className="mt-4 p-3 bg-green-100 border border-green-200 rounded-lg max-h-32 overflow-y-auto">
-              <p className="text-xs font-semibold text-green-800 mb-2">Kijelolt napok:</p>
-              <div className="flex flex-wrap gap-1">
-                {formData.availableDays.sort().map((dateStr) => (
-                  <span
-                    key={`avail-tag-${dateStr}`}
-                    className="px-2 py-0.5 bg-green-200 text-green-800 rounded text-xs"
-                  >
-                    {dateStr}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-        </Card>
-
-        {/* Right column - Retrieval Days Calendar */}
-        <Card className="p-6 bg-background border border-border">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-foreground">Átvételi napok</h3>
-            {formData.retrievalDays.length > 0 && (
-              <Button onClick={clearAllRetrieval} variant="outline" size="sm" className="text-xs flex items-center gap-1 bg-transparent">
-                <X className="h-4 w-4" />
-                Törlés
-              </Button>
-            )}
-          </div>
-          <p className="text-xs text-foreground/60 mb-4">
-            Kattints a napokra az átvételi napok megjelöléséhez (kék)
-          </p>
-
-          {/* Month/Year Navigation */}
-          <div className="flex items-center justify-between mb-4">
-            <button onClick={() => setRetrievalMonth(new Date(retrievalMonth.getFullYear(), retrievalMonth.getMonth() - 1, 1))} className="p-2 hover:bg-secondary rounded-lg transition-colors" type="button">
-              <ChevronLeft className="h-5 w-5 text-foreground" />
-            </button>
-
-            <h3 className="font-semibold text-foreground">
-              {retrievalMonth.getFullYear()}. {monthNames[retrievalMonth.getMonth()]}
-            </h3>
-
-            <button onClick={() => setRetrievalMonth(new Date(retrievalMonth.getFullYear(), retrievalMonth.getMonth() + 1, 1))} className="p-2 hover:bg-secondary rounded-lg transition-colors" type="button">
-              <ChevronRight className="h-5 w-5 text-foreground" />
-            </button>
-          </div>
-
-          {/* Day names header */}
-          <div className="grid grid-cols-7 gap-1 mb-2">
-            {dayNames.map((day, index) => (
-              <div key={`retr-day-${index}`} className="text-center text-xs font-semibold text-foreground/60 py-2">
-                {day}
-              </div>
-            ))}
-          </div>
-
-          {/* Calendar grid */}
-          <div className="space-y-1">
-            {retrievalWeeks.map((week, weekIndex) => (
-              <div key={`retr-week-${weekIndex}`} className="grid grid-cols-7 gap-1">
-                {week.map((day, dayIndex) => {
-                  if (!day) {
-                    return <div key={`retr-empty-${weekIndex}-${dayIndex}`} className="h-10" />
-                  }
-
-                  const dateStr = toDateStr(retrievalMonth.getFullYear(), retrievalMonth.getMonth(), day)
-                  const isRetrieval = formData.retrievalDays.includes(dateStr)
-
-                  return (
-                    <button
-                      key={`retr-${dateStr}`}
-                      type="button"
-                      onClick={() => handleToggleRetrievalDay(dateStr)}
-                      className={`
-                        h-10 rounded-lg font-semibold transition-colors text-sm cursor-pointer
-                        ${isRetrieval ? "bg-blue-500 text-white hover:bg-blue-600" : "bg-secondary/50 text-foreground/60 hover:bg-secondary"}
-                      `}
-                    >
-                      {day}
-                    </button>
-                  )
-                })}
-              </div>
-            ))}
-          </div>
-
-          {/* Selected days list */}
-          {formData.retrievalDays.length > 0 && (
-            <div className="mt-4 p-3 bg-blue-100 border border-blue-200 rounded-lg max-h-32 overflow-y-auto">
-              <p className="text-xs font-semibold text-blue-800 mb-2">Kijelolt napok:</p>
-              <div className="flex flex-wrap gap-1">
-                {formData.retrievalDays.sort().map((dateStr) => (
-                  <span
-                    key={`retr-tag-${dateStr}`}
-                    className="px-2 py-0.5 bg-blue-200 text-blue-800 rounded text-xs"
-                  >
-                    {dateStr}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-        </Card>
       </div>
 
-      {/* Info Box */}
-      <div className="mt-8 p-4 bg-secondary/20 rounded-lg">
-        <p className="text-sm text-foreground/70">
-          <span className="font-semibold text-primary">Tipp:</span> Kattints egyszer egy napra az "Elérhető napok" vagy "Átvételi napok" naptárban a nap kijelöléséhez vagy eltávolításához. A zöld napok a foglaláshoz elérhető napok, a kék napok az átvételi napok.
-        </p>
-      </div>
-
-      {/* Save Button */}
-      <div className="mt-8">
-        <Button onClick={handleSave} disabled={isSaving} className="bg-primary hover:bg-primary/90">
+      <div className="fixed inset-x-0 bottom-[72px] z-40 border-t border-primary/10 bg-[rgba(255,253,249,0.96)] px-4 py-3 shadow-[0_-12px_32px_rgba(16,39,32,0.08)] backdrop-blur md:bottom-0 md:left-auto md:right-0 md:w-[420px] md:rounded-tl-[28px] md:border-l">
+        <Button type="button" className="w-full" onClick={handleSave} disabled={isSaving}>
           {isSaving ? "Mentés..." : "Beállítások mentése"}
         </Button>
       </div>
