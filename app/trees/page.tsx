@@ -66,7 +66,7 @@ export default function TreesPage() {
             </div>
 
             {/* Right — image */}
-            <div className="bg-secondary/30 rounded-lg overflow-hidden min-h-[400px]">
+            <div className="bg-secondary/30 rounded-lg aspect-square overflow-hidden">
               <img
                 src="/nordmann-christmas-tree-close-up-green.jpg"
                 alt="Nordmann fa közelről"
