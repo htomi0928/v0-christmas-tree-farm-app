@@ -61,7 +61,7 @@ export function Navigation() {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`${navLinkClass} ${isActive ? activeClass : ""}`}
+                  className={`${navLinkClass} ${isActive ? `${activeClass} active` : ""}`}
                 >
                   {item.label}
                 </Link>
