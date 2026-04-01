@@ -37,7 +37,7 @@ export default function TreesPage() {
       {/* Hero + Why Nordmann — single screen */}
       <section className="min-h-[calc(100vh-4rem)] flex items-center bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-12">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-stretch">
 
             {/* Left — text */}
             <div className="flex flex-col">
@@ -58,7 +58,7 @@ export default function TreesPage() {
                 Frissen vágva adjuk át. Nem hetekkel korábban vágott, ponyva alatt tárolt fa.
               </p>
 
-              <div className="border border-border rounded-lg px-6 py-5 flex-1 flex flex-col justify-center">
+              <div className="border border-border rounded-lg px-6 py-5 mt-auto">
                 <p className="text-xs font-bold text-muted-foreground/40 tracking-widest mb-1 uppercase">Egységes ár</p>
                 <p className="text-3xl font-extrabold text-foreground tracking-tight">8 000 Ft</p>
                 <p className="text-sm text-muted-foreground font-light mt-1">Mérettől függetlenül.</p>
@@ -66,7 +66,7 @@ export default function TreesPage() {
             </div>
 
             {/* Right — image */}
-            <div className="bg-secondary/30 rounded-lg aspect-square overflow-hidden">
+            <div className="bg-secondary/30 rounded-lg overflow-hidden min-h-[400px]">
               <img
                 src="/nordmann-christmas-tree-close-up-green.jpg"
                 alt="Nordmann fa közelről"
