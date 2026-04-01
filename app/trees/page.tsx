@@ -58,7 +58,7 @@ export default function TreesPage() {
                 Frissen vágva adjuk át. Nem hetekkel korábban vágott, ponyva alatt tárolt fa.
               </p>
 
-              <div className="border border-border rounded-lg px-6 py-4 inline-block">
+              <div className="border border-border rounded-lg px-6 py-5 block">
                 <p className="text-xs font-bold text-muted-foreground/40 tracking-widest mb-1 uppercase">Egységes ár</p>
                 <p className="text-3xl font-extrabold text-foreground tracking-tight">8 000 Ft</p>
                 <p className="text-sm text-muted-foreground font-light mt-1">Mérettől függetlenül.</p>
