@@ -3,7 +3,6 @@
 import type React from "react"
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
 import { CheckCircle2, AlertCircle } from "lucide-react"
 import Link from "next/link"
 import CalendarPicker from "@/components/calendar-picker"
@@ -22,6 +21,11 @@ interface FormData {
 interface FormErrors {
   [key: string]: string
 }
+
+const inputClass = (hasError: boolean) =>
+  `w-full px-4 py-2 rounded-lg border bg-background text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-foreground ${
+    hasError ? "border-destructive" : "border-border"
+  }`
 
 export default function BookingPage() {
   const [formData, setFormData] = useState<FormData>({
@@ -142,8 +146,8 @@ export default function BookingPage() {
       } else {
         setErrors({ submit: data.errors?.join(", ") || "Hiba történt a foglalás során" })
       }
-    } catch (error) {
-      setErrors({ submit: "Hálózati hiba. Kérjük, próbáld újra." })
+    } catch {
+      setErrors({ submit: "Hálózati hiba. Próbáld újra." })
     } finally {
       setIsLoading(false)
     }
@@ -151,97 +155,86 @@ export default function BookingPage() {
 
   if (isSuccess && successData) {
     return (
-      <div className="min-h-screen bg-background py-12 sm:py-20">
+      <div className="min-h-screen bg-background py-24 sm:py-32">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
-          <Card className="p-8 sm:p-12 text-center">
-            <CheckCircle2 className="h-16 w-16 text-accent mx-auto mb-6" />
-            <h1 className="text-4xl font-bold text-primary mb-4">Köszönjük a foglalást!</h1>
+          <div className="border border-border rounded-lg p-8 sm:p-12">
+            <CheckCircle2 className="h-10 w-10 text-foreground mb-6" />
+            <h1 className="text-3xl font-bold text-foreground mb-2 tracking-tight">Foglalás rögzítve.</h1>
+            <p className="text-muted-foreground font-light mb-8">Hamarosan felvesszük veled a kapcsolatot.</p>
 
-            <div className="bg-secondary/20 rounded-lg p-6 text-left mb-8">
-              <h2 className="font-bold text-primary mb-4">Foglalás összegzése:</h2>
-              <div className="space-y-2 text-foreground/70">
-                <p>
-                  <span className="font-semibold text-foreground">Név:</span> {successData.name}
+            <div className="border border-border rounded-lg p-6 mb-8 space-y-2">
+              <p className="text-sm text-muted-foreground">
+                <span className="font-semibold text-foreground">Név:</span> {successData.name}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                <span className="font-semibold text-foreground">Telefon:</span> {successData.phone}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                <span className="font-semibold text-foreground">Nap:</span>{" "}
+                {new Date(successData.visitDate).toLocaleDateString("hu-HU", {
+                  weekday: "long",
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
+                })}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                <span className="font-semibold text-foreground">Fák száma:</span> {successData.treeCount} db
+              </p>
+              {settings?.pricePerTree && (
+                <p className="text-sm text-muted-foreground">
+                  <span className="font-semibold text-foreground">Becsült ár:</span>{" "}
+                  {(successData.treeCount * settings.pricePerTree).toLocaleString("hu-HU")} Ft
                 </p>
-                <p>
-                  <span className="font-semibold text-foreground">Telefonszám:</span> {successData.phone}
-                </p>
-                <p>
-                  <span className="font-semibold text-foreground">Nap:</span>{" "}
-                  {new Date(successData.visitDate).toLocaleDateString("hu-HU", {
-                    weekday: "long",
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })}
-                </p>
-                <p>
-                  <span className="font-semibold text-foreground">Várható fák száma:</span> {successData.treeCount} db
-                </p>
-                {settings?.pricePerTree && (
-                  <p>
-                    <span className="font-semibold text-foreground">Becsült ár:</span>{" "}
-                    {(successData.treeCount * settings.pricePerTree).toLocaleString("hu-HU")} Ft
-                  </p>
-                )}
-              </div>
+              )}
             </div>
 
-            <div className="bg-accent/10 border border-accent rounded-lg p-6 mb-8 text-left">
-              <h3 className="font-bold text-primary mb-3">Fontos információk:</h3>
-              <ul className="space-y-2 text-sm text-foreground/70">
-                <li className="flex gap-2">
-                  <span className="text-accent font-bold">→</span>
-                  <span>Az érkezés 10:00 és 12:00 között. Nem percre pontos időpont szükséges.</span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="text-accent font-bold">→</span>
-                  <span>Fizetés a helyszínen: készpénz vagy bankkártya.</span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="text-accent font-bold">→</span>
-                  <span>Majd Karácsony előtti hétvégén fogjuk kivágni és kiszállítani a fát.</span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="text-accent font-bold">→</span>
-                  <span>
-                    Ha kérdésed van, hívj telefonon: <span className="font-semibold">+36 (30) 123 4567</span>
-                  </span>
-                </li>
-              </ul>
+            <div className="border border-border rounded-lg p-6 mb-8 space-y-3">
+              <p className="text-sm font-semibold text-foreground mb-1">Tudnivalók</p>
+              {[
+                "Érkezz 10:00 és 12:00 között. Nem kell percre pontosan.",
+                "Fizetés helyszínen: készpénz vagy bankkártya.",
+                "A fát karácsony előtti hétvégén vágjuk és adjuk át.",
+                "Kérdés esetén hívj: +36 (30) 123 4567",
+              ].map((item, i) => (
+                <p key={i} className="text-sm text-muted-foreground font-light flex gap-3">
+                  <span className="text-muted-foreground/40 font-bold flex-shrink-0">→</span>
+                  {item}
+                </p>
+              ))}
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-3">
               <Link href="/">
-                <Button className="bg-primary hover:bg-primary/90">Vissza a kezdőlapra</Button>
+                <Button className="bg-foreground text-background hover:bg-foreground/90">Vissza a főoldalra</Button>
               </Link>
               <a href="https://www.facebook.com/karacsonyfak" target="_blank" rel="noopener noreferrer">
                 <Button variant="outline">Kövess Facebookon</Button>
               </a>
             </div>
-          </Card>
+          </div>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-background py-12 sm:py-20">
+    <div className="min-h-screen bg-background py-24 sm:py-32">
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl sm:text-5xl font-bold text-primary mb-4">Időpontfoglalás</h1>
-          <p className="text-lg text-foreground/70">
-            Válassz egy szombati vagy vasárnapi napot, és gyere 10:00 és 12:00 között, amikor kényelmes. Nem foglalunk
-            percre pontos időpontot, így van idő beszélgetni.
+        <div className="mb-10">
+          <div className="section-label">Foglalás</div>
+          <h1 className="text-4xl sm:text-5xl font-bold text-foreground mb-4 tracking-tight">Időpontfoglalás</h1>
+          <p className="text-muted-foreground font-light max-w-md">
+            Válassz egy szombatot vagy vasárnapot, és gyere 10 és 12 között, amikor jön. Percre pontos időpont nem kell.
           </p>
           {settings?.pricePerTree && (
-            <p className="text-base font-semibold text-accent mt-4">
-              Jelenlegi ár: {settings.pricePerTree.toLocaleString("hu-HU")} Ft per fa
+            <p className="text-sm font-semibold text-foreground mt-3">
+              Jelenlegi ár: {settings.pricePerTree.toLocaleString("hu-HU")} Ft / fa
             </p>
           )}
         </div>
 
-        <Card className="p-6 sm:p-10">
+        <div className="border border-border rounded-lg p-6 sm:p-10">
           <form onSubmit={handleSubmit} className="space-y-6">
             {errors.submit && (
               <div className="flex gap-3 p-4 bg-destructive/10 border border-destructive rounded-lg">
@@ -252,7 +245,7 @@ export default function BookingPage() {
 
             <div>
               <label htmlFor="name" className="block text-sm font-semibold text-foreground mb-2">
-                Név <span className="text-accent">*</span>
+                Név <span className="text-muted-foreground">*</span>
               </label>
               <input
                 id="name"
@@ -261,16 +254,14 @@ export default function BookingPage() {
                 value={formData.name}
                 onChange={handleChange}
                 placeholder="pl. Kovács István"
-                className={`w-full px-4 py-2 rounded-lg border bg-background text-foreground placeholder:text-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary ${
-                  errors.name ? "border-destructive" : "border-border"
-                }`}
+                className={inputClass(!!errors.name)}
               />
               {errors.name && <p className="text-destructive text-sm mt-1">{errors.name}</p>}
             </div>
 
             <div>
               <label htmlFor="phone" className="block text-sm font-semibold text-foreground mb-2">
-                Telefonszám <span className="text-accent">*</span>
+                Telefonszám <span className="text-muted-foreground">*</span>
               </label>
               <input
                 id="phone"
@@ -279,16 +270,14 @@ export default function BookingPage() {
                 value={formData.phone}
                 onChange={handleChange}
                 placeholder="pl. +36 (30) 123 4567"
-                className={`w-full px-4 py-2 rounded-lg border bg-background text-foreground placeholder:text-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary ${
-                  errors.phone ? "border-destructive" : "border-border"
-                }`}
+                className={inputClass(!!errors.phone)}
               />
               {errors.phone && <p className="text-destructive text-sm mt-1">{errors.phone}</p>}
             </div>
 
             <div>
               <label htmlFor="email" className="block text-sm font-semibold text-foreground mb-2">
-                E-mail cím <span className="text-muted-foreground text-xs">(opcionális)</span>
+                E-mail <span className="text-muted-foreground text-xs font-normal">(opcionális)</span>
               </label>
               <input
                 id="email"
@@ -296,17 +285,15 @@ export default function BookingPage() {
                 type="email"
                 value={formData.email}
                 onChange={handleChange}
-                placeholder="pl. example@example.com"
-                className={`w-full px-4 py-2 rounded-lg border bg-background text-foreground placeholder:text-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary ${
-                  errors.email ? "border-destructive" : "border-border"
-                }`}
+                placeholder="pl. nev@email.com"
+                className={inputClass(!!errors.email)}
               />
               {errors.email && <p className="text-destructive text-sm mt-1">{errors.email}</p>}
             </div>
 
             <div>
               <label className="block text-sm font-semibold text-foreground mb-2">
-                Nap <span className="text-accent">*</span>
+                Nap <span className="text-muted-foreground">*</span>
               </label>
               <CalendarPicker
                 selectedDate={formData.visitDate}
@@ -320,16 +307,14 @@ export default function BookingPage() {
             {settings?.retrievalDays && settings.retrievalDays.length > 0 && (
               <div>
                 <label htmlFor="pickupDate" className="block text-sm font-semibold text-foreground mb-2">
-                  Átvételi nap <span className="text-accent">*</span>
+                  Átvételi nap <span className="text-muted-foreground">*</span>
                 </label>
                 <select
                   id="pickupDate"
                   name="pickupDate"
                   value={formData.pickupDate}
                   onChange={handleChange}
-                  className={`w-full px-4 py-2 rounded-lg border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary ${
-                    errors.pickupDate ? "border-destructive" : "border-border"
-                  }`}
+                  className={inputClass(!!errors.pickupDate)}
                 >
                   <option value="">Válassz átvételi napot...</option>
                   {settings.retrievalDays.sort().map((day: string) => {
@@ -355,16 +340,14 @@ export default function BookingPage() {
 
             <div>
               <label htmlFor="treeCount" className="block text-sm font-semibold text-foreground mb-2">
-                Várhatóan hány fát szeretnél? <span className="text-accent">*</span>
+                Hány fát szeretnél? <span className="text-muted-foreground">*</span>
               </label>
               <select
                 id="treeCount"
                 name="treeCount"
                 value={formData.treeCount}
                 onChange={handleChange}
-                className={`w-full px-4 py-2 rounded-lg border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary ${
-                  errors.treeCount ? "border-destructive" : "border-border"
-                }`}
+                className={inputClass(!!errors.treeCount)}
               >
                 <option value="1">1 fa</option>
                 <option value="2">2 fa</option>
@@ -376,18 +359,16 @@ export default function BookingPage() {
 
             <div>
               <label htmlFor="notes" className="block text-sm font-semibold text-foreground mb-2">
-                Megjegyzés <span className="text-muted-foreground text-xs">(opcionális)</span>
+                Megjegyzés <span className="text-muted-foreground text-xs font-normal">(opcionális)</span>
               </label>
               <textarea
                 id="notes"
                 name="notes"
                 value={formData.notes}
                 onChange={handleChange}
-                placeholder="pl. magas fa, kb. 2,5 m"
+                placeholder="pl. magas fát keresek, kb. 2,5 m"
                 rows={4}
-                className={`w-full px-4 py-2 rounded-lg border bg-background text-foreground placeholder:text-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary ${
-                  errors.notes ? "border-destructive" : "border-border"
-                }`}
+                className={inputClass(!!errors.notes)}
               />
             </div>
 
@@ -398,25 +379,27 @@ export default function BookingPage() {
                   type="checkbox"
                   checked={formData.acceptTerms}
                   onChange={handleChange}
-                  className={`mt-1 h-4 w-4 rounded border ${
-                    errors.acceptTerms ? "border-destructive" : "border-border"
-                  }`}
+                  className={`mt-1 h-4 w-4 rounded border ${errors.acceptTerms ? "border-destructive" : "border-border"}`}
                 />
-                <span className="text-sm text-foreground/70">
+                <span className="text-sm text-muted-foreground font-light">
                   Tudomásul veszem, hogy a foglalás 10:00 és 12:00 közötti érkezést jelent, nem percre pontos időpontot.{" "}
-                  <span className="text-accent">*</span>
+                  <span className="text-foreground">*</span>
                 </span>
               </label>
               {errors.acceptTerms && <p className="text-destructive text-sm mt-1 ml-7">{errors.acceptTerms}</p>}
             </div>
 
-            <div className="pt-4">
-              <Button type="submit" disabled={isLoading} className="w-full bg-accent hover:bg-accent/90 text-lg py-3">
+            <div className="pt-2">
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className="w-full bg-foreground text-background hover:bg-foreground/90 text-base py-3"
+              >
                 {isLoading ? "Feldolgozás..." : "Foglalás megerősítése"}
               </Button>
             </div>
           </form>
-        </Card>
+        </div>
       </div>
     </div>
   )
