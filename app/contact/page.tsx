@@ -1,101 +1,112 @@
 import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
 import { Phone, MapPin, Facebook } from "lucide-react"
+import { AnimateOnScroll } from "@/components/ui/animate-on-scroll"
 
 export default function ContactPage() {
   return (
     <div className="w-full">
       {/* Hero */}
-      <section className="py-12 sm:py-16 bg-secondary/20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl sm:text-5xl font-bold text-primary mb-4">Elérhetőség</h1>
-          <p className="text-lg text-foreground/70">Lépj kapcsolatba velünk. Szívesen beszélgetünk!</p>
+      <section className="py-24 sm:py-32 bg-secondary/20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <AnimateOnScroll>
+            <div className="section-label">Kapcsolat</div>
+            <h1 className="text-4xl sm:text-5xl font-bold text-foreground mb-4 tracking-tight">Elérhetőség</h1>
+            <p className="text-lg text-muted-foreground font-light max-w-xl">
+              Telefonon elérhetők vagyunk. GPS-koordinátákkal megtalálsz.
+            </p>
+          </AnimateOnScroll>
         </div>
       </section>
 
       {/* Contact Info */}
-      <section className="py-16 sm:py-20 bg-background">
+      <section className="py-24 sm:py-32 bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Phone */}
-            <Card className="p-8 text-center hover:shadow-lg transition-shadow">
-              <Phone className="h-12 w-12 text-accent mx-auto mb-4" />
-              <h3 className="text-xl font-bold text-primary mb-2">Telefonszám</h3>
-              <p className="text-2xl font-semibold text-accent mb-2">+36 (30) 123 4567</p>
-              <p className="text-foreground/70 text-sm">Nyitva szombat és vasárnap, 10:00-12:00</p>
-            </Card>
+            <AnimateOnScroll delay={0}>
+              <div className="border border-border rounded-lg p-8">
+                <Phone className="h-6 w-6 text-foreground mb-4" />
+                <h3 className="font-semibold text-foreground mb-2 tracking-tight">Telefonszám</h3>
+                <p className="text-2xl font-bold text-foreground mb-2 tracking-tight">+36 (30) 123 4567</p>
+                <p className="text-sm text-muted-foreground font-light">Szombat–vasárnap, 10:00–12:00</p>
+              </div>
+            </AnimateOnScroll>
 
             {/* Contact Person */}
-            <Card className="p-8 text-center hover:shadow-lg transition-shadow">
-              <MapPin className="h-12 w-12 text-accent mx-auto mb-4" />
-              <h3 className="text-xl font-bold text-primary mb-2">Kapcsolattartó</h3>
-              <p className="text-foreground/70 mb-2">
-                Apa neve – mindig kint van 10–12-ig a fenyvesben a foglalási napokon.
-              </p>
-              <p className="text-sm text-foreground/60">Egyéb időpontban előzetes egyeztetés szükséges.</p>
-            </Card>
+            <AnimateOnScroll delay={100}>
+              <div className="border border-border rounded-lg p-8">
+                <MapPin className="h-6 w-6 text-foreground mb-4" />
+                <h3 className="font-semibold text-foreground mb-2 tracking-tight">A helyszínen</h3>
+                <p className="text-muted-foreground font-light mb-2">
+                  A foglalási napokon 10–12 között mindig ott vagyunk a fenyvesben.
+                </p>
+                <p className="text-sm text-muted-foreground font-light">Egyéb időpontban előre egyeztess.</p>
+              </div>
+            </AnimateOnScroll>
 
             {/* Facebook */}
-            <Card className="p-8 text-center hover:shadow-lg transition-shadow">
-              <Facebook className="h-12 w-12 text-accent mx-auto mb-4" />
-              <h3 className="text-xl font-bold text-primary mb-2">Kövess</h3>
-              <p className="text-foreground/70 mb-4">Friss képek és hírek a Facebookon.</p>
-              <a href="https://www.facebook.com/karacsonyfak" target="_blank" rel="noopener noreferrer">
-                <Button size="sm" className="bg-accent hover:bg-accent/90">
-                  Facebook oldal
-                </Button>
-              </a>
-            </Card>
+            <AnimateOnScroll delay={200}>
+              <div className="border border-border rounded-lg p-8">
+                <Facebook className="h-6 w-6 text-foreground mb-4" />
+                <h3 className="font-semibold text-foreground mb-2 tracking-tight">Facebook</h3>
+                <p className="text-muted-foreground font-light mb-4">Képek és hírek az idei szezonról.</p>
+                <a href="https://www.facebook.com/karacsonyfak" target="_blank" rel="noopener noreferrer">
+                  <Button size="sm" className="bg-foreground text-background hover:bg-foreground/90">
+                    Facebook oldal
+                  </Button>
+                </a>
+              </div>
+            </AnimateOnScroll>
           </div>
         </div>
       </section>
 
       {/* Map Section */}
-      <section className="py-16 sm:py-20 bg-secondary/20">
+      <section className="py-24 sm:py-32 bg-secondary/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-primary mb-8 text-center">Megközelítés és helyszín</h2>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Map placeholder */}
-            <div className="rounded-lg overflow-hidden h-96 bg-secondary/30 flex items-center justify-center">
-              <iframe
-                title="Zalaegerszeg map"
-                width="100%"
-                height="100%"
-                frameBorder="0"
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2717.1234567890!2d16.8412!3d46.8206!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x476551234567%3A0x1234567890abcdef!2sZalaegerszeg!5e0!3m2!1shu!2shu!4v1234567890"
-                style={{ border: 0 }}
-                allowFullScreen
-                loading="lazy"
-              />
-            </div>
+          <AnimateOnScroll>
+            <div className="section-label">Megközelítés</div>
+            <h2 className="text-3xl font-bold text-foreground mb-12 tracking-tight">A helyszín</h2>
+          </AnimateOnScroll>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+            {/* Map */}
+            <AnimateOnScroll>
+              <div className="rounded-lg overflow-hidden h-96 bg-secondary/30">
+                <iframe
+                  title="Zalaegerszeg map"
+                  width="100%"
+                  height="100%"
+                  frameBorder="0"
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2717.1234567890!2d16.8412!3d46.8206!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x476551234567%3A0x1234567890abcdef!2sZalaegerszeg!5e0!3m2!1shu!2shu!4v1234567890"
+                  style={{ border: 0 }}
+                  allowFullScreen
+                  loading="lazy"
+                />
+              </div>
+            </AnimateOnScroll>
 
             {/* Info */}
-            <div>
-              <h3 className="text-2xl font-bold text-primary mb-4">A helyszín</h3>
-              <p className="text-foreground/70 mb-4">
-                Egy kis erdő Zalaegerszeg szélén, amely nem rendelkezik közúti utcacímmel. Az érkezéshez a Google Maps
-                alkalmazás szükséges.
+            <AnimateOnScroll delay={150}>
+              <p className="text-muted-foreground font-light mb-6">
+                Nincs utcacím, nincs házszám. Egy kis erdő Zalaegerszeg határán. GPS-koordinátákkal érkezhetsz — ezt
+                a foglalás visszaigazolásában küldjük el.
               </p>
-              <h4 className="font-semibold text-primary mb-3">Megközelítési útmutató:</h4>
-              <ul className="space-y-3 text-foreground/70">
-                <li className="flex gap-3">
-                  <span className="text-accent font-bold">→</span>
-                  <span>Zalaegerszeg városának északi részéről közelítsd meg (az 74-es számú főút felé)</span>
-                </li>
-                <li className="flex gap-3">
-                  <span className="text-accent font-bold">→</span>
-                  <span>Kövess egy földutat az erdő felé (ne félj a paraszt úttól – ideális az autók számára)</span>
-                </li>
-                <li className="flex gap-3">
-                  <span className="text-accent font-bold">→</span>
-                  <span>Parkolás ingyenes, közvetlenül a fenyvesben. 5-6 autó számára van hely.</span>
-                </li>
-                <li className="flex gap-3">
-                  <span className="text-accent font-bold">→</span>
-                  <span>Ha elvétednéd az utat, hívd fel a telefonszámon – megtalálunk!</span>
-                </li>
-              </ul>
-            </div>
+              <div className="space-y-4">
+                {[
+                  "Zalaegerszeg északi részéről közelítsd meg, a 74-es főút irányából.",
+                  "Egy rövid földúton kell behajtani — normál autóval simán járható.",
+                  "Parkolás ingyen, közvetlenül a fenyvesnél. Pár autónak van hely.",
+                  "Ha elvéted az utat, hívj — megtalálunk.",
+                ].map((item, i) => (
+                  <div key={i} className="flex gap-4">
+                    <span className="text-muted-foreground/40 font-bold text-sm tabular-nums flex-shrink-0 mt-0.5">
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                    <p className="text-muted-foreground font-light">{item}</p>
+                  </div>
+                ))}
+              </div>
+            </AnimateOnScroll>
           </div>
         </div>
       </section>
