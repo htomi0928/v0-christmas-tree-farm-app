@@ -39,7 +39,7 @@ export function Navigation() {
           {/* Logo */}
           <Link href="/" className="flex-shrink-0">
             <div className={`text-base font-bold tracking-tight transition-colors duration-300 ${scrolled ? "text-foreground" : "text-white"}`}>
-              Nordmann Fenyők
+              Hollósi Fenyő
             </div>
           </Link>
 
