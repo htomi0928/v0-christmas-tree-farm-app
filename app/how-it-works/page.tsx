@@ -1,6 +1,8 @@
+"use client"
+
 import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
 import Link from "next/link"
+import { AnimateOnScroll } from "@/components/ui/animate-on-scroll"
 
 export default function HowItWorksPage() {
   const steps = [
@@ -39,36 +41,47 @@ export default function HowItWorksPage() {
   return (
     <div className="w-full">
       {/* Hero */}
-      <section className="py-12 sm:py-16 bg-secondary/20">
+      <section className="py-24 sm:py-32 bg-secondary/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl sm:text-5xl font-bold text-primary mb-4">Hogyan működik?</h1>
-          <p className="text-lg text-foreground/70 max-w-2xl mx-auto">
-            Lépésről lépésre végig megy az egész folyamaton, az online foglalástól az átvételig.
-          </p>
+          <AnimateOnScroll>
+            <div className="section-label">A folyamat</div>
+            <h1 className="text-4xl sm:text-5xl font-bold text-primary mb-4">Hogyan működik?</h1>
+            <p className="text-lg text-foreground/70 max-w-2xl mx-auto">
+              Lépésről lépésre végig megy az egész folyamaton, az online foglalástól az átvételig.
+            </p>
+          </AnimateOnScroll>
         </div>
       </section>
 
       {/* Steps */}
-      <section className="py-16 sm:py-20 bg-background">
+      <section className="py-24 sm:py-32 bg-background">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="space-y-8">
+          <div className="space-y-16">
             {steps.map((step, index) => (
-              <div key={step.number} className="flex gap-6">
-                <div className="flex flex-col items-center flex-shrink-0">
-                  <div className="flex items-center justify-center h-12 w-12 rounded-full bg-accent text-accent-foreground font-bold text-lg">
+              <AnimateOnScroll key={step.number} delay={index * 120}>
+                <div className="relative flex gap-8 items-start">
+                  {/* Oversized background step number — decorative, aria-hidden */}
+                  <div
+                    aria-hidden="true"
+                    className="absolute -left-4 -top-6 text-[8rem] font-bold leading-none text-foreground/[0.06] select-none pointer-events-none"
+                  >
                     {step.number}
                   </div>
-                  {index < steps.length - 1 && <div className="w-1 h-16 bg-border mt-4" />}
+                  {/* Step badge */}
+                  <div className="relative flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-accent text-accent-foreground font-bold text-lg z-10">
+                    {step.number}
+                  </div>
+                  {/* Content */}
+                  <div className="relative z-10 pt-1">
+                    <h3 className="text-xl font-bold text-primary mb-2">{step.title}</h3>
+                    <p className="text-foreground/70 leading-relaxed">{step.description}</p>
+                  </div>
                 </div>
-                <Card className="p-6 flex-1">
-                  <h3 className="text-xl font-bold text-primary mb-2">{step.title}</h3>
-                  <p className="text-foreground/70">{step.description}</p>
-                </Card>
-              </div>
+              </AnimateOnScroll>
             ))}
           </div>
 
-          {/* CTA */}
+          {/* CTA — primary conversion action, preserved from original */}
           <div className="mt-12 text-center">
             <Link href="/booking">
               <Button size="lg" className="bg-accent hover:bg-accent/90">
