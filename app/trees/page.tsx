@@ -40,7 +40,7 @@ export default function TreesPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
 
             {/* Left — text */}
-            <div>
+            <div className="flex flex-col">
               <div className="section-label mb-3">Kínálatunk</div>
               <h1 className="text-4xl sm:text-5xl font-bold text-foreground mb-6 tracking-tight leading-tight">
                 Nordmann fenyőink
@@ -58,7 +58,7 @@ export default function TreesPage() {
                 Frissen vágva adjuk át. Nem hetekkel korábban vágott, ponyva alatt tárolt fa.
               </p>
 
-              <div className="border border-border rounded-lg px-6 py-5 block">
+              <div className="border border-border rounded-lg px-6 py-5 flex-1 flex flex-col justify-center">
                 <p className="text-xs font-bold text-muted-foreground/40 tracking-widest mb-1 uppercase">Egységes ár</p>
                 <p className="text-3xl font-extrabold text-foreground tracking-tight">8 000 Ft</p>
                 <p className="text-sm text-muted-foreground font-light mt-1">Mérettől függetlenül.</p>
