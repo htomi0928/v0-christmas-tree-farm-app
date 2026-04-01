@@ -4,41 +4,41 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background:              #f9f9f7;
-  --foreground:              #1c2218;
-  --card:                    #f4f3ef;
-  --card-foreground:         #1c2218;
-  --popover:                 #f4f3ef;
-  --popover-foreground:      #1c2218;
-  --primary:                 #2d5a27;
-  --primary-foreground:      #ffffff;
-  --secondary:               #e8e5db;
-  --secondary-foreground:    #2d5a27;
-  --muted:                   #efeee8;
-  --muted-foreground:        #6b6b6b;
-  --accent:                  #b5651d;
-  --accent-foreground:       #ffffff;
-  --destructive:             #dc2626;
-  --destructive-foreground:  #ffffff;
-  --border:                  #e0ddd4;
-  --input:                   #e8e5db;
-  --ring:                    #2d5a27;
-  --radius:                  0.625rem;
-  --chart-1:                 #2d5a27;
-  --chart-2:                 #b5651d;
-  --chart-3:                 #e8e5db;
-  --chart-4:                 #4a7c3f;
-  --chart-5:                 #8fa882;
-  --sidebar:                 #f4f3ef;
-  --sidebar-foreground:      #1c2218;
-  --sidebar-primary:         #2d5a27;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent:          #b5651d;
-  --sidebar-accent-foreground: #ffffff;
-  --sidebar-border:          #e0ddd4;
-  --sidebar-ring:            #2d5a27;
-  --ease-premium:            cubic-bezier(0.22, 1, 0.36, 1);
-  --ease-card:               cubic-bezier(0.45, 0, 0.15, 1);
+  --background:                    #ffffff;
+  --foreground:                    #0a0a0a;
+  --card:                          #ffffff;
+  --card-foreground:               #0a0a0a;
+  --popover:                       #ffffff;
+  --popover-foreground:            #0a0a0a;
+  --primary:                       #0a0a0a;
+  --primary-foreground:            #ffffff;
+  --secondary:                     #fafaf8;
+  --secondary-foreground:          #0a0a0a;
+  --muted:                         #f5f5f3;
+  --muted-foreground:              #666666;
+  --accent:                        #0a0a0a;
+  --accent-foreground:             #ffffff;
+  --destructive:                   #dc2626;
+  --destructive-foreground:        #ffffff;
+  --border:                        #ebebeb;
+  --input:                         #f0f0ee;
+  --ring:                          #0a0a0a;
+  --radius:                        0.5rem;
+  --chart-1:                       #0a0a0a;
+  --chart-2:                       #444444;
+  --chart-3:                       #888888;
+  --chart-4:                       #bbbbbb;
+  --chart-5:                       #e5e5e5;
+  --sidebar:                       #fafaf8;
+  --sidebar-foreground:            #0a0a0a;
+  --sidebar-primary:               #0a0a0a;
+  --sidebar-primary-foreground:    #ffffff;
+  --sidebar-accent:                #f5f5f3;
+  --sidebar-accent-foreground:     #0a0a0a;
+  --sidebar-border:                #ebebeb;
+  --sidebar-ring:                  #0a0a0a;
+  --ease-premium:                  cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-card:                     cubic-bezier(0.45, 0, 0.15, 1);
 }
 
 .dark {
@@ -80,7 +80,6 @@
   /* Font tokens — injected by next/font/google on <html> element.
      Names are identical on both sides intentionally — this re-exposes
      the CSS custom property as a Tailwind theme token. Not a copy-paste error. */
-  --font-heading: var(--font-heading);
   --font-sans: var(--font-sans);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -133,7 +132,7 @@
    Placed outside @layer base intentionally — higher specificity than
    Tailwind's base layer while remaining overridable by utility classes. */
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-heading), 'Outfit', sans-serif;
+  font-family: var(--font-sans), 'Plus Jakarta Sans', sans-serif;
   letter-spacing: -0.035em;
 }
 
@@ -153,7 +152,7 @@ body {
   text-transform: uppercase;
   color: var(--muted-foreground);
   margin-bottom: 1rem;
-  font-family: var(--font-heading), 'Outfit', sans-serif;
+  font-family: var(--font-sans), 'Plus Jakarta Sans', sans-serif;
 }
 .section-label::before,
 .section-label::after {
@@ -222,7 +221,7 @@ body {
   display: flex;
   gap: 3rem;
   white-space: nowrap;
-  font-family: var(--font-heading), 'Outfit', sans-serif;
+  font-family: var(--font-sans), 'Plus Jakarta Sans', sans-serif;
   font-size: 0.75rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
