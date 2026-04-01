@@ -52,11 +52,21 @@ export function Navigation() {
 
           {/* Desktop menu */}
           <div className="hidden md:flex items-center gap-1">
-            {navigationItems.map((item) => (
-              <Link key={item.href} href={item.href} className={navLinkClass}>
-                {item.label}
-              </Link>
-            ))}
+            {navigationItems.map((item) => {
+              const isActive = pathname === item.href
+              const activeClass = isSolid
+                ? "text-foreground"
+                : "text-white"
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`${navLinkClass} ${isActive ? activeClass : ""}`}
+                >
+                  {item.label}
+                </Link>
+              )
+            })}
             <Link href="/booking">
               <Button
                 size="sm"
