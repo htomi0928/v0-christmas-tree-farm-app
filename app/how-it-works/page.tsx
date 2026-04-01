@@ -39,9 +39,9 @@ export default function HowItWorksPage() {
 
           {/* Left — heading + CTA */}
           <div>
-            <div className="section-label mb-3">A folyamat</div>
+            <div className="section-label mb-3">A vásárlás folyamata</div>
             <h1 className="text-4xl sm:text-5xl font-bold text-foreground mb-4 tracking-tight leading-tight">
-              Hogyan működik?
+              Hogyan működünk?
             </h1>
             <p className="text-muted-foreground font-light mb-8 max-w-xs">
               Az online foglalástól az átvételig — öt lépés.
