@@ -21,10 +21,10 @@ export default function ContactPage() {
       {/* Contact Info */}
       <section className="py-14 sm:py-20 bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
             {/* Phone */}
-            <AnimateOnScroll delay={0}>
-              <div className="border border-border rounded-lg p-8">
+            <AnimateOnScroll delay={0} className="h-full">
+              <div className="border border-border rounded-lg p-8 h-full">
                 <Phone className="h-6 w-6 text-foreground mb-4" />
                 <h3 className="font-semibold text-foreground mb-2 tracking-tight">Telefonszám</h3>
                 <p className="text-2xl font-bold text-foreground mb-2 tracking-tight">+36 (30) 123 4567</p>
@@ -33,8 +33,8 @@ export default function ContactPage() {
             </AnimateOnScroll>
 
             {/* Contact Person */}
-            <AnimateOnScroll delay={100}>
-              <div className="border border-border rounded-lg p-8">
+            <AnimateOnScroll delay={100} className="h-full">
+              <div className="border border-border rounded-lg p-8 h-full">
                 <MapPin className="h-6 w-6 text-foreground mb-4" />
                 <h3 className="font-semibold text-foreground mb-2 tracking-tight">A helyszínen</h3>
                 <p className="text-muted-foreground font-light mb-2">
@@ -45,13 +45,13 @@ export default function ContactPage() {
             </AnimateOnScroll>
 
             {/* Facebook */}
-            <AnimateOnScroll delay={200}>
-              <div className="border border-border rounded-lg p-8">
+            <AnimateOnScroll delay={200} className="h-full">
+              <div className="border border-border rounded-lg p-8 h-full">
                 <Facebook className="h-6 w-6 text-foreground mb-4" />
                 <h3 className="font-semibold text-foreground mb-2 tracking-tight">Facebook</h3>
                 <p className="text-muted-foreground font-light mb-4">Képek és hírek az idei szezonról.</p>
                 <a href="https://www.facebook.com/karacsonyfak" target="_blank" rel="noopener noreferrer">
-                  <Button size="sm" className="bg-foreground text-background hover:bg-foreground/90">
+                  <Button size="sm" className="bg-foreground text-background hover:bg-foreground/90 cursor-pointer">
                     Facebook oldal
                   </Button>
                 </a>
