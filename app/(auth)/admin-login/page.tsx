@@ -1,11 +1,10 @@
-"use client"
+﻿"use client"
 
 import type React from "react"
-
 import { useState } from "react"
+import { AlertCircle, LockKeyhole } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
-import { AlertCircle } from "lucide-react"
 
 export default function LoginPage() {
   const [username, setUsername] = useState("")
@@ -21,9 +20,7 @@ export default function LoginPage() {
     try {
       const response = await fetch("/api/admin/login", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({ username, password }),
       })
@@ -33,66 +30,67 @@ export default function LoginPage() {
       if (data.success) {
         window.location.href = "/admin"
       } else {
-        setError(data.error || "Hibás felhasználónév vagy jelszó")
+        setError(data.error || "Hibás felhasználónév vagy jelszó.")
       }
-    } catch (error) {
-      setError("Hálózati hiba. Kérjük, próbáld újra.")
+    } catch {
+      setError("Hálózati hiba történt. Kérjük, próbáld újra.")
     } finally {
       setIsLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center py-12 px-4">
-      <Card className="w-full max-w-md p-8">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-primary mb-2">Admin Bejelentkezés</h1>
-          <p className="text-foreground/70 text-sm">Foglalások kezeléséhez és beállításokhoz</p>
-        </div>
-
-        {error && (
-          <div className="mb-6 flex gap-3 p-4 bg-destructive/10 border border-destructive rounded-lg">
-            <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0" />
-            <p className="text-destructive text-sm">{error}</p>
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label htmlFor="username" className="block text-sm font-semibold text-foreground mb-2">
-              Felhasználónév
-            </label>
-            <input
-              id="username"
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="admin"
-              required
-              className="w-full px-4 py-2 rounded-lg border border-border bg-background text-foreground placeholder:text-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary"
-            />
+    <div className="min-h-screen bg-[linear-gradient(180deg,rgba(247,243,235,1),rgba(239,233,222,0.72))] px-4 py-10">
+      <div className="mx-auto flex min-h-[80vh] max-w-md items-center">
+        <Card className="w-full px-8 py-10">
+          <div className="px-6 text-center">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary text-primary-foreground">
+              <LockKeyhole className="h-7 w-7" />
+            </div>
+            <p className="section-kicker mt-6">Admin</p>
+            <h1 className="text-4xl font-semibold text-primary">Belépés a kezelőfelületre</h1>
+            <p className="mt-4 text-base leading-7 text-foreground/70">
+              A foglalások, kiadások és szezonbeállítások kezelése innen érhető el.
+            </p>
           </div>
 
-          <div>
-            <label htmlFor="password" className="block text-sm font-semibold text-foreground mb-2">
-              Jelszó
-            </label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              required
-              className="w-full px-4 py-2 rounded-lg border border-border bg-background text-foreground placeholder:text-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary"
-            />
-          </div>
+          <form onSubmit={handleSubmit} className="mt-8 space-y-5 px-6">
+            {error && (
+              <div className="rounded-2xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
+                <div className="flex gap-3">
+                  <AlertCircle className="h-5 w-5" />
+                  {error}
+                </div>
+              </div>
+            )}
 
-          <Button type="submit" disabled={isLoading} className="w-full bg-primary hover:bg-primary/90 text-lg py-3">
-            {isLoading ? "Bejelentkezés..." : "Bejelentkezés"}
-          </Button>
-        </form>
-      </Card>
+            <div>
+              <label className="mb-2 block text-sm font-semibold text-foreground">Felhasználónév</label>
+              <input
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="input-base"
+                placeholder="admin"
+              />
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm font-semibold text-foreground">Jelszó</label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="input-base"
+                placeholder="••••••••"
+              />
+            </div>
+
+            <Button type="submit" size="lg" className="w-full">
+              {isLoading ? "Belépés..." : "Belépés"}
+            </Button>
+          </form>
+        </Card>
+      </div>
     </div>
   )
 }

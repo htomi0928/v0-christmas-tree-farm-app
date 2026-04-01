@@ -1,4 +1,4 @@
-import "server-only"
+﻿import "server-only"
 import { sql } from "./db"
 import { type Reservation, ReservationStatus, type CreateReservationData, type UpdateReservationData } from "./types"
 
@@ -21,13 +21,13 @@ function formatDate(value: any): string {
 function validateReservationData(data: CreateReservationData): string[] {
   const errors: string[] = []
 
-  if (!data.name?.trim()) errors.push("Név szükséges")
-  if (!data.phone?.trim()) errors.push("Telefonszám szükséges")
-  if (!data.visitDate) errors.push("Nap szükséges")
-  if (!data.treeCount || data.treeCount < 1) errors.push("Fák száma minimum 1")
+  if (!data.name?.trim()) errors.push("NÃ©v szÃ¼ksÃ©ges")
+  if (!data.phone?.trim()) errors.push("TelefonszÃ¡m szÃ¼ksÃ©ges")
+  if (!data.visitDate) errors.push("Nap szÃ¼ksÃ©ges")
+  if (!data.treeCount || data.treeCount < 1) errors.push("FÃ¡k szÃ¡ma minimum 1")
 
   // Basic email validation if provided
-  if (data.email && !data.email.includes("@")) errors.push("Érvénytelen email cím")
+  if (data.email && !data.email.includes("@")) errors.push("Ã‰rvÃ©nytelen email cÃ­m")
 
   return errors
 }
@@ -134,7 +134,7 @@ export async function updateReservation(
   // First check if reservation exists
   const existing = await getReservationById(id)
   if (!existing) {
-    return { success: false, error: "Foglalás nem található" }
+    return { success: false, error: "FoglalÃ¡s nem talÃ¡lhatÃ³" }
   }
 
   // Validate if core fields are being updated
@@ -229,7 +229,7 @@ export async function updateReservation(
 export async function deleteReservation(id: number): Promise<{ success: boolean; error?: string }> {
   const existing = await getReservationById(id)
   if (!existing) {
-    return { success: false, error: "Foglalás nem található" }
+    return { success: false, error: "FoglalÃ¡s nem talÃ¡lhatÃ³" }
   }
   await sql`DELETE FROM reservations WHERE id = ${id}`
   return { success: true }
@@ -281,7 +281,7 @@ export async function getReservationStats(): Promise<{
 
   for (const row of revenueRows) {
     const revenue = Number(row.total_trees) * price
-    if (row.paid_to === "János") {
+    if (row.paid_to === "János" || row.paid_to === "JÃ¡nos") {
       revenueJanos = revenue
     } else if (row.paid_to === "Sanyi") {
       revenueSanyi = revenue
@@ -297,3 +297,4 @@ export async function getReservationStats(): Promise<{
     totalRevenue: revenueJanos + revenueSanyi,
   }
 }
+
