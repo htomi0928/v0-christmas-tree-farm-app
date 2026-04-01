@@ -57,7 +57,7 @@ export default function FAQPage() {
           <div>
             <div className="section-label mb-3">Kérdések</div>
             <h1 className="text-4xl sm:text-5xl font-bold text-foreground mb-4 tracking-tight leading-tight">
-              GYIK
+              Gyakran ismételt kérdések
             </h1>
             <p className="text-muted-foreground font-light max-w-xs">
               A leggyakoribb kérdések, amiket kapunk.
