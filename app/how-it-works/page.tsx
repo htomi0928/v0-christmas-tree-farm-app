@@ -44,7 +44,7 @@ export default function HowItWorksPage() {
               Hogyan működünk?
             </h1>
             <p className="text-muted-foreground font-light mb-8 max-w-xs">
-              Az online foglalástól az átvételig — öt lépés.
+              Az online foglalástól az átvételig öt lépés.
             </p>
             <Link href="/booking">
               <Button size="lg" className="bg-foreground text-background hover:bg-foreground/90">
