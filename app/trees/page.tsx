@@ -40,7 +40,7 @@ export default function TreesPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-stretch">
 
             {/* Left — text */}
-            <div className="flex flex-col">
+            <div className="flex flex-col text-center items-center">
               <div className="section-label mb-3">Kínálatunk</div>
               <h1 className="text-4xl sm:text-5xl font-bold text-foreground mb-6 tracking-tight leading-tight">
                 Nordmann fenyőink
