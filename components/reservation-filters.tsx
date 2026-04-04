@@ -1,161 +1,109 @@
-"use client"
+﻿"use client"
 
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import Link from "next/link"
+import { Search, SlidersHorizontal } from "lucide-react"
 import { Card } from "@/components/ui/card"
-import type { Reservation, ReservationStatus } from "@/lib/types"
-import { ChevronRight, ArrowUp, ArrowDown } from "lucide-react"
+import type { Reservation } from "@/lib/types"
+import { reservationStatusMeta, formatDateHu } from "@/lib/site"
 
 interface Props {
   reservations: Reservation[]
-  statusLabels: Record<ReservationStatus, string>
-  statusColors: Record<ReservationStatus, string>
 }
 
-type SortField = "createdAt" | "visitDate" | "pickupDate"
-type SortDir = "asc" | "desc"
+function toTimestamp(value: unknown) {
+  if (typeof value === "string" || value instanceof Date) {
+    const timestamp = new Date(value).getTime()
+    return Number.isNaN(timestamp) ? 0 : timestamp
+  }
 
-function formatDateHu(dateStr?: string) {
-  if (!dateStr) return "—"
-  const [y, m, d] = dateStr.split("-")
-  return new Date(Number(y), Number(m) - 1, Number(d)).toLocaleDateString("hu-HU")
+  return 0
 }
 
-export default function ReservationFilters({ reservations, statusLabels, statusColors }: Props) {
-  const [statusFilter, setStatusFilter] = useState<string | ReservationStatus>("ALL")
-  const [sortField, setSortField] = useState<SortField>("createdAt")
-  const [sortDir, setSortDir] = useState<SortDir>("desc")
+export default function ReservationFilters({ reservations }: Props) {
+  const [query, setQuery] = useState("")
+  const [statusFilter, setStatusFilter] = useState("ALL")
+  const [visitDateFilter, setVisitDateFilter] = useState("")
 
-  const toggleSort = (field: SortField) => {
-    if (sortField === field) {
-      setSortDir((d) => (d === "asc" ? "desc" : "asc"))
-    } else {
-      setSortField(field)
-      setSortDir("desc")
-    }
-  }
-
-  const filtered = (statusFilter === "ALL" ? reservations : reservations.filter((r) => r.status === statusFilter))
-    .slice()
-    .sort((a, b) => {
-      let aVal: string
-      let bVal: string
-
-      if (sortField === "createdAt") {
-        aVal = a.createdAt ?? ""
-        bVal = b.createdAt ?? ""
-      } else if (sortField === "visitDate") {
-        aVal = a.visitDate ?? ""
-        bVal = b.visitDate ?? ""
-      } else {
-        aVal = a.pickupDate ?? ""
-        bVal = b.pickupDate ?? ""
-      }
-
-      if (aVal < bVal) return sortDir === "asc" ? -1 : 1
-      if (aVal > bVal) return sortDir === "asc" ? 1 : -1
-      return 0
-    })
-
-  const SortButton = ({ field, label }: { field: SortField; label: string }) => {
-    const active = sortField === field
-    return (
-      <button
-        type="button"
-        onClick={() => toggleSort(field)}
-        className={`flex items-center gap-1 px-3 py-1.5 rounded-lg border text-sm font-medium transition-colors ${
-          active
-            ? "bg-primary text-primary-foreground border-primary"
-            : "bg-background text-foreground border-border hover:bg-secondary"
-        }`}
-      >
-        {label}
-        {active ? (
-          sortDir === "asc" ? <ArrowUp className="h-3.5 w-3.5" /> : <ArrowDown className="h-3.5 w-3.5" />
-        ) : (
-          <ArrowDown className="h-3.5 w-3.5 opacity-30" />
-        )}
-      </button>
-    )
-  }
+  const filteredReservations = useMemo(() => {
+    return reservations
+      .filter((reservation) => (statusFilter === "ALL" ? true : reservation.status === statusFilter))
+      .filter((reservation) => (visitDateFilter ? reservation.visitDate === visitDateFilter : true))
+      .filter((reservation) => {
+        if (!query.trim()) return true
+        const normalized = query.toLowerCase()
+        return [reservation.name, reservation.phone, reservation.notes ?? "", reservation.treeNumbers ?? ""].some((value) => value.toLowerCase().includes(normalized))
+      })
+      .sort((a, b) => {
+        const visitDiff = toTimestamp(a.visitDate) - toTimestamp(b.visitDate)
+        if (visitDiff !== 0) return visitDiff
+        return toTimestamp(b.createdAt) - toTimestamp(a.createdAt)
+      })
+  }, [query, reservations, statusFilter, visitDateFilter])
 
   return (
-    <>
-      <Card className="p-4 mb-6 flex flex-col sm:flex-row gap-4 sm:items-end">
-        <div>
-          <label className="block text-sm font-semibold text-foreground mb-2">Szűrés státusz szerint:</label>
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-4 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-          >
-            <option value="ALL">Összes ({reservations.length})</option>
-            {Object.entries(statusLabels).map(([key, label]) => {
-              const count = reservations.filter((r) => r.status === key).length
-              return (
-                <option key={key} value={key}>
-                  {label} ({count})
-                </option>
-              )
-            })}
-          </select>
-        </div>
+    <div className="space-y-4">
+      <Card className="admin-card px-6 py-6">
+        <div className="grid gap-4 px-6 lg:grid-cols-[1.2fr_0.8fr_0.7fr]">
+          <label className="block">
+            <span className="mb-2 flex items-center gap-2 text-sm font-semibold text-foreground"><Search className="h-4 w-4" /> Keresés</span>
+            <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Név, telefonszám, megjegyzés vagy sorszám" className="input-base" />
+          </label>
 
-        <div>
-          <label className="block text-sm font-semibold text-foreground mb-2">Rendezés:</label>
-          <div className="flex flex-wrap gap-2">
-            <SortButton field="createdAt" label="Létrehozva" />
-            <SortButton field="visitDate" label="Látogatás napja" />
-            <SortButton field="pickupDate" label="Átvételi nap" />
-          </div>
+          <label className="block">
+            <span className="mb-2 flex items-center gap-2 text-sm font-semibold text-foreground"><SlidersHorizontal className="h-4 w-4" /> Státusz</span>
+            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="select-base">
+              <option value="ALL">Minden státusz</option>
+              {Object.entries(reservationStatusMeta).map(([value, meta]) => (
+                <option key={value} value={value}>{meta.label}</option>
+              ))}
+            </select>
+          </label>
+
+          <label className="block">
+            <span className="mb-2 block text-sm font-semibold text-foreground">Nap szerint</span>
+            <input type="date" value={visitDateFilter} onChange={(e) => setVisitDateFilter(e.target.value)} className="input-base" />
+          </label>
         </div>
       </Card>
 
-      {filtered.length === 0 ? (
-        <Card className="p-8 text-center">
-          <p className="text-foreground/70">Nincsenek foglalások</p>
-        </Card>
-      ) : (
-        <div className="space-y-3">
-          {filtered.map((reservation) => (
-            <Link key={reservation.id} href={`/admin/reservations/${reservation.id}`}>
-              <Card className="p-4 hover:shadow-lg transition-shadow cursor-pointer">
-                <div className="flex items-center justify-between gap-4">
-                  <div className="flex-1 grid grid-cols-2 md:grid-cols-5 gap-4">
-                    <div className="min-w-0">
-                      <p className="text-xs text-foreground/60">Név</p>
-                      <p className="font-semibold text-foreground truncate">{reservation.name}</p>
+      <div className="grid gap-3">
+        {filteredReservations.length === 0 ? (
+          <Card className="admin-card px-8 py-10">
+            <div className="px-6 text-center text-base text-foreground/68">Nincs a szűrésnek megfelelő foglalás.</div>
+          </Card>
+        ) : (
+          filteredReservations.map((reservation) => {
+            const meta = reservationStatusMeta[reservation.status]
+            return (
+              <Link key={reservation.id} href={`/admin/reservations/${reservation.id}`}>
+                <Card className="admin-card gap-4 px-6 py-6 transition hover:-translate-y-0.5 hover:shadow-[0_18px_36px_rgba(16,39,32,0.12)]">
+                  <div className="flex flex-col gap-4 px-6 md:flex-row md:items-start md:justify-between">
+                    <div className="space-y-3">
+                      <div>
+                        <p className="text-2xl font-semibold text-primary">{reservation.name}</p>
+                        <p className="mt-1 text-sm text-foreground/64">
+                          {reservation.phone}
+                          {reservation.email ? ` • ${reservation.email}` : ""}
+                        </p>
+                      </div>
+                      <div className="grid gap-2 text-sm text-foreground/72 sm:grid-cols-3">
+                        <p><span className="font-semibold text-primary">Nap:</span> {formatDateHu(reservation.visitDate)}</p>
+                        <p><span className="font-semibold text-primary">Darab:</span> {reservation.treeCount} fa</p>
+                        <p><span className="font-semibold text-primary">Sorszám:</span> {reservation.treeNumbers || "Még nincs"}</p>
+                      </div>
                     </div>
-                    <div className="min-w-0">
-                      <p className="text-xs text-foreground/60">Látogatás napja</p>
-                      <p className="font-semibold text-foreground">{formatDateHu(reservation.visitDate)}</p>
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-xs text-foreground/60">Átvételi nap</p>
-                      <p className="font-semibold text-foreground">{formatDateHu(reservation.pickupDate)}</p>
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-xs text-foreground/60">Fák száma</p>
-                      <p className="font-semibold text-foreground">{reservation.treeCount}</p>
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-xs text-foreground/60">Státusz</p>
-                      <span
-                        className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
-                          statusColors[reservation.status]
-                        }`}
-                      >
-                        {statusLabels[reservation.status]}
-                      </span>
+                    <div className="flex flex-col items-start gap-3 md:items-end">
+                      <span className={`status-pill ${meta.pillClassName}`}>{meta.label}</span>
+                      <span className="text-sm font-semibold text-primary">Megnyitás</span>
                     </div>
                   </div>
-                  <ChevronRight className="h-5 w-5 text-foreground/40 flex-shrink-0" />
-                </div>
-              </Card>
-            </Link>
-          ))}
-        </div>
-      )}
-    </>
+                </Card>
+              </Link>
+            )
+          })
+        )}
+      </div>
+    </div>
   )
 }

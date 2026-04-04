@@ -1,8 +1,7 @@
-import "server-only"
+﻿import "server-only"
 import { sql } from "./db"
 import type { Expense, CreateExpenseData } from "./types"
 
-// List expenses with optional filters
 export async function listExpenses(filters?: { person?: "János" | "Sanyi" }): Promise<Expense[]> {
   let query = "SELECT * FROM expenses WHERE 1=1"
   const params: any[] = []
@@ -13,23 +12,19 @@ export async function listExpenses(filters?: { person?: "János" | "Sanyi" }): P
   }
 
   query += " ORDER BY date DESC, created_at DESC"
-
   const rows = await sql.query(query, params)
 
   return rows.map((row: any) => ({
     id: row.id,
     description: row.description,
     amount: row.amount,
-    person: row.person as "János" | "Sanyi",
+    person: row.person === "JÃ¡nos" ? "János" : (row.person as "János" | "Sanyi"),
     date: row.date,
     createdAt: row.created_at,
   }))
 }
 
-// Create expense
-export async function createExpense(
-  data: CreateExpenseData,
-): Promise<{ success: boolean; data?: Expense; error?: string }> {
+export async function createExpense(data: CreateExpenseData): Promise<{ success: boolean; data?: Expense; error?: string }> {
   if (!data.person || !data.amount || !data.description || !data.date) {
     return { success: false, error: "Minden mező kitöltése kötelező" }
   }
@@ -45,39 +40,28 @@ export async function createExpense(
   `
 
   const row = rows[0]
-  const expense: Expense = {
-    id: row.id,
-    description: row.description,
-    amount: row.amount,
-    person: row.person as "János" | "Sanyi",
-    date: row.date,
-    createdAt: row.created_at,
+  return {
+    success: true,
+    data: {
+      id: row.id,
+      description: row.description,
+      amount: row.amount,
+      person: row.person === "JÃ¡nos" ? "János" : (row.person as "János" | "Sanyi"),
+      date: row.date,
+      createdAt: row.created_at,
+    },
   }
-
-  return { success: true, data: expense }
 }
 
-// Delete expense
 export async function deleteExpense(id: number): Promise<{ success: boolean; error?: string }> {
   const rows = await sql`DELETE FROM expenses WHERE id = ${id} RETURNING id`
-
-  if (rows.length === 0) {
-    return { success: false, error: "Kiadás nem található" }
-  }
-
+  if (rows.length === 0) return { success: false, error: "Kiadás nem található" }
   return { success: true }
 }
 
-// Get expenses summary per person
-export async function getExpensesSummary(): Promise<{
-  janos: number
-  sanyi: number
-  total: number
-}> {
+export async function getExpensesSummary(): Promise<{ janos: number; sanyi: number; total: number }> {
   const rows = await sql`
-    SELECT 
-      person,
-      COALESCE(SUM(amount), 0) as total_amount
+    SELECT person, COALESCE(SUM(amount), 0) as total_amount
     FROM expenses
     GROUP BY person
   `
@@ -86,16 +70,9 @@ export async function getExpensesSummary(): Promise<{
   let sanyi = 0
 
   for (const row of rows) {
-    if (row.person === "János") {
-      janos = Number(row.total_amount)
-    } else if (row.person === "Sanyi") {
-      sanyi = Number(row.total_amount)
-    }
+    if (row.person === "János" || row.person === "JÃ¡nos") janos = Number(row.total_amount)
+    if (row.person === "Sanyi") sanyi = Number(row.total_amount)
   }
 
-  return {
-    janos,
-    sanyi,
-    total: janos + sanyi,
-  }
+  return { janos, sanyi, total: janos + sanyi }
 }

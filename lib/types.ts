@@ -1,4 +1,4 @@
-export enum ReservationStatus {
+﻿export enum ReservationStatus {
   BOOKED = "BOOKED",
   TREE_TAGGED = "TREE_TAGGED",
   CUT = "CUT",
@@ -11,14 +11,14 @@ export interface Reservation {
   name: string
   phone: string
   email?: string
-  visitDate: string // ISO date string, day-only
-  pickupDate?: string // ISO date string, day-only
+  visitDate: string
+  pickupDate?: string
   treeCount: number
   notes?: string
-  treeNumbers?: string // e.g. "12,13,14"
+  treeNumbers?: string
   status: ReservationStatus
-  createdAt: string // ISO datetime
-  paidTo?: "János" | "Sanyi" // Who received the payment
+  createdAt: string
+  paidTo?: "János" | "Sanyi"
 }
 
 export interface CreateReservationData {
@@ -49,7 +49,7 @@ export interface Expense {
   person: "János" | "Sanyi"
   amount: number
   description: string
-  date: string // ISO date
+  date: string
   createdAt: string
 }
 
@@ -61,8 +61,8 @@ export interface CreateExpenseData {
 }
 
 export interface Settings {
-  availableDays: string[] // Array of ISO date strings - days when booking is available
+  availableDays: string[]
   maxBookingsPerDay: number
-  retrievalDays: string[] // Array of ISO date strings - days when customers can pick up trees
-  pricePerTree: number // Price in HUF
+  retrievalDays: string[]
+  pricePerTree: number
 }

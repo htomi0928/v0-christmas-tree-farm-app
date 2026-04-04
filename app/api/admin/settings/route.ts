@@ -1,9 +1,16 @@
-import "server-only"
-import { cookies } from "next/headers"
+﻿import "server-only"
+import { z } from "zod"
 import { getSettings, updateSettings } from "@/lib/settings"
-import { validateSession } from "@/lib/auth"
+import { enforceSameOrigin, logApiError, parseJsonBody, requireAdminSessionResponse } from "@/lib/api"
 
-export async function GET(request: Request) {
+const settingsSchema = z.object({
+  availableDays: z.array(z.string().regex(/^\d{4}-\d{2}-\d{2}$/)).max(366).optional(),
+  maxBookingsPerDay: z.number().int().min(1).max(500).optional(),
+  retrievalDays: z.array(z.string().regex(/^\d{4}-\d{2}-\d{2}$/)).max(366).optional(),
+  pricePerTree: z.number().int().min(0).max(100000000).optional(),
+})
+
+export async function GET(_request: Request) {
   try {
     const settings = await getSettings()
 
@@ -19,6 +26,7 @@ export async function GET(request: Request) {
       },
     )
   } catch (error) {
+    logApiError("settings fetch failed", error)
     return Response.json(
       {
         success: false,
@@ -31,21 +39,16 @@ export async function GET(request: Request) {
 
 export async function PATCH(request: Request) {
   try {
-    const cookieStore = await cookies()
-    const sessionId = cookieStore.get("admin_session")?.value
+    const originError = enforceSameOrigin(request)
+    if (originError) return originError
 
-    if (!sessionId || !validateSession(sessionId)) {
-      return Response.json(
-        {
-          success: false,
-          error: "Nincs hitelesítés",
-        },
-        { status: 401 },
-      )
-    }
+    const authError = await requireAdminSessionResponse()
+    if (authError) return authError
 
-    const body = await request.json()
-    const settings = await updateSettings(body)
+    const parsedBody = await parseJsonBody(request, settingsSchema)
+    if (!parsedBody.success) return parsedBody.response
+
+    const settings = await updateSettings(parsedBody.data)
 
     return Response.json(
       {
@@ -59,7 +62,7 @@ export async function PATCH(request: Request) {
       },
     )
   } catch (error) {
-    console.error("[v0] Settings update error:", error)
+    logApiError("settings update failed", error)
     return Response.json(
       {
         success: false,
@@ -69,3 +72,4 @@ export async function PATCH(request: Request) {
     )
   }
 }
+
