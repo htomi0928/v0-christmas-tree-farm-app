@@ -23,8 +23,8 @@ interface FormErrors {
 }
 
 const inputClass = (hasError: boolean) =>
-  `w-full px-4 py-2 rounded-lg border bg-background text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-foreground ${
-    hasError ? "border-destructive" : "border-border"
+  `w-full px-4 py-2 rounded-lg border bg-[#f5f4f1] text-[#3a3a3a] placeholder:text-[#4a4f4a]/40 focus:outline-none focus:ring-2 focus:ring-[#6e7f6a] ${
+    hasError ? "border-destructive" : "border-[#bfc3c7]"
   }`
 
 export default function BookingPage() {
@@ -155,22 +155,22 @@ export default function BookingPage() {
 
   if (isSuccess && successData) {
     return (
-      <div className="min-h-screen bg-background py-14 sm:py-20">
+      <div className="min-h-screen bg-[#ededed] py-14 sm:py-20">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="border border-border rounded-lg p-8 sm:p-12">
-            <CheckCircle2 className="h-10 w-10 text-foreground mb-6" />
-            <h1 className="text-3xl font-bold text-foreground mb-2 tracking-tight">Foglalás rögzítve.</h1>
-            <p className="text-muted-foreground font-light mb-8">Hamarosan felvesszük veled a kapcsolatot.</p>
+          <div className="border border-[#bfc3c7] bg-[#f5f4f1] rounded-lg p-8 sm:p-12">
+            <CheckCircle2 className="h-10 w-10 text-[#6e7f6a] mb-6" />
+            <h1 className="text-3xl font-bold text-[#3a3a3a] mb-2 tracking-tight">Foglalás rögzítve.</h1>
+            <p className="text-[#4a4f4a] font-light mb-8">Hamarosan felvesszük veled a kapcsolatot.</p>
 
-            <div className="border border-border rounded-lg p-6 mb-8 space-y-2">
-              <p className="text-sm text-muted-foreground">
-                <span className="font-semibold text-foreground">Név:</span> {successData.name}
+            <div className="border border-[#bfc3c7] rounded-lg p-6 mb-8 space-y-2">
+              <p className="text-sm text-[#4a4f4a]">
+                <span className="font-semibold text-[#3a3a3a]">Név:</span> {successData.name}
               </p>
-              <p className="text-sm text-muted-foreground">
-                <span className="font-semibold text-foreground">Telefon:</span> {successData.phone}
+              <p className="text-sm text-[#4a4f4a]">
+                <span className="font-semibold text-[#3a3a3a]">Telefon:</span> {successData.phone}
               </p>
-              <p className="text-sm text-muted-foreground">
-                <span className="font-semibold text-foreground">Nap:</span>{" "}
+              <p className="text-sm text-[#4a4f4a]">
+                <span className="font-semibold text-[#3a3a3a]">Nap:</span>{" "}
                 {new Date(successData.visitDate).toLocaleDateString("hu-HU", {
                   weekday: "long",
                   year: "numeric",
@@ -178,27 +178,27 @@ export default function BookingPage() {
                   day: "numeric",
                 })}
               </p>
-              <p className="text-sm text-muted-foreground">
-                <span className="font-semibold text-foreground">Fák száma:</span> {successData.treeCount} db
+              <p className="text-sm text-[#4a4f4a]">
+                <span className="font-semibold text-[#3a3a3a]">Fák száma:</span> {successData.treeCount} db
               </p>
               {settings?.pricePerTree && (
-                <p className="text-sm text-muted-foreground">
-                  <span className="font-semibold text-foreground">Becsült ár:</span>{" "}
+                <p className="text-sm text-[#4a4f4a]">
+                  <span className="font-semibold text-[#3a3a3a]">Becsült ár:</span>{" "}
                   {(successData.treeCount * settings.pricePerTree).toLocaleString("hu-HU")} Ft
                 </p>
               )}
             </div>
 
-            <div className="border border-border rounded-lg p-6 mb-8 space-y-3">
-              <p className="text-sm font-semibold text-foreground mb-1">Tudnivalók</p>
+            <div className="border border-[#bfc3c7] rounded-lg p-6 mb-8 space-y-3">
+              <p className="text-sm font-semibold text-[#3a3a3a] mb-1">Tudnivalók</p>
               {[
                 "Érkezz 10:00 és 12:00 között. Nem kell percre pontosan.",
                 "Fizetés helyszínen: készpénz vagy bankkártya.",
                 "A fát karácsony előtti hétvégén vágjuk és adjuk át.",
                 "Kérdés esetén hívj: +36 (30) 123 4567",
               ].map((item, i) => (
-                <p key={i} className="text-sm text-muted-foreground font-light flex gap-3">
-                  <span className="text-muted-foreground/40 font-bold flex-shrink-0">→</span>
+                <p key={i} className="text-sm text-[#4a4f4a] font-light flex gap-3">
+                  <span className="text-[#6e7f6a] font-bold flex-shrink-0">→</span>
                   {item}
                 </p>
               ))}
@@ -206,10 +206,10 @@ export default function BookingPage() {
 
             <div className="flex flex-col sm:flex-row gap-3">
               <Link href="/">
-                <Button className="bg-foreground text-background hover:bg-foreground/90">Vissza a főoldalra</Button>
+                <Button className="h-12 px-7 text-base rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(74,79,74,0.25)] active:translate-y-0 active:shadow-none font-semibold">Vissza a főoldalra</Button>
               </Link>
               <a href="https://www.facebook.com/karacsonyfak" target="_blank" rel="noopener noreferrer">
-                <Button variant="outline">Kövess Facebookon</Button>
+                <Button className="h-12 px-7 text-base rounded-lg border border-[#4a4f4a]/30 bg-transparent text-[#4a4f4a]/70 hover:bg-transparent hover:text-[#4a4f4a] hover:border-[#4a4f4a]/60 hover:-translate-y-0.5 active:translate-y-0 active:shadow-none shadow-none font-normal">Kövess Facebookon</Button>
               </a>
             </div>
           </div>
@@ -219,22 +219,22 @@ export default function BookingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background py-14 sm:py-20">
+    <div className="min-h-screen bg-[#ededed] py-14 sm:py-20">
       <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-10">
           <div className="section-label">Foglalás</div>
-          <h1 className="text-4xl sm:text-5xl font-bold text-foreground mb-4 tracking-tight">Időpontfoglalás</h1>
-          <p className="text-muted-foreground font-light max-w-md">
+          <h1 className="text-4xl sm:text-5xl font-bold text-[#3a3a3a] mb-4 tracking-tight">Időpontfoglalás</h1>
+          <p className="text-[#4a4f4a] font-light max-w-md">
             Válassz egy szombatot vagy vasárnapot, és gyere 10 és 12 között, amikor jön. Percre pontos időpont nem kell.
           </p>
           {settings?.pricePerTree && (
-            <p className="text-sm font-semibold text-foreground mt-3">
+            <p className="text-sm font-semibold text-[#3a3a3a] mt-3">
               Jelenlegi ár: {settings.pricePerTree.toLocaleString("hu-HU")} Ft / fa
             </p>
           )}
         </div>
 
-        <div className="border border-border rounded-lg p-6 sm:p-10">
+        <div className="border border-[#bfc3c7] bg-[#f5f4f1] rounded-lg p-6 sm:p-10">
           <form onSubmit={handleSubmit} className="space-y-6">
             {errors.submit && (
               <div className="flex gap-3 p-4 bg-destructive/10 border border-destructive rounded-lg">
@@ -244,8 +244,8 @@ export default function BookingPage() {
             )}
 
             <div>
-              <label htmlFor="name" className="block text-sm font-semibold text-foreground mb-2">
-                Név <span className="text-muted-foreground">*</span>
+              <label htmlFor="name" className="block text-sm font-semibold text-[#3a3a3a] mb-2">
+                Név <span className="text-[#4a4f4a]">*</span>
               </label>
               <input
                 id="name"
@@ -260,8 +260,8 @@ export default function BookingPage() {
             </div>
 
             <div>
-              <label htmlFor="phone" className="block text-sm font-semibold text-foreground mb-2">
-                Telefonszám <span className="text-muted-foreground">*</span>
+              <label htmlFor="phone" className="block text-sm font-semibold text-[#3a3a3a] mb-2">
+                Telefonszám <span className="text-[#4a4f4a]">*</span>
               </label>
               <input
                 id="phone"
@@ -276,8 +276,8 @@ export default function BookingPage() {
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm font-semibold text-foreground mb-2">
-                E-mail <span className="text-muted-foreground text-xs font-normal">(opcionális)</span>
+              <label htmlFor="email" className="block text-sm font-semibold text-[#3a3a3a] mb-2">
+                E-mail <span className="text-[#4a4f4a] text-xs font-normal">(opcionális)</span>
               </label>
               <input
                 id="email"
@@ -292,22 +292,22 @@ export default function BookingPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-foreground mb-2">
-                Nap <span className="text-muted-foreground">*</span>
+              <label className="block text-sm font-semibold text-[#3a3a3a] mb-2">
+                Nap <span className="text-[#4a4f4a]">*</span>
               </label>
               <CalendarPicker
                 selectedDate={formData.visitDate}
                 onDateSelect={handleDateSelect}
                 availableDates={settings?.availableDays}
               />
-              <p className="text-muted-foreground text-xs mt-1">Válassz egy elérhető napot</p>
+              <p className="text-[#4a4f4a] text-xs mt-1">Válassz egy elérhető napot</p>
               {errors.visitDate && <p className="text-destructive text-sm mt-2">{errors.visitDate}</p>}
             </div>
 
             {settings?.retrievalDays && settings.retrievalDays.length > 0 && (
               <div>
-                <label htmlFor="pickupDate" className="block text-sm font-semibold text-foreground mb-2">
-                  Átvételi nap <span className="text-muted-foreground">*</span>
+                <label htmlFor="pickupDate" className="block text-sm font-semibold text-[#3a3a3a] mb-2">
+                  Átvételi nap <span className="text-[#4a4f4a]">*</span>
                 </label>
                 <select
                   id="pickupDate"
@@ -333,14 +333,14 @@ export default function BookingPage() {
                     )
                   })}
                 </select>
-                <p className="text-muted-foreground text-xs mt-1">Mikor szeretnéd átvenni a fát?</p>
+                <p className="text-[#4a4f4a] text-xs mt-1">Mikor szeretnéd átvenni a fát?</p>
                 {errors.pickupDate && <p className="text-destructive text-sm mt-1">{errors.pickupDate}</p>}
               </div>
             )}
 
             <div>
-              <label htmlFor="treeCount" className="block text-sm font-semibold text-foreground mb-2">
-                Hány fát szeretnél? <span className="text-muted-foreground">*</span>
+              <label htmlFor="treeCount" className="block text-sm font-semibold text-[#3a3a3a] mb-2">
+                Hány fát szeretnél? <span className="text-[#4a4f4a]">*</span>
               </label>
               <select
                 id="treeCount"
@@ -358,8 +358,8 @@ export default function BookingPage() {
             </div>
 
             <div>
-              <label htmlFor="notes" className="block text-sm font-semibold text-foreground mb-2">
-                Megjegyzés <span className="text-muted-foreground text-xs font-normal">(opcionális)</span>
+              <label htmlFor="notes" className="block text-sm font-semibold text-[#3a3a3a] mb-2">
+                Megjegyzés <span className="text-[#4a4f4a] text-xs font-normal">(opcionális)</span>
               </label>
               <textarea
                 id="notes"
@@ -381,9 +381,9 @@ export default function BookingPage() {
                   onChange={handleChange}
                   className={`mt-1 h-4 w-4 rounded border ${errors.acceptTerms ? "border-destructive" : "border-border"}`}
                 />
-                <span className="text-sm text-muted-foreground font-light">
+                <span className="text-sm text-[#4a4f4a] font-light">
                   Tudomásul veszem, hogy a foglalás 10:00 és 12:00 közötti érkezést jelent, nem percre pontos időpontot.{" "}
-                  <span className="text-foreground">*</span>
+                  <span className="text-[#3a3a3a]">*</span>
                 </span>
               </label>
               {errors.acceptTerms && <p className="text-destructive text-sm mt-1 ml-7">{errors.acceptTerms}</p>}
@@ -393,7 +393,7 @@ export default function BookingPage() {
               <Button
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-foreground text-background hover:bg-foreground/90 text-base py-3"
+                className="w-full bg-primary text-primary-foreground hover:bg-primary/90 text-base py-3"
               >
                 {isLoading ? "Feldolgozás..." : "Foglalás megerősítése"}
               </Button>

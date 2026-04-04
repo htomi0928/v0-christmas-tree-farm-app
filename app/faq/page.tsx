@@ -30,18 +30,18 @@ function FAQItem({ question, answer }: { question: string; answer: string }) {
   const [isOpen, setIsOpen] = useState(false)
 
   return (
-    <div className="border-b border-border last:border-b-0">
+    <div className="border-b border-[#bfc3c7] last:border-b-0">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full py-5 flex items-start justify-between text-left hover:text-foreground/80 transition-colors"
+        className="w-full py-5 flex items-start justify-between text-left cursor-pointer hover:text-[#3a3a3a]/70 transition-colors"
       >
-        <h3 className="font-semibold text-foreground pr-4 tracking-tight text-base">{question}</h3>
+        <h3 className="font-semibold text-[#3a3a3a] pr-4 tracking-tight text-base">{question}</h3>
         <ChevronDown
-          className={`h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+          className={`h-5 w-5 text-[#6e7f6a] flex-shrink-0 mt-0.5 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
         />
       </button>
       {isOpen && (
-        <p className="pb-5 text-base text-muted-foreground font-light leading-relaxed">{answer}</p>
+        <p className="pb-5 text-base text-[#4a4f4a] font-light leading-relaxed">{answer}</p>
       )}
     </div>
   )
@@ -49,17 +49,17 @@ function FAQItem({ question, answer }: { question: string; answer: string }) {
 
 export default function FAQPage() {
   return (
-    <div className="min-h-[calc(100vh-4rem)] flex items-center bg-background">
+    <div className="min-h-[calc(100vh-4rem)] flex items-center bg-[#ededed]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-12">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
 
           {/* Left — heading */}
           <div>
             <div className="section-label mb-3">Kérdések</div>
-            <h1 className="text-4xl sm:text-5xl font-bold text-foreground mb-4 tracking-tight leading-tight">
+            <h1 className="text-4xl sm:text-5xl font-bold text-[#3a3a3a] mb-4 tracking-tight leading-tight">
               GYAKRAN ISMÉTELT KÉRDÉSEK
             </h1>
-            <p className="text-muted-foreground font-light max-w-xs">
+            <p className="text-[#4a4f4a] font-light max-w-xs">
               A leggyakoribb kérdések, amiket kapunk.
             </p>
           </div>

@@ -5,6 +5,7 @@ import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 import { Navigation } from "@/components/navigation"
 import { Footer } from "@/components/footer"
+import { PageTransition } from "@/components/ui/page-transition"
 
 const plusJakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -19,11 +20,9 @@ export const metadata: Metadata = {
   generator: "v0.app",
   icons: {
     icon: [
-      { url: "/icon-light-32x32.png", media: "(prefers-color-scheme: light)" },
-      { url: "/icon-dark-32x32.png",  media: "(prefers-color-scheme: dark)" },
-      { url: "/icon.svg",             type: "image/svg+xml" },
+      { url: "/spruce-icon.png", type: "image/png" },
     ],
-    apple: "/apple-icon.png",
+    apple: "/spruce-icon.png",
   },
 }
 
@@ -35,7 +34,9 @@ export default function RootLayout({
       <body className="font-sans antialiased flex flex-col min-h-screen">
         <Navigation />
         {/* pt-16 compensates for the fixed nav (h-16) so content on all pages isn't hidden underneath it */}
-        <main className="flex-1 pt-16">{children}</main>
+        <main className="flex-1 pt-16">
+          <PageTransition>{children}</PageTransition>
+        </main>
         <Footer />
         <Analytics />
       </body>

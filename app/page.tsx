@@ -1,16 +1,10 @@
 "use client"
 
 import Link from "next/link"
-import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { SpotlightCard } from "@/components/ui/spotlight-card"
 import { AnimateOnScroll } from "@/components/ui/animate-on-scroll"
-
-const slides = [
-  { src: "/placeholder.jpg", alt: "Nordmann fenyőerdő",      anim: "ken-burns-1" },
-  { src: "/placeholder.jpg", alt: "Fenyőfarm",               anim: "ken-burns-2" },
-  { src: "/placeholder.jpg", alt: "Nordmann fenyő közelkép", anim: "ken-burns-3" },
-]
+import MistBackground from "@/components/ui/mist-background"
 
 const cards = [
   {
@@ -36,32 +30,20 @@ const cards = [
 ]
 
 export default function HomePage() {
-  const [activeSlide, setActiveSlide] = useState(0)
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setActiveSlide((s) => (s + 1) % slides.length)
-    }, 5000)
-    return () => clearInterval(timer)
-  }, [])
 
   return (
     <div className="w-full">
-      {/* Hero Section — Ken Burns slideshow */}
+      {/* Hero Section */}
       <section className="relative min-h-screen flex items-center justify-center overflow-hidden -mt-16">
-        {/* Slides */}
-        {slides.map((slide, i) => (
-          <div
-            key={slide.src + i}
-            className={`absolute inset-0 transition-opacity duration-1000 ${activeSlide === i ? "opacity-100" : "opacity-0"}`}
-          >
-            <img
-              src={slide.src}
-              alt={slide.alt}
-              className={`w-full h-full object-cover ${activeSlide === i ? `animate-[${slide.anim}_10s_ease-in-out_infinite_alternate]` : ""}`}
-            />
-          </div>
-        ))}
+        {/* Hero image */}
+        <img
+          src="/spruce.webp"
+          alt="Nordmann fenyőerdő"
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+
+        {/* WebGL mist — sits between photo and dark gradients */}
+        <MistBackground />
 
         {/* Gradient overlay — top band for nav legibility */}
         <div
@@ -113,35 +95,18 @@ export default function HomePage() {
               style={{ animation: "fade-in-up 0.6s var(--ease-premium) 0.65s both" }}
             >
               <Link href="/booking">
-                <Button size="lg" className="w-full sm:w-auto bg-white text-foreground hover:bg-white/90 font-semibold">
+                <Button size="lg" className="w-full sm:w-auto h-12 px-7 text-base rounded-lg bg-white text-foreground hover:bg-white hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(255,255,255,0.3)] active:translate-y-0 active:shadow-none font-semibold">
                   Időpontfoglalás
                 </Button>
               </Link>
-              <Link href="/how-it-works">
-                <Button
-                  size="lg"
-                  variant="ghost"
-                  className="w-full sm:w-auto text-white/75 hover:text-white hover:bg-transparent border-b border-white/30 rounded-none px-0 font-normal"
-                >
-                  Hogyan működik? →
-                </Button>
+              <Link
+                href="/how-it-works"
+                className="cursor-pointer inline-flex items-center justify-center h-12 px-7 text-base font-normal text-white/75 border border-white/55 rounded-lg hover:text-white hover:border-white/80 transition-all duration-200 w-full sm:w-auto"
+              >
+                Hogyan működik?
               </Link>
             </div>
           </div>
-        </div>
-
-        {/* Slide dots */}
-        <div className="absolute bottom-8 right-6 flex gap-2 z-10">
-          {slides.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setActiveSlide(i)}
-              aria-label={`${i + 1}. dia`}
-              className={`h-2 rounded-full transition-all duration-300 ${
-                activeSlide === i ? "bg-white w-6" : "bg-white/40 w-2"
-              }`}
-            />
-          ))}
         </div>
 
         {/* Scroll indicator */}
@@ -156,19 +121,19 @@ export default function HomePage() {
       </section>
 
       {/* Why Choose Us Section */}
-      <section className="py-14 sm:py-20 bg-secondary/20">
+      <section className="py-14 sm:py-20 bg-[#6e7f6a]/15">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <AnimateOnScroll>
             <div className="section-label">Miért minket?</div>
-            <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-8 tracking-tight">A mi különlegességünk</h2>
+            <h2 className="text-3xl sm:text-4xl font-bold text-[#3a3a3a] mb-8 tracking-tight">A mi különlegességünk</h2>
           </AnimateOnScroll>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {cards.map((card, i) => (
               <AnimateOnScroll key={card.title} delay={i * 100}>
-                <SpotlightCard className="bg-card border border-border rounded-lg p-6 h-full">
-                  <p className="text-xs font-bold text-muted-foreground/40 mb-3 tracking-widest">{card.number}</p>
-                  <h3 className="font-semibold text-base mb-2 tracking-tight">{card.title}</h3>
-                  <p className="text-sm text-muted-foreground font-light leading-relaxed">{card.body}</p>
+                <SpotlightCard className="bg-[#f5f4f1] border border-[#bfc3c7] rounded-lg p-6 h-full">
+                  <p className="text-xs font-bold text-[#6e7f6a] mb-3 tracking-widest">{card.number}</p>
+                  <h3 className="font-semibold text-base mb-2 tracking-tight text-[#3a3a3a]">{card.title}</h3>
+                  <p className="text-sm text-[#4a4f4a] font-light leading-relaxed">{card.body}</p>
                 </SpotlightCard>
               </AnimateOnScroll>
             ))}
@@ -177,31 +142,31 @@ export default function HomePage() {
       </section>
 
       {/* About Section */}
-      <section className="py-14 sm:py-20 bg-background">
+      <section className="py-14 sm:py-20 bg-[#ededed]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
             <AnimateOnScroll>
               <div className="section-label">Rólunk</div>
-              <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-6 tracking-tight">
+              <h2 className="text-3xl sm:text-4xl font-bold text-[#3a3a3a] mb-6 tracking-tight">
                 Egy kis family farm<br />a város szélén
               </h2>
-              <p className="text-muted-foreground mb-4 font-light">
+              <p className="text-[#4a4f4a] mb-4 font-light">
                 Egy kis farm Zalaegerszeg határán. Nem ipar — a fák között van idő elbeszélgetni.
               </p>
-              <p className="text-muted-foreground mb-6 font-light">
+              <p className="text-[#4a4f4a] mb-6 font-light">
                 Nincs utcacím, nincs házszám. Egy kis erdő. Mindenki GPS-koordinátákkal érkezik, és mi személyesen fogadjuk.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Link href="/contact">
-                  <Button className="bg-foreground text-background hover:bg-foreground/90">Térkép és megközelítés</Button>
+                  <Button className="h-12 px-7 text-base rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(74,79,74,0.25)] active:translate-y-0 active:shadow-none font-semibold">Térkép és megközelítés</Button>
                 </Link>
                 <a href="https://www.facebook.com/karacsonyfak" target="_blank" rel="noopener noreferrer">
-                  <Button variant="outline">Kövess Facebookon</Button>
+                  <Button className="h-12 px-7 text-base rounded-lg border border-[#4a4f4a]/30 bg-transparent text-[#4a4f4a]/70 hover:bg-transparent hover:text-[#4a4f4a] hover:border-[#4a4f4a]/60 hover:-translate-y-0.5 active:translate-y-0 active:shadow-none shadow-none font-normal">Kövess Facebookon</Button>
                 </a>
               </div>
             </AnimateOnScroll>
             <AnimateOnScroll delay={200}>
-              <div className="bg-secondary/30 rounded-lg aspect-square overflow-hidden">
+              <div className="bg-[#6e7f6a]/20 rounded-lg aspect-square overflow-hidden">
                 <img
                   src="/nordmann-christmas-tree-family-farm.jpg"
                   alt="A família a zalaegerszegi fenyőfarmon"
@@ -214,23 +179,23 @@ export default function HomePage() {
       </section>
 
       {/* Marquee strip */}
-      <div aria-hidden="true" className="bg-foreground py-4 overflow-hidden">
+      <div aria-hidden="true" className="bg-primary py-4 overflow-hidden">
         <div className="marquee-track">
           {"Nordmann · Zalaegerszeg · 8 000 Ft · Csak Nordmann fenyő · Időpontfoglalás · ".repeat(4)}
         </div>
       </div>
 
       {/* CTA Section */}
-      <section className="py-14 sm:py-20 bg-secondary/20">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <section className="py-14 sm:py-20 bg-[#6e7f6a]/15">
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <AnimateOnScroll>
-            <div className="section-label">Kövess minket</div>
-            <h2 className="text-3xl font-bold text-foreground mb-4 tracking-tight">Ami éppen zajlik</h2>
-            <p className="text-lg text-muted-foreground mb-8 font-light">
+            <div className="section-label justify-center">Kövess minket</div>
+            <h2 className="text-3xl font-bold text-[#3a3a3a] mb-4 tracking-tight">Ami éppen zajlik</h2>
+            <p className="text-lg text-[#4a4f4a] mb-8 font-light">
               Ha tudni akarod, mikor nyitunk, vagy csak megnéznéd az idei fákat — Facebookon posztolunk.
             </p>
             <a href="https://www.facebook.com/karacsonyfak" target="_blank" rel="noopener noreferrer">
-              <Button size="lg" className="bg-foreground text-background hover:bg-foreground/90">
+              <Button className="h-12 px-7 text-base rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(74,79,74,0.25)] active:translate-y-0 active:shadow-none font-semibold">
                 Facebook oldal megnyitása
               </Button>
             </a>

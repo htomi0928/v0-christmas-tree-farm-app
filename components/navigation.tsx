@@ -5,6 +5,7 @@ import { useState, useEffect } from "react"
 import { usePathname } from "next/navigation"
 import { Menu, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { motion, AnimatePresence } from "framer-motion"
 
 const navigationItems = [
   { label: "Hogyan működik?", href: "/how-it-works" },
@@ -12,6 +13,40 @@ const navigationItems = [
   { label: "GYIK",            href: "/faq" },
   { label: "Elérhetőség",     href: "/contact" },
 ]
+
+function LogoWave({ isSolid }: { isSolid: boolean }) {
+  const chars = "HOLLÓSI FENYŐ".split("")
+
+  return (
+    <motion.span
+      className={`inline-block cursor-pointer font-bold tracking-tight transition-colors duration-300 ${isSolid ? "text-foreground" : "text-white"}`}
+      whileHover="hover"
+      initial="initial"
+    >
+      {chars.map((char, i) => (
+        <motion.span
+          key={i}
+          className="inline-block"
+          variants={{
+            initial: { y: 0, scale: 1 },
+            hover: {
+              y: -4,
+              scale: 1.2,
+              transition: {
+                type: "spring",
+                stiffness: 300,
+                damping: 15,
+                delay: i * 0.03,
+              },
+            },
+          }}
+        >
+          {char === " " ? "\u00A0" : char}
+        </motion.span>
+      ))}
+    </motion.span>
+  )
+}
 
 export function Navigation() {
   const pathname = usePathname()
@@ -30,24 +65,22 @@ export function Navigation() {
   const isSolid = !isHome || scrolled
 
   const navLinkClass = isSolid
-    ? "nav-link px-3 py-2 text-sm font-normal text-muted-foreground hover:text-foreground transition-colors"
+    ? "nav-link px-3 py-2 text-sm font-normal text-[#4a4f4a] hover:text-[#3a3a3a] transition-colors"
     : "nav-link px-3 py-2 text-sm font-normal text-white/70 hover:text-white transition-colors"
 
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 w-full transition-all duration-300 ${
         isSolid
-          ? "bg-background/95 backdrop-blur-md shadow-sm border-b border-border"
+          ? "bg-[#ededed]/95 backdrop-blur-md shadow-sm border-b border-[#bfc3c7]"
           : "bg-transparent border-b border-transparent"
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link href="/" className="flex-shrink-0">
-            <div className={`text-base font-bold tracking-tight transition-colors duration-300 ${isSolid ? "text-foreground" : "text-white"}`}>
-              HOLLÓSI FENYŐ
-            </div>
+          <Link href="/" className="flex-shrink-0 text-base">
+            <LogoWave isSolid={isSolid} />
           </Link>
 
           {/* Desktop menu */}
@@ -55,7 +88,7 @@ export function Navigation() {
             {navigationItems.map((item) => {
               const isActive = pathname === item.href
               const activeClass = isSolid
-                ? "text-foreground"
+                ? "text-[#6e7f6a]"
                 : "text-white"
               return (
                 <Link
@@ -70,10 +103,10 @@ export function Navigation() {
             <Link href="/booking">
               <Button
                 size="sm"
-                className={`ml-4 text-sm font-semibold transition-colors duration-300 ${
+                className={`ml-4 text-sm font-semibold transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 active:shadow-none ${
                   isSolid
-                    ? "bg-foreground text-background hover:bg-foreground/90"
-                    : "bg-white text-foreground hover:bg-white/90"
+                    ? "bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-[0_6px_20px_rgba(74,79,74,0.3)]"
+                    : "bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-[0_6px_20px_rgba(74,79,74,0.2)]"
                 }`}
               >
                 Időpontfoglalás
@@ -81,7 +114,7 @@ export function Navigation() {
             </Link>
             <Link
               href="/admin"
-              className="ml-3 text-xs text-muted-foreground hover:text-foreground transition-colors"
+              className="ml-3 text-xs text-[#4a4f4a]/50 hover:text-[#4a4f4a] transition-colors"
             >
               Admin
             </Link>
@@ -89,7 +122,7 @@ export function Navigation() {
 
           {/* Mobile menu button */}
           <button
-            className={`md:hidden p-2 transition-colors duration-300 ${isSolid ? "text-foreground" : "text-white"}`}
+            className={`md:hidden cursor-pointer p-2 transition-colors duration-300 ${isSolid ? "text-foreground" : "text-white"}`}
             onClick={() => setIsOpen(!isOpen)}
             aria-label="Toggle menu"
           >
@@ -98,34 +131,45 @@ export function Navigation() {
         </div>
 
         {/* Mobile menu */}
-        {isOpen && (
-          <div className="md:hidden pb-4 space-y-1 bg-background/95 backdrop-blur-md rounded-b-lg">
-            <Link
-              href="/booking"
-              className="block px-3 py-2 rounded-md text-base font-semibold text-foreground bg-foreground/5 hover:bg-foreground/10"
-              onClick={() => setIsOpen(false)}
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div
+              key="mobile-menu"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+              className="md:hidden overflow-hidden"
             >
-              Időpontfoglalás
-            </Link>
-            {navigationItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="block px-3 py-2 rounded-md text-base font-medium text-foreground hover:bg-secondary"
-                onClick={() => setIsOpen(false)}
-              >
-                {item.label}
-              </Link>
-            ))}
-            <Link
-              href="/admin"
-              className="block px-3 py-2 text-xs text-muted-foreground"
-              onClick={() => setIsOpen(false)}
-            >
-              Admin
-            </Link>
-          </div>
-        )}
+              <div className="pb-4 space-y-1 bg-[#ededed]/95 backdrop-blur-md rounded-b-lg">
+                <Link
+                  href="/booking"
+                  className="block px-3 py-2 rounded-md text-base font-semibold text-[#4a4f4a] bg-[#4a4f4a]/5 hover:bg-[#4a4f4a]/10"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Időpontfoglalás
+                </Link>
+                {navigationItems.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="block px-3 py-2 rounded-md text-base font-medium text-[#3a3a3a] hover:bg-[#6e7f6a]/10"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+                <Link
+                  href="/admin"
+                  className="block px-3 py-2 text-xs text-muted-foreground"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Admin
+                </Link>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </nav>
   )
