@@ -1,4 +1,4 @@
-import "server-only"
+﻿import "server-only"
 import { sql } from "./db"
 import { type Reservation, ReservationStatus, type CreateReservationData, type UpdateReservationData } from "./types"
 
@@ -281,7 +281,7 @@ export async function getReservationStats(): Promise<{
 
   for (const row of revenueRows) {
     const revenue = Number(row.total_trees) * price
-    if (row.paid_to === "János") {
+    if (row.paid_to === "János" || row.paid_to === "JÃ¡nos") {
       revenueJanos = revenue
     } else if (row.paid_to === "Sanyi") {
       revenueSanyi = revenue
@@ -297,3 +297,4 @@ export async function getReservationStats(): Promise<{
     totalRevenue: revenueJanos + revenueSanyi,
   }
 }
+
