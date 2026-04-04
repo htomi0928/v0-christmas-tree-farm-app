@@ -1,40 +1,44 @@
-﻿import type React from "react"
+import type React from "react"
 import type { Metadata } from "next"
-import { Cormorant_Garamond, Manrope } from "next/font/google"
+import { Plus_Jakarta_Sans } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
-import { SpeedInsights } from "@vercel/speed-insights/next"
 import "./globals.css"
 import { Navigation } from "@/components/navigation"
 import { Footer } from "@/components/footer"
+import { PageTransition } from "@/components/ui/page-transition"
 
-const manrope = Manrope({ subsets: ["latin"], variable: "--font-sans" })
-const cormorant = Cormorant_Garamond({ subsets: ["latin"], variable: "--font-display", weight: ["400", "500", "600", "700"] })
+const plusJakarta = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  variable: "--font-sans",
+  weight: ["300", "400", "500", "600", "700", "800"],
+})
 
 export const metadata: Metadata = {
-  title: "Zalaegerszegi Nordmann fenyők",
-  description: "Nordmann fenyők Zalaegerszeg közelében. Családias hangulat, egységes ár, nyugodt hétvégi látogatás és előre megjelölt fa.",
+  title: "Zalaegerszegi Nordmann Fenyők - Karácsonyfák",
+  description:
+    "Nordmann karácsonyfák Zalaegerszeg határában. Családias hangulat, barátoknak és ismerősöknek, beszélgetéssel – nem futószalagon.",
   generator: "v0.app",
   icons: {
     icon: [
-      { url: "/icon-light-32x32.png", media: "(prefers-color-scheme: light)" },
-      { url: "/icon-dark-32x32.png", media: "(prefers-color-scheme: dark)" },
-      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/spruce-icon.png", type: "image/png" },
     ],
-    apple: "/apple-icon.png",
+    apple: "/spruce-icon.png",
   },
 }
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default function RootLayout({
+  children,
+}: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="hu">
-      <body className={`${manrope.variable} ${cormorant.variable} font-sans antialiased`}>
-        <div className="flex min-h-screen flex-col">
-          <Navigation />
-          <main className="flex-1">{children}</main>
-          <Footer />
-        </div>
+    <html lang="hu" className={plusJakarta.variable}>
+      <body className="font-sans antialiased flex flex-col min-h-screen">
+        <Navigation />
+        {/* pt-16 compensates for the fixed nav (h-16) so content on all pages isn't hidden underneath it */}
+        <main className="flex-1 pt-16">
+          <PageTransition>{children}</PageTransition>
+        </main>
+        <Footer />
         <Analytics />
-        <SpeedInsights />
       </body>
     </html>
   )

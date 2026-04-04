@@ -1,85 +1,117 @@
-﻿import Link from "next/link"
-import Image from "next/image"
-import { ArrowRight, Ruler } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { treeSizeExamples } from "@/lib/site"
+"use client"
 
-const facts = [
-  "Csak nordmann fenyő érhető el.",
-  "Minden fa ára egységesen 8000 Ft.",
-  "A kiválasztott fa sorszámos jelölést kap.",
-  "Egy foglalással több fa is választható.",
-]
+import { SpotlightCard } from "@/components/ui/spotlight-card"
+import { AnimateOnScroll } from "@/components/ui/animate-on-scroll"
 
 export default function TreesPage() {
+  const treeVariants = [
+    {
+      number: "01",
+      size: "Kisebb fa",
+      height: "1–1,5 m",
+      description: "Kisebb helyiségekbe, lakásokba. Nem nyomasztó, de pont elég.",
+    },
+    {
+      number: "02",
+      size: "Közepes fa",
+      height: "1,5–2 m",
+      description: "A legtöbben ezt viszik. Bármilyen nappaliba belefér.",
+    },
+    {
+      number: "03",
+      size: "Nagy fa",
+      height: "2–2,5 m",
+      description: "Erős jelenléte van. Nagyobb szobákba, ahol van neki hely.",
+    },
+    {
+      number: "04",
+      size: "Extra magas fa",
+      height: "2,5 m felett",
+      description: "Magasabb terű helyiségekbe. Ritka, de van belőlük.",
+    },
+  ]
+
   return (
-    <div>
-      <section className="section-space">
-        <div className="page-shell grid gap-6 lg:grid-cols-[1.02fr_0.98fr] lg:items-center">
-          <div>
-            <p className="section-kicker">Fenyőink</p>
-            <h1 className="section-title">Nálunk kizárólag nordmann fenyő közül választasz.</h1>
-            <p className="section-subtitle mt-5">A kínálat tudatosan egyszerű: nem kell fajták között lavírozni, csak azt nézni, melyik forma, magasság és karakter illik legjobban az otthonotokhoz.</p>
-            <div className="mt-8 grid gap-3 sm:grid-cols-2">
-              {facts.map((fact, index) => (
-                <div key={fact} className={`${index % 2 === 0 ? "tint-sky" : "tint-berry"} px-4 py-4 text-sm font-medium text-foreground/78`}>
-                  {fact}
-                </div>
-              ))}
-            </div>
-          </div>
+    <div className="w-full">
 
-          <div className="relative min-h-[450px] overflow-hidden rounded-[32px] border border-white/60 shadow-[0_28px_80px_rgba(16,39,32,0.14)]">
-            <Image src="/nordmann-christmas-tree-close-up-green.jpg" alt="Nordmann fenyő közelről" fill className="object-cover" />
-            <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(16,39,32,0.82),rgba(16,39,32,0.1))]" />
-            <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-              <p className="text-sm uppercase tracking-[0.2em] text-white/72">Nordmann fenyő</p>
-              <p className="mt-2 text-2xl font-semibold">Dús, szép tartású, sokak kedvence.</p>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Hero + Why Nordmann — single screen */}
+      <section className="min-h-[calc(100vh-4rem)] flex items-center bg-background">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-12">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-stretch">
 
-      <section className="section-space pt-0">
-        <div className="page-shell grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
-          <Card className="overflow-hidden bg-[linear-gradient(180deg,#12382f,#0c241f)] px-8 py-8 text-primary-foreground">
-            <div className="px-6">
-              <p className="text-sm uppercase tracking-[0.22em] text-white/72">Egységes ár</p>
-              <div className="mt-5 flex items-end gap-3"><span className="text-6xl font-semibold text-white sm:text-7xl">8000</span><span className="pb-2 text-2xl font-semibold text-white/86">Ft / fa</span></div>
-              <p className="mt-5 text-base leading-7 text-white/80">Mérettől függetlenül minden kiválasztott nordmann fenyő ugyanannyiba kerül. Ez egyszerűvé teszi a döntést, és már előre pontosan tudható a költség.</p>
-            </div>
-          </Card>
+            {/* Left — text */}
+            <div className="flex flex-col text-center items-center">
+              <div className="section-label mb-3">Kínálatunk</div>
+              <h1 className="text-4xl sm:text-5xl font-bold text-foreground mb-6 tracking-tight leading-tight">
+                Nordmann fenyőink
+              </h1>
 
-          <Card className="tint-forest px-7 py-7">
-            <div className="grid gap-5 px-6 md:grid-cols-3">
-              {treeSizeExamples.map((item, index) => (
-                <div key={item.label} className={`${index === 1 ? "bg-[rgba(241,223,182,0.72)]" : "bg-white/78"} rounded-3xl border border-primary/8 p-5`}>
-                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white text-primary"><Ruler className="h-5 w-5" /></div>
-                  <h2 className="mt-4 text-2xl font-semibold text-primary">{item.label}</h2>
-                  <p className="mt-2 text-lg font-semibold text-accent">{item.height}</p>
-                  <p className="mt-3 text-sm leading-6 text-foreground/72">{item.note}</p>
-                </div>
-              ))}
-            </div>
-          </Card>
-        </div>
-      </section>
+              <div className="section-label mb-2">A fajta</div>
+              <h2 className="text-xl font-semibold text-foreground mb-3 tracking-tight">Miért Nordmann?</h2>
+              <p className="text-muted-foreground font-light mb-3">
+                Nem hullik a tűje. Ez az egyetlen komoly különbség, ami számít, ha otthon szeretnéd tartani az ünnep után is.
+              </p>
+              <p className="text-muted-foreground font-light mb-3">
+                Dús forma, erős ágak — a nehezebb díszeket is elbírja. Gyerekbarát, nincs szúrós tűlevele.
+              </p>
+              <p className="text-muted-foreground font-light mb-8">
+                Frissen vágva adjuk át. Nem hetekkel korábban vágott, ponyva alatt tárolt fa.
+              </p>
 
-      <section className="section-space pt-0">
-        <div className="page-shell">
-          <Card className="tint-berry px-8 py-8">
-            <div className="grid gap-6 px-6 lg:grid-cols-[1fr_auto] lg:items-center">
-              <div>
-                <p className="section-kicker">A választás megkönnyítésére</p>
-                <h2 className="text-4xl font-semibold text-primary">A méret változhat, az élmény és az ár ugyanaz marad.</h2>
-                <p className="mt-4 text-base leading-7 text-foreground/72">Ha több fát szeretnétek családtagoknak vagy barátoknak, azt egy foglalással is meg tudjátok oldani. A várható darabszámot elég előre jelezni.</p>
+              <div className="border border-border rounded-lg px-6 py-5 mt-auto w-full">
+                <p className="text-xs font-bold text-muted-foreground/40 tracking-widest mb-1 uppercase">Egységes ár</p>
+                <p className="text-3xl font-extrabold text-foreground tracking-tight">8 000 Ft</p>
+                <p className="text-sm text-muted-foreground font-light mt-1">Mérettől függetlenül.</p>
               </div>
-              <Button asChild size="lg"><Link href="/booking">Foglalás indítása<ArrowRight className="h-4 w-4" /></Link></Button>
             </div>
-          </Card>
+
+            {/* Right — image */}
+            <div className="bg-secondary/30 rounded-lg aspect-square overflow-hidden">
+              <img
+                src="/nordmann-christmas-tree-close-up-green.jpg"
+                alt="Nordmann fa közelről"
+                className="w-full h-full object-cover"
+              />
+            </div>
+
+          </div>
         </div>
       </section>
+
+      {/* Tree Variants */}
+      <section className="py-14 sm:py-20 bg-secondary/20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <AnimateOnScroll>
+            <div className="section-label">Méretek</div>
+            <h2 className="text-3xl font-bold text-foreground mb-8 tracking-tight">Mekkora fát keresel?</h2>
+          </AnimateOnScroll>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {treeVariants.map((variant, index) => (
+              <AnimateOnScroll key={variant.number} delay={index * 100}>
+                <SpotlightCard className="bg-card border border-border rounded-lg p-6 h-full">
+                  <p className="text-xs font-bold text-muted-foreground/40 mb-3 tracking-widest">{variant.number}</p>
+                  <h3 className="font-semibold text-base mb-1 tracking-tight">{variant.size}</h3>
+                  <p className="text-sm text-muted-foreground/60 font-light mb-2">{variant.height}</p>
+                  <p className="text-sm text-muted-foreground font-light leading-relaxed">{variant.description}</p>
+                </SpotlightCard>
+              </AnimateOnScroll>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Tip */}
+      <section className="py-12 bg-background">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <AnimateOnScroll>
+            <p className="text-muted-foreground font-light">
+              Egy foglalással több fát is elvihetsz — például szülőknek, szomszédoknak. Jelezd a várható darabszámot a
+              foglalási űrlapon.
+            </p>
+          </AnimateOnScroll>
+        </div>
+      </section>
+
     </div>
   )
 }

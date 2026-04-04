@@ -1,91 +1,175 @@
-﻿"use client"
+"use client"
 
 import Link from "next/link"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { usePathname } from "next/navigation"
-import { Menu, Trees, X } from "lucide-react"
+import { Menu, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
-import { publicNavigation } from "@/lib/site"
+import { motion, AnimatePresence } from "framer-motion"
 
-export function Navigation() {
-  const [isOpen, setIsOpen] = useState(false)
-  const pathname = usePathname()
+const navigationItems = [
+  { label: "Hogyan működik?", href: "/how-it-works" },
+  { label: "Fenyőink",        href: "/trees" },
+  { label: "GYIK",            href: "/faq" },
+  { label: "Elérhetőség",     href: "/contact" },
+]
+
+function LogoWave({ isSolid }: { isSolid: boolean }) {
+  const chars = "HOLLÓSI FENYŐ".split("")
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b border-primary/10 bg-[linear-gradient(180deg,rgba(248,244,236,0.9),rgba(246,239,226,0.78))] backdrop-blur-xl">
-      <div className="absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,rgba(197,155,77,0.65),transparent)]" />
-      <div className="page-shell">
-        <div className="flex min-h-22 items-center justify-between gap-4">
-          <Link href="/" className="group flex items-center gap-3">
-            <div className="flex h-13 w-13 items-center justify-center rounded-[1.2rem] bg-[linear-gradient(145deg,#1c4b3e,#102d26)] text-primary-foreground shadow-[0_14px_34px_rgba(16,39,32,0.22)] transition group-hover:scale-[1.02]">
-              <Trees className="h-5 w-5" />
-            </div>
-            <div>
-              <div className="text-lg font-semibold text-primary sm:text-xl">Zalaegerszegi Nordmann fenyők</div>
-              <div className="text-sm text-foreground/62">Csendes fenyves, egységes ár, emberi hangulat</div>
-            </div>
+    <motion.span
+      className={`inline-block cursor-pointer font-bold tracking-tight transition-colors duration-300 ${isSolid ? "text-foreground" : "text-white"}`}
+      whileHover="hover"
+      initial="initial"
+    >
+      {chars.map((char, i) => (
+        <motion.span
+          key={i}
+          className="inline-block"
+          variants={{
+            initial: { y: 0, scale: 1 },
+            hover: {
+              y: -4,
+              scale: 1.2,
+              transition: {
+                type: "spring",
+                stiffness: 300,
+                damping: 15,
+                delay: i * 0.03,
+              },
+            },
+          }}
+        >
+          {char === " " ? "\u00A0" : char}
+        </motion.span>
+      ))}
+    </motion.span>
+  )
+}
+
+export function Navigation() {
+  const pathname = usePathname()
+  const isHome = pathname === "/"
+  const [isOpen, setIsOpen]     = useState(false)
+  const [scrolled, setScrolled] = useState(false)
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 20)
+    handleScroll()
+    window.addEventListener("scroll", handleScroll, { passive: true })
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
+
+  // On non-home pages there's no full-screen hero, so always use the solid style
+  const isSolid = !isHome || scrolled
+
+  const navLinkClass = isSolid
+    ? "nav-link px-3 py-2 text-sm font-normal text-[#4a4f4a] hover:text-[#3a3a3a] transition-colors"
+    : "nav-link px-3 py-2 text-sm font-normal text-white/70 hover:text-white transition-colors"
+
+  return (
+    <nav
+      className={`fixed top-0 left-0 right-0 z-50 w-full transition-all duration-300 ${
+        isSolid
+          ? "bg-[#ededed]/95 backdrop-blur-md shadow-sm border-b border-[#bfc3c7]"
+          : "bg-transparent border-b border-transparent"
+      }`}
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-16">
+          {/* Logo */}
+          <Link href="/" className="flex-shrink-0 text-base">
+            <LogoWave isSolid={isSolid} />
           </Link>
 
-          <div className="hidden items-center gap-1 xl:flex">
-            {publicNavigation.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                prefetch={false}
-                className={cn(
-                  "rounded-full px-4 py-2.5 text-sm font-semibold transition",
-                  pathname === item.href
-                    ? "bg-[linear-gradient(135deg,#173f35,#255246)] text-primary-foreground shadow-[0_12px_25px_rgba(16,39,32,0.15)]"
-                    : "text-foreground/74 hover:bg-white/80 hover:text-primary",
-                )}
+          {/* Desktop menu */}
+          <div className="hidden md:flex items-center gap-1">
+            {navigationItems.map((item) => {
+              const isActive = pathname === item.href
+              const activeClass = isSolid
+                ? "text-[#6e7f6a]"
+                : "text-white"
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`${navLinkClass} ${isActive ? `${activeClass} active` : ""}`}
+                >
+                  {item.label}
+                </Link>
+              )
+            })}
+            <Link href="/booking">
+              <Button
+                size="sm"
+                className={`ml-4 text-sm font-semibold transition-all duration-200 hover:-translate-y-0.5 active:translate-y-0 active:shadow-none ${
+                  isSolid
+                    ? "bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-[0_6px_20px_rgba(74,79,74,0.3)]"
+                    : "bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-[0_6px_20px_rgba(74,79,74,0.2)]"
+                }`}
               >
-                {item.label}
-              </Link>
-            ))}
-            <Link href="/admin" prefetch={false}>
-              <Button variant="outline" size="sm" className="ml-3 border-[color:var(--champagne-border)] bg-[rgba(241,223,182,0.38)] text-primary hover:bg-[rgba(241,223,182,0.55)]">
-                Admin
+                Időpontfoglalás
               </Button>
+            </Link>
+            <Link
+              href="/admin"
+              className="ml-3 text-xs text-[#4a4f4a]/50 hover:text-[#4a4f4a] transition-colors"
+            >
+              Admin
             </Link>
           </div>
 
+          {/* Mobile menu button */}
           <button
-            className="inline-flex h-12 w-12 items-center justify-center rounded-full border border-primary/12 bg-white/85 shadow-[0_10px_28px_rgba(16,39,32,0.08)] xl:hidden"
+            className={`md:hidden cursor-pointer p-2 transition-colors duration-300 ${isSolid ? "text-foreground" : "text-white"}`}
             onClick={() => setIsOpen(!isOpen)}
-            aria-label="Menü megnyitása"
+            aria-label="Toggle menu"
           >
             {isOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
 
-        {isOpen && (
-          <div className="pb-5 xl:hidden">
-            <div className="surface-card mt-1 space-y-2 p-3">
-              {publicNavigation.map((item) => (
+        {/* Mobile menu */}
+        <AnimatePresence>
+          {isOpen && (
+            <motion.div
+              key="mobile-menu"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+              className="md:hidden overflow-hidden"
+            >
+              <div className="pb-4 space-y-1 bg-[#ededed]/95 backdrop-blur-md rounded-b-lg">
                 <Link
-                  key={item.href}
-                  href={item.href}
-                  prefetch={false}
-                  className={cn(
-                    "block rounded-2xl px-4 py-3 text-base font-semibold transition",
-                    pathname === item.href ? "bg-primary text-primary-foreground" : "text-foreground/72 hover:bg-secondary/60 hover:text-primary",
-                  )}
+                  href="/booking"
+                  className="block px-3 py-2 rounded-md text-base font-semibold text-[#4a4f4a] bg-[#4a4f4a]/5 hover:bg-[#4a4f4a]/10"
                   onClick={() => setIsOpen(false)}
                 >
-                  {item.label}
+                  Időpontfoglalás
                 </Link>
-              ))}
-              <div className="pt-1">
-                <Link href="/admin" prefetch={false} onClick={() => setIsOpen(false)}>
-                  <Button variant="outline" size="lg" className="w-full border-[color:var(--champagne-border)] bg-[rgba(241,223,182,0.3)] text-primary hover:bg-[rgba(241,223,182,0.46)]">
-                    Admin
-                  </Button>
+                {navigationItems.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className="block px-3 py-2 rounded-md text-base font-medium text-[#3a3a3a] hover:bg-[#6e7f6a]/10"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    {item.label}
+                  </Link>
+                ))}
+                <Link
+                  href="/admin"
+                  className="block px-3 py-2 text-xs text-muted-foreground"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Admin
                 </Link>
               </div>
-            </div>
-          </div>
-        )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </nav>
   )
