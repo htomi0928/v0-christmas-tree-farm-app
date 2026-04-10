@@ -4,24 +4,18 @@ import { AnimateOnScroll } from "@/components/ui/animate-on-scroll"
 export default function ContactPage() {
   return (
     <div className="w-full">
-      {/* Hero */}
-      <section className="pt-14 sm:pt-20 pb-8 bg-[#6e7f6a]/15">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+      {/* Hero + Contact Info */}
+      <section className="min-h-[calc(100vh-4rem)] flex items-center bg-[#ededed]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-16">
           <AnimateOnScroll>
             <div className="section-label">Kapcsolat</div>
             <h1 className="text-4xl sm:text-5xl font-bold text-[#3a3a3a] mb-4 tracking-tight">Elérhetőség</h1>
-            <p className="text-lg text-[#4a4f4a] font-light max-w-xl">
+            <p className="text-lg text-[#4a4f4a] font-light max-w-xl mb-12">
               Telefonon elérhetők vagyunk. GPS-koordinátákkal megtalálsz.
             </p>
           </AnimateOnScroll>
-        </div>
-      </section>
-
-      {/* Contact Info */}
-      <section className="pt-8 pb-14 sm:pb-20 bg-[#ededed]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
-            {/* Phone */}
             <AnimateOnScroll delay={0} className="h-full">
               <div className="border border-[#bfc3c7] bg-[#f5f4f1] rounded-lg p-8 h-full">
                 <Phone className="h-6 w-6 text-[#6e7f6a] mb-4" />
@@ -31,7 +25,6 @@ export default function ContactPage() {
               </div>
             </AnimateOnScroll>
 
-            {/* Contact Person */}
             <AnimateOnScroll delay={100} className="h-full">
               <div className="border border-[#bfc3c7] bg-[#f5f4f1] rounded-lg p-8 h-full">
                 <MapPin className="h-6 w-6 text-[#6e7f6a] mb-4" />
@@ -43,7 +36,6 @@ export default function ContactPage() {
               </div>
             </AnimateOnScroll>
 
-            {/* Facebook */}
             <AnimateOnScroll delay={200} className="h-full">
               <div className="border border-[#bfc3c7] bg-[#f5f4f1] rounded-lg p-8 h-full">
                 <Facebook className="h-6 w-6 text-[#6e7f6a] mb-4" />
@@ -56,14 +48,13 @@ export default function ContactPage() {
       </section>
 
       {/* Map Section */}
-      <section className="py-14 sm:py-20 bg-[#6e7f6a]/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="min-h-screen flex items-center bg-[#6e7f6a]/10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-16">
           <AnimateOnScroll>
             <div className="section-label">Megközelítés</div>
             <h2 className="text-3xl font-bold text-[#3a3a3a] mb-8 tracking-tight">A helyszín</h2>
           </AnimateOnScroll>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
-            {/* Map */}
             <AnimateOnScroll>
               <div className="rounded-lg overflow-hidden h-96 bg-[#6e7f6a]/20">
                 <iframe
@@ -71,7 +62,7 @@ export default function ContactPage() {
                   width="100%"
                   height="100%"
                   frameBorder="0"
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2717.1234567890!2d16.8412!3d46.8206!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x476551234567%3A0x1234567890abcdef!2sZalaegerszeg!5e0!3m2!1shu!2shu!4v1234567890"
+                  src="https://maps.google.com/maps?q=46.8981178,16.793078&z=15&output=embed"
                   style={{ border: 0 }}
                   allowFullScreen
                   loading="lazy"
@@ -79,7 +70,6 @@ export default function ContactPage() {
               </div>
             </AnimateOnScroll>
 
-            {/* Info */}
             <AnimateOnScroll delay={150}>
               <p className="text-[#4a4f4a] font-light mb-6">
                 Nincs utcacím, nincs házszám. Egy kis erdő Zalaegerszeg határán. GPS-koordinátákkal érkezhetsz — ezt
@@ -102,7 +92,7 @@ export default function ContactPage() {
               </div>
               <div className="flex flex-col sm:flex-row gap-3">
                 <a
-                  href="https://maps.google.com/?q=Zalaegerszeg"
+                  href="https://www.google.com/maps/@46.8981178,16.793078,3a,75y,131.58h,73.3t/data=!3m7!1e1!3m5!1s-hT2m-kiN5YvOSq8pHqw9w!2e0!6shttps:%2F%2Fstreetviewpixels-pa.googleapis.com%2Fv1%2Fthumbnail%3Fcb_client%3Dmaps_sv.tactile%26w%3D900%26h%3D600%26pitch%3D16.704629455204085%26panoid%3D-hT2m-kiN5YvOSq8pHqw9w%26yaw%3D131.58103283271973!7i16384!8i8192"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="cursor-pointer inline-flex items-center justify-center h-12 px-7 text-base font-semibold rounded-lg bg-[#4a4f4a] text-[#ededed] hover:bg-[#4a4f4a]/90 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(74,79,74,0.25)] active:translate-y-0 active:shadow-none transition-all duration-200"
@@ -122,6 +112,7 @@ export default function ContactPage() {
           </div>
         </div>
       </section>
+
     </div>
   )
 }

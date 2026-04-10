@@ -6,6 +6,61 @@ import { SpotlightCard } from "@/components/ui/spotlight-card"
 import { AnimateOnScroll } from "@/components/ui/animate-on-scroll"
 import MistBackground from "@/components/ui/mist-background"
 
+const treeVariants = [
+  {
+    number: "01",
+    size: "Kisebb fa",
+    height: "1–1,5 m",
+    description: "Kisebb helyiségekbe, lakásokba. Nem nyomasztó, de pont elég.",
+  },
+  {
+    number: "02",
+    size: "Közepes fa",
+    height: "1,5–2 m",
+    description: "A legtöbben ezt viszik. Bármilyen nappaliba belefér.",
+  },
+  {
+    number: "03",
+    size: "Nagy fa",
+    height: "2–2,5 m",
+    description: "Erős jelenléte van. Nagyobb szobákba, ahol van neki hely.",
+  },
+  {
+    number: "04",
+    size: "Extra magas fa",
+    height: "2,5 m felett",
+    description: "Magasabb terű helyiségekbe. Ritka, de van belőlük.",
+  },
+]
+
+const steps = [
+  {
+    number: "01",
+    title: "Online napfoglalás",
+    description: "Kiválasztasz egy szombatot vagy vasárnapot. 10 és 12 között érkezhetsz.",
+  },
+  {
+    number: "02",
+    title: "Kijössz, fát választasz",
+    description: "Körbenéztek, kiválasztod, amelyik tetszik. Van idő megnézni.",
+  },
+  {
+    number: "03",
+    title: "Megjelöljük sorszámmal",
+    description: "Számot kap a fád, bekerül a rendszerbe. Senki más nem veheti el.",
+  },
+  {
+    number: "04",
+    title: "Karácsony előtt kivágjuk",
+    description: "A kivágás akkor történik. Így kapsz tényleg friss fát.",
+  },
+  {
+    number: "05",
+    title: "Átvétel és fizetés",
+    description: "Sorszám alapján azonosítjuk. Készpénz vagy bankkártya.",
+  },
+]
+
 const cards = [
   {
     number: "01",
@@ -100,7 +155,7 @@ export default function HomePage() {
                 </Button>
               </Link>
               <Link
-                href="/how-it-works"
+                href="#hogyan-mukodik"
                 className="cursor-pointer inline-flex items-center justify-center h-12 px-7 text-base font-normal text-white/75 border border-white/55 rounded-lg hover:text-white hover:border-white/80 transition-all duration-200 w-full sm:w-auto"
               >
                 Hogyan működik?
@@ -121,19 +176,22 @@ export default function HomePage() {
       </section>
 
       {/* Why Choose Us Section */}
-      <section className="py-14 sm:py-20 bg-[#6e7f6a]/15">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="min-h-screen flex items-center bg-[#6e7f6a]/15">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-16">
           <AnimateOnScroll>
-            <div className="section-label">Miért minket?</div>
-            <h2 className="text-3xl sm:text-4xl font-bold text-[#3a3a3a] mb-8 tracking-tight">A mi különlegességünk</h2>
+            <div className="section-label justify-center lg:justify-start">Miért minket?</div>
+            <h2 className="text-3xl sm:text-4xl font-bold text-[#3a3a3a] mb-8 tracking-tight text-center lg:text-left">A mi különlegességünk</h2>
           </AnimateOnScroll>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {cards.map((card, i) => (
               <AnimateOnScroll key={card.title} delay={i * 100}>
                 <SpotlightCard className="bg-[#f5f4f1] border border-[#bfc3c7] rounded-lg p-6 h-full">
-                  <p className="text-xs font-bold text-[#6e7f6a] mb-3 tracking-widest">{card.number}</p>
-                  <h3 className="font-semibold text-base mb-2 tracking-tight text-[#3a3a3a]">{card.title}</h3>
-                  <p className="text-sm text-[#4a4f4a] font-light leading-relaxed">{card.body}</p>
+                  <div className="flex items-center mb-2">
+                    <p className="text-xs font-bold text-[#6e7f6a] tracking-widest w-8 flex-shrink-0">{card.number}</p>
+                    <h3 className="flex-1 font-semibold text-base tracking-tight text-[#3a3a3a] text-center">{card.title}</h3>
+                    <div className="w-8 flex-shrink-0" />
+                  </div>
+                  <p className="text-sm text-[#4a4f4a] font-light leading-relaxed text-center">{card.body}</p>
                 </SpotlightCard>
               </AnimateOnScroll>
             ))}
@@ -141,39 +199,74 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* About Section */}
-      <section className="py-14 sm:py-20 bg-[#ededed]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+      {/* Nordmann Fenyőink Section */}
+      <section id="fenyoink" className="min-h-screen flex items-center bg-[#ededed]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-16">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+
+            {/* Left — text */}
             <AnimateOnScroll>
-              <div className="section-label">Rólunk</div>
-              <h2 className="text-3xl sm:text-4xl font-bold text-[#3a3a3a] mb-6 tracking-tight">
-                Egy kis family farm<br />a város szélén
-              </h2>
-              <p className="text-[#4a4f4a] mb-4 font-light">
-                Egy kis farm Zalaegerszeg határán. Nem ipar — a fák között van idő elbeszélgetni.
-              </p>
-              <p className="text-[#4a4f4a] mb-6 font-light">
-                Nincs utcacím, nincs házszám. Egy kis erdő. Mindenki GPS-koordinátákkal érkezik, és mi személyesen fogadjuk.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Link href="/contact">
-                  <Button className="h-12 px-7 text-base rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(74,79,74,0.25)] active:translate-y-0 active:shadow-none font-semibold">Térkép és megközelítés</Button>
-                </Link>
-                <a href="https://www.facebook.com/karacsonyfak" target="_blank" rel="noopener noreferrer">
-                  <Button className="h-12 px-7 text-base rounded-lg border border-[#4a4f4a]/30 bg-transparent text-[#4a4f4a]/70 hover:bg-transparent hover:text-[#4a4f4a] hover:border-[#4a4f4a]/60 hover:-translate-y-0.5 active:translate-y-0 active:shadow-none shadow-none font-normal">Kövess Facebookon</Button>
-                </a>
+              <div className="flex flex-col text-center lg:text-left items-center lg:items-start">
+                <div className="section-label">Kínálatunk</div>
+                <h2 className="text-3xl sm:text-4xl font-bold text-[#3a3a3a] mb-6 tracking-tight leading-tight">
+                  Nordmann fenyőink
+                </h2>
+                <div className="section-label mb-2">A fajta</div>
+                <h3 className="text-xl font-semibold text-[#3a3a3a] mb-3 tracking-tight">Miért Nordmann?</h3>
+                <p className="text-[#4a4f4a] font-light mb-3">
+                  Nem hullik a tűje. Ez az egyetlen komoly különbség, ami számít, ha otthon szeretnéd tartani az ünnep után is.
+                </p>
+                <p className="text-[#4a4f4a] font-light mb-3">
+                  Dús forma, erős ágak — a nehezebb díszeket is elbírja. Gyerekbarát, nincs szúrós tűlevele.
+                </p>
+                <p className="text-[#4a4f4a] font-light mb-8">
+                  Frissen vágva adjuk át. Nem hetekkel korábban vágott, ponyva alatt tárolt fa.
+                </p>
+                <div className="border border-[#bfc3c7] rounded-lg px-6 py-5 w-full">
+                  <p className="text-xs font-bold text-[#4a4f4a]/40 tracking-widest mb-1 uppercase">Egységes ár</p>
+                  <p className="text-3xl font-extrabold text-[#3a3a3a] tracking-tight">8 000 Ft</p>
+                  <p className="text-sm text-[#4a4f4a] font-light mt-1">Mérettől függetlenül.</p>
+                </div>
               </div>
             </AnimateOnScroll>
+
+            {/* Right — image */}
             <AnimateOnScroll delay={200}>
               <div className="bg-[#6e7f6a]/20 rounded-lg aspect-square overflow-hidden">
                 <img
-                  src="/nordmann-christmas-tree-family-farm.jpg"
-                  alt="A família a zalaegerszegi fenyőfarmon"
+                  src="/nordmann-christmas-tree-close-up-green.jpg"
+                  alt="Nordmann fa közelről"
                   className="w-full h-full object-cover"
                 />
               </div>
             </AnimateOnScroll>
+          </div>
+        </div>
+      </section>
+
+      {/* Tree Size Variants Section */}
+      <section className="min-h-screen flex items-center bg-[#f5f4f1]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-16">
+          <AnimateOnScroll>
+            <div className="text-center lg:text-left">
+              <div className="section-label justify-center lg:justify-start">Méretek</div>
+              <h2 className="text-3xl sm:text-4xl font-bold text-[#3a3a3a] mb-8 tracking-tight">Mekkora fát keresel?</h2>
+            </div>
+          </AnimateOnScroll>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {treeVariants.map((variant, i) => (
+              <AnimateOnScroll key={variant.number} delay={i * 100}>
+                <SpotlightCard className="bg-white border border-[#bfc3c7] rounded-lg p-6 h-full">
+                  <div className="flex items-center mb-1">
+                    <p className="text-xs font-bold text-[#6e7f6a]/60 tracking-widest w-8 flex-shrink-0">{variant.number}</p>
+                    <h3 className="flex-1 font-semibold text-base tracking-tight text-[#3a3a3a] text-center">{variant.size}</h3>
+                    <div className="w-8 flex-shrink-0" />
+                  </div>
+                  <p className="text-sm text-[#4a4f4a]/60 font-light mb-2 text-center">{variant.height}</p>
+                  <p className="text-sm text-[#4a4f4a] font-light leading-relaxed text-center">{variant.description}</p>
+                </SpotlightCard>
+              </AnimateOnScroll>
+            ))}
           </div>
         </div>
       </section>
@@ -185,21 +278,50 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* CTA Section */}
-      <section className="py-14 sm:py-20 bg-[#6e7f6a]/15">
-        <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <AnimateOnScroll>
-            <div className="section-label justify-center">Kövess minket</div>
-            <h2 className="text-3xl font-bold text-[#3a3a3a] mb-4 tracking-tight">Ami éppen zajlik</h2>
-            <p className="text-lg text-[#4a4f4a] mb-8 font-light">
-              Ha tudni akarod, mikor nyitunk, vagy csak megnéznéd az idei fákat — Facebookon posztolunk.
-            </p>
-            <a href="https://www.facebook.com/karacsonyfak" target="_blank" rel="noopener noreferrer">
-              <Button className="h-12 px-7 text-base rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(74,79,74,0.25)] active:translate-y-0 active:shadow-none font-semibold">
-                Facebook oldal megnyitása
-              </Button>
-            </a>
-          </AnimateOnScroll>
+      {/* Hogyan Működik Section */}
+      <section id="hogyan-mukodik" className="min-h-screen flex items-center bg-[#6e7f6a]/15">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-16">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+
+            {/* Left — heading + CTA */}
+            <AnimateOnScroll>
+              <div className="flex flex-col items-center lg:items-start text-center lg:text-left">
+                <div className="section-label">A vásárlás folyamata</div>
+                <h2 className="text-3xl sm:text-4xl font-bold text-[#3a3a3a] mb-4 tracking-tight leading-tight">
+                  Hogyan működünk?
+                </h2>
+                <p className="text-[#4a4f4a] font-light mb-8 max-w-xs">
+                  Az online foglalástól az átvételig öt lépés.
+                </p>
+                <Link href="/booking">
+                  <Button className="h-12 px-7 text-base rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(74,79,74,0.25)] active:translate-y-0 active:shadow-none font-semibold">
+                    Időpontfoglalás
+                  </Button>
+                </Link>
+              </div>
+            </AnimateOnScroll>
+
+            {/* Right — steps */}
+            <AnimateOnScroll delay={200}>
+              <div>
+                {steps.map((step, index) => (
+                  <div
+                    key={step.number}
+                    className={`flex gap-5 items-start py-4 ${index < steps.length - 1 ? "border-b border-[#bfc3c7]" : ""}`}
+                  >
+                    <span className="text-xs font-bold text-[#4a4f4a]/40 w-6 flex-shrink-0 mt-1 tabular-nums">
+                      {step.number}
+                    </span>
+                    <div>
+                      <h3 className="text-sm font-semibold text-[#3a3a3a] mb-0.5 tracking-tight">{step.title}</h3>
+                      <p className="text-sm text-[#4a4f4a] font-light leading-relaxed">{step.description}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </AnimateOnScroll>
+
+          </div>
         </div>
       </section>
     </div>
