@@ -234,7 +234,7 @@ body {
 /* ── Marquee ──────────────────────────────────────────────────── */
 .marquee-track {
   display: flex;
-  gap: 3rem;
+  gap: 5rem;
   white-space: nowrap;
   font-family: var(--font-sans), 'Plus Jakarta Sans', sans-serif;
   font-size: 0.75rem;
