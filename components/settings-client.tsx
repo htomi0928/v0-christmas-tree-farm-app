@@ -134,7 +134,7 @@ export default function SettingsClient({ initialSettings }: Props) {
                   key={dateStr}
                   type="button"
                   onClick={() => toggleDay(dayKey, dateStr)}
-                  className={`h-10 rounded-lg text-sm font-medium transition-all ${active ? activeClass : "bg-[#4a4f4a]/6 text-[#4a4f4a]/50 hover:bg-[#4a4f4a]/12"}`}
+                  className={`h-10 rounded-2xl text-sm font-semibold transition-all ${active ? activeClass : "text-[#4a4f4a]/50 hover:bg-[#4a4f4a]/8"}`}
                 >
                   {day}
                 </button>
@@ -203,7 +203,7 @@ export default function SettingsClient({ initialSettings }: Props) {
             onMonthChange={setAvailableMonth}
             dates={formData.availableDays}
             dayKey="availableDays"
-            activeClass="bg-[#6e7f6a]/20 text-[#6e7f6a] font-semibold"
+            activeClass="bg-[#3a3a3a] text-white font-semibold"
           />
           <CalendarBlock
             title="Átvételi napok"
@@ -212,7 +212,7 @@ export default function SettingsClient({ initialSettings }: Props) {
             onMonthChange={setRetrievalMonth}
             dates={formData.retrievalDays}
             dayKey="retrievalDays"
-            activeClass="bg-[#4a4f4a]/15 text-[#3a3a3a] font-semibold"
+            activeClass="bg-[#3a3a3a] text-white font-semibold"
           />
         </div>
       </div>
