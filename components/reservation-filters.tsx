@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react"
 import Link from "next/link"
-import { Search, SlidersHorizontal } from "lucide-react"
+import { Search, SlidersHorizontal, X } from "lucide-react"
 import type { Reservation } from "@/lib/types"
 import { reservationStatusMeta, formatDateHu } from "@/lib/site"
 
@@ -24,6 +24,14 @@ export default function ReservationFilters({ reservations }: Props) {
   const [statusFilter, setStatusFilter] = useState("ALL")
   const [visitDateFilter, setVisitDateFilter] = useState("")
 
+  const hasActiveFilters = query.trim() !== "" || statusFilter !== "ALL" || visitDateFilter !== ""
+
+  const clearFilters = () => {
+    setQuery("")
+    setStatusFilter("ALL")
+    setVisitDateFilter("")
+  }
+
   const filteredReservations = useMemo(() => {
     return reservations
       .filter((reservation) => (statusFilter === "ALL" ? true : reservation.status === statusFilter))
@@ -43,7 +51,7 @@ export default function ReservationFilters({ reservations }: Props) {
   return (
     <div className="space-y-4">
       <div className="border border-[#bfc3c7] bg-[#f5f4f1] rounded-lg p-6">
-        <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr_0.7fr]">
+        <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr_0.7fr_auto] lg:items-end">
           <label className="block">
             <span className="mb-2 flex items-center gap-2 text-xs font-bold text-[#3a3a3a] tracking-widest uppercase"><Search className="h-4 w-4 text-[#6e7f6a]" /> Keresés</span>
             <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Név, telefonszám, megjegyzés vagy sorszám" className="w-full px-4 py-3 rounded-lg border border-[#bfc3c7] bg-white text-[#3a3a3a] placeholder:text-[#4a4f4a]/40 focus:outline-none focus:ring-2 focus:ring-[#6e7f6a] text-sm transition-all" />
@@ -63,6 +71,17 @@ export default function ReservationFilters({ reservations }: Props) {
             <span className="mb-2 block text-xs font-bold text-[#3a3a3a] tracking-widest uppercase">Nap szerint</span>
             <input type="date" value={visitDateFilter} onChange={(e) => setVisitDateFilter(e.target.value)} className="w-full px-4 py-3 rounded-lg border border-[#bfc3c7] bg-white text-[#3a3a3a] focus:outline-none focus:ring-2 focus:ring-[#6e7f6a] text-sm transition-all" />
           </label>
+
+          {hasActiveFilters && (
+            <button
+              type="button"
+              onClick={clearFilters}
+              className="flex items-center gap-1.5 px-4 py-3 rounded-lg border border-[#bfc3c7] bg-white text-sm font-semibold text-[#4a4f4a] hover:bg-[#f0efec] transition-colors whitespace-nowrap"
+            >
+              <X className="h-4 w-4" />
+              Szűrők törlése
+            </button>
+          )}
         </div>
       </div>
 
