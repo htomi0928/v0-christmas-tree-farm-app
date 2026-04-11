@@ -274,7 +274,7 @@ export default function HomePage() {
       {/* Marquee strip */}
       <div aria-hidden="true" className="bg-primary py-4 overflow-hidden">
         <div className="marquee-track">
-          {"Nordmann · Zalaegerszeg · 8 000 Ft · Csak Nordmann fenyő · Időpontfoglalás · ".repeat(4)}
+          {"Nordmann · Zalaegerszeg · 8 000 Ft · Csak Nordmann fenyő · Időpontfoglalás · ".repeat(10)}
         </div>
       </div>
 

@@ -103,6 +103,7 @@ export default function AdminDatePicker({ selectedDate, onDateSelect, highlightD
                   <button
                     key={dateStr}
                     type="button"
+                    disabled={!isHighlighted}
                     onClick={() => onDateSelect(isSelected ? "" : dateStr)}
                     className={`h-10 rounded-2xl text-sm font-semibold transition ${
                       isSelected
