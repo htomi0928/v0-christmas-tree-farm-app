@@ -29,7 +29,7 @@ const monthNames = [
   "december",
 ]
 
-const dayNames = ["V", "H", "K", "Sze", "Cs", "P", "Szo"]
+const dayNames = ["H", "K", "Sze", "Cs", "P", "Szo", "V"]
 
 export default function AdminDatePicker({ selectedDate, onDateSelect, highlightDays }: AdminDatePickerProps) {
   const initialMonth = () => {
@@ -48,7 +48,8 @@ export default function AdminDatePicker({ selectedDate, onDateSelect, highlightD
 
   const [currentMonth, setCurrentMonth] = useState(initialMonth)
   const daysInMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0).getDate()
-  const firstDay = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1).getDay()
+  const firstDayRaw = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1).getDay()
+  const firstDay = (firstDayRaw + 6) % 7
 
   const days: (number | null)[] = []
   for (let i = 0; i < firstDay; i++) days.push(null)
@@ -107,8 +108,8 @@ export default function AdminDatePicker({ selectedDate, onDateSelect, highlightD
                       isSelected
                         ? "bg-primary text-primary-foreground"
                         : isHighlighted
-                          ? "bg-[color:var(--sky-soft)] text-[color:var(--sky-strong)]"
-                          : "bg-secondary/40 text-foreground/68 hover:bg-secondary"
+                          ? "text-foreground/80 hover:bg-secondary/60"
+                          : "text-foreground/30 cursor-not-allowed"
                     }`}
                   >
                     {day}
