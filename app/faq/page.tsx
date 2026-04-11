@@ -54,12 +54,12 @@ export default function FAQPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
 
           {/* Left — heading */}
-          <div>
-            <div className="section-label mb-3">Kérdések</div>
+          <div className="text-center lg:text-left">
+            <div className="section-label justify-center lg:justify-start mb-3">Kérdések</div>
             <h1 className="text-4xl sm:text-5xl font-bold text-[#3a3a3a] mb-4 tracking-tight leading-tight">
               GYAKRAN ISMÉTELT KÉRDÉSEK
             </h1>
-            <p className="text-[#4a4f4a] font-light max-w-xs">
+            <p className="text-[#4a4f4a] font-light max-w-xs mx-auto lg:mx-0">
               A leggyakoribb kérdések, amiket kapunk.
             </p>
           </div>

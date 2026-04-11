@@ -8,8 +8,8 @@ import { Button } from "@/components/ui/button"
 import { motion, AnimatePresence } from "framer-motion"
 
 const navigationItems = [
-  { label: "Hogyan működik?", href: "/how-it-works" },
-  { label: "Fenyőink",        href: "/trees" },
+  { label: "Hogyan működik?", href: "/#hogyan-mukodik" },
+  { label: "Fenyőink",        href: "/#fenyoink" },
   { label: "GYIK",            href: "/faq" },
   { label: "Elérhetőség",     href: "/contact" },
 ]
@@ -53,12 +53,20 @@ export function Navigation() {
   const isHome = pathname === "/"
   const [isOpen, setIsOpen]     = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const [activeHash, setActiveHash] = useState("")
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20)
     handleScroll()
     window.addEventListener("scroll", handleScroll, { passive: true })
     return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
+
+  useEffect(() => {
+    const updateHash = () => setActiveHash(window.location.hash)
+    updateHash()
+    window.addEventListener("hashchange", updateHash)
+    return () => window.removeEventListener("hashchange", updateHash)
   }, [])
 
   // On non-home pages there's no full-screen hero, so always use the solid style
@@ -86,7 +94,7 @@ export function Navigation() {
           {/* Desktop menu */}
           <div className="hidden md:flex items-center gap-1">
             {navigationItems.map((item) => {
-              const isActive = pathname === item.href
+              const isActive = !item.href.startsWith("/#") && pathname === item.href
               const activeClass = isSolid
                 ? "text-[#6e7f6a]"
                 : "text-white"
@@ -112,10 +120,7 @@ export function Navigation() {
                 Időpontfoglalás
               </Button>
             </Link>
-            <Link
-              href="/admin"
-              className="ml-3 text-xs text-[#4a4f4a]/50 hover:text-[#4a4f4a] transition-colors"
-            >
+            <Link href="/admin" className={navLinkClass}>
               Admin
             </Link>
           </div>
@@ -141,27 +146,43 @@ export function Navigation() {
               transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
               className="md:hidden overflow-hidden"
             >
-              <div className="pb-4 space-y-1 bg-[#ededed]/95 backdrop-blur-md rounded-b-lg">
+              <div className="pb-4 space-y-0 bg-[#ededed]/95 backdrop-blur-md rounded-b-lg">
+                {navigationItems.map((item) => {
+                  const isActive = item.href.startsWith("/#")
+                    ? pathname === "/" && activeHash === item.href.slice(1)
+                    : pathname === item.href
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      className={`block px-3 py-2.5 text-base font-medium transition-colors ${
+                        isActive ? "text-[#3a3a3a]" : "text-[#4a4f4a]/70 hover:text-[#3a3a3a]"
+                      }`}
+                      onClick={() => {
+                        if (item.href.startsWith("/#")) setActiveHash(item.href.slice(1))
+                        setIsOpen(false)
+                      }}
+                    >
+                      <span className={`relative inline-block ${isActive ? "after:absolute after:bottom-0 after:left-0 after:right-0 after:h-px after:bg-current" : ""}`}>
+                        {item.label}
+                      </span>
+                    </Link>
+                  )
+                })}
                 <Link
                   href="/booking"
-                  className="block px-3 py-2 rounded-md text-base font-semibold text-[#4a4f4a] bg-[#4a4f4a]/5 hover:bg-[#4a4f4a]/10"
+                  className={`block px-3 py-2.5 text-base font-medium transition-colors ${
+                    pathname === "/booking" ? "text-[#3a3a3a]" : "text-[#4a4f4a]/70 hover:text-[#3a3a3a]"
+                  }`}
                   onClick={() => setIsOpen(false)}
                 >
-                  Időpontfoglalás
+                  <span className={`relative inline-block ${pathname === "/booking" ? "after:absolute after:bottom-0 after:left-0 after:right-0 after:h-px after:bg-current" : ""}`}>
+                    Időpontfoglalás
+                  </span>
                 </Link>
-                {navigationItems.map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className="block px-3 py-2 rounded-md text-base font-medium text-[#3a3a3a] hover:bg-[#6e7f6a]/10"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    {item.label}
-                  </Link>
-                ))}
                 <Link
                   href="/admin"
-                  className="block px-3 py-2 text-xs text-muted-foreground"
+                  className="block px-3 py-2.5 text-sm text-[#4a4f4a]/40 hover:text-[#4a4f4a]/70 transition-colors"
                   onClick={() => setIsOpen(false)}
                 >
                   Admin

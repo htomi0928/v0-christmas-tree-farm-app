@@ -1,7 +1,5 @@
 ﻿import Link from "next/link"
 import { CalendarDays, DollarSign, Trees, TrendingDown, TrendingUp, Wallet } from "lucide-react"
-import { Card } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import { listReservations } from "@/lib/reservations"
 import { getSettings } from "@/lib/settings"
 import { getExpensesSummary } from "@/lib/expenses"
@@ -115,69 +113,86 @@ export default async function AdminDashboard() {
   ]
 
   return (
-    <div className="space-y-6">
-      <section>
-        <p className="section-kicker">Admin dashboard</p>
-        <h1 className="admin-section-title">Gyors áttekintés egy kézben is használható nézetben.</h1>
-        <p className="mt-3 max-w-3xl text-base leading-7 text-foreground/70">A legfontosabb számok rögtön felül látszanak, a bevételi bontás pedig újra külön blokkban jelenik meg, hogy ne vesszen el a napi használatban.</p>
+    <div className="space-y-10">
+
+      {/* Header */}
+      <section className="text-center">
+        <div className="section-label justify-center">Áttekintés</div>
+        <h1 className="text-4xl sm:text-5xl font-bold text-[#3a3a3a] mb-3 tracking-tight">Dashboard</h1>
+        <p className="text-[#4a4f4a] font-light max-w-md mx-auto">A legfontosabb számok és gyors műveletek egy helyen.</p>
       </section>
 
+      {/* Overview stats */}
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {overviewCards.map((item) => (
-          <Card key={item.label} className="admin-card gap-4 px-6 py-6">
-            <div className="flex items-center justify-between px-6">
-              <span className="rounded-2xl bg-primary/8 p-3 text-primary"><item.icon className="h-5 w-5" /></span>
-            </div>
-            <div className="px-6">
-              <p className="text-sm font-semibold uppercase tracking-[0.16em] text-foreground/48">{item.label}</p>
-              <p className="mt-2 text-4xl font-semibold text-primary">{item.value}</p>
-              <p className="mt-2 text-sm text-foreground/62">{item.help}</p>
-            </div>
-          </Card>
+          <div key={item.label} className="border border-[#bfc3c7] bg-[#f5f4f1] rounded-lg p-6">
+            <item.icon className="h-5 w-5 text-[#6e7f6a] mb-4" />
+            <p className="text-xs font-bold text-[#4a4f4a]/50 tracking-widest uppercase mb-2">{item.label}</p>
+            <p className="text-3xl font-bold text-[#3a3a3a] tracking-tight mb-1">{item.value}</p>
+            <p className="text-sm text-[#4a4f4a] font-light">{item.help}</p>
+          </div>
         ))}
       </section>
 
+      {/* Revenue breakdown */}
       <section>
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-3xl font-semibold text-primary">Bevétel és kiadás</h2>
-          <span className="rounded-full bg-primary/8 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-primary">Fontos blokk</span>
-        </div>
+        <div className="section-label justify-center mb-3">Pénzügyek</div>
+        <h2 className="text-2xl font-bold text-[#3a3a3a] tracking-tight mb-6 text-center">Bevétel és kiadás</h2>
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {revenueCards.map((item) => (
-            <div key={item.label} className={`rounded-[24px] border border-white/60 bg-gradient-to-br ${item.className} p-[1px] shadow-[0_20px_44px_rgba(16,39,32,0.09)]`}>
-              <div className="rounded-[23px] bg-[rgba(255,250,242,0.92)] px-6 py-6">
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-semibold uppercase tracking-[0.16em]">{item.label}</p>
-                  <item.icon className="h-5 w-5" />
-                </div>
-                <p className="mt-4 text-3xl font-semibold">{item.value}</p>
-                <p className="mt-3 text-sm font-medium opacity-80">{item.expense}</p>
-                <p className="mt-1 text-sm font-semibold">{item.net}</p>
+            <div key={item.label} className="border border-[#bfc3c7] bg-[#f5f4f1] rounded-lg p-6">
+              <div className="flex items-center justify-between mb-4">
+                <p className="text-xs font-bold text-[#4a4f4a]/50 tracking-widest uppercase">{item.label}</p>
+                <item.icon className="h-4 w-4 text-[#6e7f6a]" />
+              </div>
+              <p className="text-2xl font-bold text-[#3a3a3a] tracking-tight mb-3">{item.value}</p>
+              <div className="space-y-1 border-t border-[#bfc3c7] pt-3">
+                <p className="text-xs text-[#4a4f4a] font-light">{item.expense}</p>
+                <p className="text-xs font-semibold text-[#3a3a3a]">{item.net}</p>
               </div>
             </div>
           ))}
         </div>
       </section>
 
-      <section className="grid gap-4 lg:grid-cols-[1fr_0.9fr]">
-        <Card className="admin-card px-7 py-7">
-          <div className="px-6">
-            <h2 className="text-3xl font-semibold text-primary">Mai fókusz</h2>
-            <div className="mt-5 space-y-3 text-base leading-7 text-foreground/72">
-              <p>Nézd át a közelgő foglalásokat, ellenőrizd a sorszámokat, és ha kell, gyorsan frissítsd a státuszokat.</p>
-              <p>A rendszer mobilról is kényelmes: a foglaláslista kártyás, a részletek oldalon pedig az alsó mentési sáv mindig kéznél marad.</p>
-            </div>
+      {/* Quick actions */}
+      <section className="grid gap-4 lg:grid-cols-2">
+        <div className="border border-[#bfc3c7] bg-[#f5f4f1] rounded-lg p-8">
+          <div className="section-label justify-center mb-3">Navigáció</div>
+          <h2 className="text-xl font-bold text-[#3a3a3a] tracking-tight mb-6 text-center">Gyors műveletek</h2>
+          <div className="flex flex-col gap-3">
+            <Link href="/admin/reservations" className="inline-flex items-center justify-center h-12 px-7 text-base font-semibold rounded-lg bg-[#4a4f4a] text-[#ededed] hover:bg-[#4a4f4a]/90 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(74,79,74,0.25)] active:translate-y-0 active:shadow-none transition-all duration-200">
+              Foglalások megnyitása
+            </Link>
+            <Link href="/admin/settings" className="inline-flex items-center justify-center h-12 px-7 text-base font-normal rounded-lg border border-[#4a4f4a]/30 text-[#4a4f4a]/70 hover:text-[#4a4f4a] hover:border-[#4a4f4a]/60 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200">
+              Szezon beállításai
+            </Link>
+            <Link href="/admin/expenses" className="inline-flex items-center justify-center h-12 px-7 text-base font-normal rounded-lg border border-[#4a4f4a]/30 text-[#4a4f4a]/70 hover:text-[#4a4f4a] hover:border-[#4a4f4a]/60 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200">
+              Kiadások kezelése
+            </Link>
           </div>
-        </Card>
+        </div>
 
-        <Card className="admin-card px-7 py-7">
-          <div className="flex flex-col gap-3 px-6">
-            <Button asChild size="lg"><Link href="/admin/reservations">Foglalások megnyitása</Link></Button>
-            <Button asChild size="lg" variant="outline"><Link href="/admin/settings">Szezon beállításai</Link></Button>
-            <Button asChild size="lg" variant="outline"><Link href="/admin/expenses">Kiadások kezelése</Link></Button>
+        <div className="border border-[#bfc3c7] bg-[#f5f4f1] rounded-lg p-8">
+          <div className="section-label justify-center mb-3">Mai teendők</div>
+          <h2 className="text-xl font-bold text-[#3a3a3a] tracking-tight mb-4 text-center">Fókusz</h2>
+          <div className="space-y-0">
+            {[
+              "Nézd át a közelgő foglalásokat és ellenőrizd a sorszámokat.",
+              "Frissítsd a státuszokat átvétel után.",
+              "Rögzítsd a kiadásokat, hogy a nettó összeg naprakész legyen.",
+            ].map((item, i) => (
+              <div key={i} className="flex gap-4 py-3 border-b border-[#bfc3c7] last:border-b-0">
+                <span className="text-[#6e7f6a] font-bold text-sm flex-shrink-0 tabular-nums">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <p className="text-sm text-[#4a4f4a] font-light">{item}</p>
+              </div>
+            ))}
           </div>
-        </Card>
+        </div>
       </section>
+
     </div>
   )
 }
