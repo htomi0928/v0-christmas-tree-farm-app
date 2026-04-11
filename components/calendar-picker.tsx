@@ -29,7 +29,7 @@ const monthNames = [
   "december",
 ]
 
-const dayNames = ["V", "H", "K", "Sze", "Cs", "P", "Szo"]
+const dayNames = ["H", "K", "Sze", "Cs", "P", "Szo", "V"]
 
 export default function CalendarPicker({ selectedDate, onDateSelect, availableDates }: CalendarPickerProps) {
   const [currentMonth, setCurrentMonth] = useState(new Date(new Date().getFullYear(), 11, 1))
@@ -53,7 +53,9 @@ export default function CalendarPicker({ selectedDate, onDateSelect, availableDa
   }, [availableDates])
 
   const daysInMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0).getDate()
-  const firstDay = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1).getDay()
+  // Convert Sunday-based (0=Sun) to Monday-based (0=Mon)
+  const firstDayRaw = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1).getDay()
+  const firstDay = (firstDayRaw + 6) % 7
 
   const days: (number | null)[] = []
   for (let i = 0; i < firstDay; i++) days.push(null)
@@ -108,7 +110,7 @@ export default function CalendarPicker({ selectedDate, onDateSelect, availableDa
                     key={dateStr}
                     type="button"
                     disabled={!isAvailable}
-                    onClick={() => onDateSelect(dateStr)}
+                    onClick={() => onDateSelect(isSelected ? "" : dateStr)}
                     className={`h-11 rounded-2xl text-sm font-semibold transition ${
                       isSelected
                         ? "bg-primary text-primary-foreground"

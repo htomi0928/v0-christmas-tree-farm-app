@@ -13,9 +13,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   }
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(180deg,rgba(247,243,235,1),rgba(239,233,222,0.72))]">
+    <div className="min-h-screen bg-[#ededed]">
       <AdminShellNav />
-      <main className="page-shell pb-28 pt-6 sm:pt-8 md:pb-10">{children}</main>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-28 pt-10 md:pb-12">{children}</main>
     </div>
   )
 }

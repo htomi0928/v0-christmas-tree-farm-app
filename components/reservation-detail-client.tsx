@@ -1,11 +1,9 @@
-﻿"use client"
+"use client"
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { AlertCircle, ArrowLeft, CheckCircle2, Save, Trash2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
 import { type Reservation, ReservationStatus } from "@/lib/types"
 import { formatDateHu, reservationStatusMeta } from "@/lib/site"
 import AdminDatePicker from "@/components/admin-date-picker"
@@ -13,6 +11,9 @@ import AdminDatePicker from "@/components/admin-date-picker"
 interface Props {
   reservation: Reservation
 }
+
+const inputClass = "w-full px-4 py-3 rounded-lg border border-[#bfc3c7] bg-white text-[#3a3a3a] placeholder:text-[#4a4f4a]/40 focus:outline-none focus:ring-2 focus:ring-[#6e7f6a] text-sm transition-all duration-150"
+const labelClass = "block text-xs font-bold text-[#3a3a3a] tracking-widest uppercase mb-2"
 
 export default function ReservationDetailClient({ reservation: initialReservation }: Props) {
   const router = useRouter()
@@ -47,7 +48,6 @@ export default function ReservationDetailClient({ reservation: initialReservatio
     setIsSaving(true)
     setError("")
     setSuccess("")
-
     try {
       const response = await fetch(`/api/admin/reservations/${initialReservation.id}`, {
         method: "PATCH",
@@ -88,122 +88,147 @@ export default function ReservationDetailClient({ reservation: initialReservatio
   }
 
   return (
-    <div className="space-y-5 pb-24">
-      <Link href="/admin/reservations" className="inline-flex items-center gap-2 text-sm font-semibold text-primary">
+    <div className="space-y-8 pb-28">
+
+      {/* Back link */}
+      <Link href="/admin/reservations" className="inline-flex items-center gap-2 text-sm text-[#4a4f4a]/60 hover:text-[#4a4f4a] transition-colors">
         <ArrowLeft className="h-4 w-4" />
         Vissza a listához
       </Link>
 
-      <section>
-        <p className="section-kicker">Foglalás részletei</p>
-        <h1 className="admin-section-title">{formData.name}</h1>
-        <p className="mt-2 text-base text-foreground/68">Látogatás napja: {formatDateHu(formData.visitDate)}</p>
+      {/* Header */}
+      <section className="text-center">
+        <div className="section-label justify-center">Foglalás részletei</div>
+        <h1 className="text-4xl font-bold text-[#3a3a3a] tracking-tight mb-2">{formData.name}</h1>
+        <p className="text-[#4a4f4a] font-light">Látogatás napja: {formatDateHu(formData.visitDate)}</p>
       </section>
 
-      {error && <div className="rounded-2xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive"><div className="flex gap-3"><AlertCircle className="h-5 w-5" />{error}</div></div>}
-      {success && <div className="rounded-2xl border border-[color:var(--mint-border)] bg-[color:var(--mint-soft)] p-4 text-sm text-[color:var(--mint-strong)]"><div className="flex gap-3"><CheckCircle2 className="h-5 w-5" />{success}</div></div>}
+      {/* Alerts */}
+      {error && (
+        <div className="flex gap-3 p-4 border border-destructive/30 bg-destructive/8 rounded-lg text-sm text-destructive">
+          <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />{error}
+        </div>
+      )}
+      {success && (
+        <div className="flex gap-3 p-4 border border-[#6e7f6a]/30 bg-[#6e7f6a]/8 rounded-lg text-sm text-[#6e7f6a]">
+          <CheckCircle2 className="h-5 w-5 flex-shrink-0 mt-0.5" />{success}
+        </div>
+      )}
 
-      <Card className="admin-card px-7 py-7">
-        <div className="px-6">
-          <h2 className="text-2xl font-semibold text-primary">Gyors státuszváltás</h2>
-          <div className="mt-4 flex flex-wrap gap-2">
-            {Object.entries(reservationStatusMeta).map(([value, meta]) => (
-              <button key={value} type="button" onClick={() => setFormData((prev) => ({ ...prev, status: value as ReservationStatus }))} className={`status-pill ${meta.pillClassName} ${formData.status === value ? "ring-2 ring-primary/20" : "opacity-80"}`}>
-                {meta.label}
-              </button>
-            ))}
+      {/* Status */}
+      <div className="border border-[#bfc3c7] bg-[#f5f4f1] rounded-lg p-6">
+        <p className="text-xs font-bold text-[#3a3a3a] tracking-widest uppercase mb-4">Gyors státuszváltás</p>
+        <div className="grid grid-cols-5">
+          {Object.entries(reservationStatusMeta).map(([value, meta]) => (
+            <button
+              key={value}
+              type="button"
+              onClick={() => setFormData((prev) => ({ ...prev, status: value as ReservationStatus }))}
+              className={`relative py-2 px-2 text-sm font-medium text-center transition-colors duration-200 after:absolute after:bottom-0 after:left-1/4 after:right-1/4 after:h-px after:bg-current after:transition-transform after:duration-200 after:origin-left ${
+                formData.status === value
+                  ? "text-[#3a3a3a] after:scale-x-100"
+                  : "text-[#4a4f4a]/40 hover:text-[#4a4f4a]/70 after:scale-x-0 hover:after:scale-x-100"
+              }`}
+            >
+              {meta.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Basic data + Notes */}
+      <div className="grid gap-6 xl:grid-cols-2">
+        <div className="border border-[#bfc3c7] bg-[#f5f4f1] rounded-lg p-6 space-y-5">
+          <p className="text-xs font-bold text-[#3a3a3a] tracking-widest uppercase">Alapadatok</p>
+          <div>
+            <label className={labelClass}>Név</label>
+            <input value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className={inputClass} />
+          </div>
+          <div>
+            <label className={labelClass}>Telefonszám</label>
+            <input value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} className={inputClass} />
+          </div>
+          <div>
+            <label className={labelClass}>E-mail</label>
+            <input value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} className={inputClass} />
+          </div>
+          <div>
+            <label className={labelClass}>Várható darabszám</label>
+            <input type="number" min="1" value={formData.treeCount} onChange={(e) => setFormData({ ...formData, treeCount: Math.max(1, Number.parseInt(e.target.value) || 1) })} className={inputClass} />
           </div>
         </div>
-      </Card>
 
-      <div className="grid gap-5 xl:grid-cols-2">
-        <Card className="admin-card px-7 py-7">
-          <div className="space-y-5 px-6">
-            <h2 className="text-2xl font-semibold text-primary">Alapadatok</h2>
-            <div>
-              <label className="mb-2 block text-sm font-semibold text-foreground">Név</label>
-              <input value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className="input-base" />
-            </div>
-            <div>
-              <label className="mb-2 block text-sm font-semibold text-foreground">Telefonszám</label>
-              <input value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} className="input-base" />
-            </div>
-            <div>
-              <label className="mb-2 block text-sm font-semibold text-foreground">E-mail</label>
-              <input value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} className="input-base" />
-            </div>
-            <div>
-              <label className="mb-2 block text-sm font-semibold text-foreground">Várható darabszám</label>
-              <input type="number" min="1" value={formData.treeCount} onChange={(e) => setFormData({ ...formData, treeCount: Math.max(1, Number.parseInt(e.target.value) || 1) })} className="input-base" />
-            </div>
-          </div>
-        </Card>
-
-        <Card className="admin-card px-7 py-7">
-          <div className="space-y-5 px-6">
-            <h2 className="text-2xl font-semibold text-primary">Sorszám és megjegyzés</h2>
-            <div>
-              <label className="mb-2 block text-sm font-semibold text-foreground">Fa sorszáma(i)</label>
-              <input value={formData.treeNumbers} onChange={(e) => setFormData({ ...formData, treeNumbers: e.target.value })} placeholder="Például 12, 13" className="input-base" />
-            </div>
-            <div>
-              <label className="mb-2 block text-sm font-semibold text-foreground">Megjegyzés</label>
-              <textarea value={formData.notes} onChange={(e) => setFormData({ ...formData, notes: e.target.value })} className="textarea-base" />
-            </div>
-            <div>
-              <label className="mb-2 block text-sm font-semibold text-foreground">Kinek fizettek?</label>
-              <select value={formData.paidTo} onChange={(e) => setFormData({ ...formData, paidTo: e.target.value as "János" | "Sanyi" | "" })} className="select-base">
-                <option value="">Még nincs rögzítve</option>
-                <option value="János">János</option>
-                <option value="Sanyi">Sanyi</option>
-              </select>
-            </div>
-          </div>
-        </Card>
-      </div>
-
-      <div className="grid gap-5 xl:grid-cols-2">
-        <Card className="admin-card px-7 py-7">
-          <div className="px-6">
-            <h2 className="text-2xl font-semibold text-primary">Látogatás napja</h2>
-            <div className="mt-4"><AdminDatePicker selectedDate={formData.visitDate} onDateSelect={(date) => setFormData({ ...formData, visitDate: date })} highlightDays={availableDays.length > 0 ? availableDays : undefined} /></div>
-          </div>
-        </Card>
-        <Card className="admin-card px-7 py-7">
-          <div className="px-6">
-            <h2 className="text-2xl font-semibold text-primary">Átvételi nap</h2>
-            <div className="mt-4"><AdminDatePicker selectedDate={formData.pickupDate} onDateSelect={(date) => setFormData({ ...formData, pickupDate: date })} highlightDays={retrievalDays.length > 0 ? retrievalDays : undefined} /></div>
-          </div>
-        </Card>
-      </div>
-
-      <Card className="admin-card px-7 py-7">
-        <div className="flex flex-col gap-4 px-6 sm:flex-row sm:items-center sm:justify-between">
+        <div className="border border-[#bfc3c7] bg-[#f5f4f1] rounded-lg p-6 space-y-5">
+          <p className="text-xs font-bold text-[#3a3a3a] tracking-widest uppercase">Sorszám és megjegyzés</p>
           <div>
-            <h2 className="text-2xl font-semibold text-primary">Törlés</h2>
-            <p className="mt-2 text-sm text-foreground/64">Csak akkor használd, ha biztosan nincs már szükség a foglalásra.</p>
+            <label className={labelClass}>Fa sorszáma(i)</label>
+            <input value={formData.treeNumbers} onChange={(e) => setFormData({ ...formData, treeNumbers: e.target.value })} placeholder="Például 12, 13" className={inputClass} />
+          </div>
+          <div>
+            <label className={labelClass}>Megjegyzés</label>
+            <textarea value={formData.notes} onChange={(e) => setFormData({ ...formData, notes: e.target.value })} rows={4} className={inputClass + " resize-none"} />
+          </div>
+          <div>
+            <label className={labelClass}>Kinek fizettek?</label>
+            <select value={formData.paidTo} onChange={(e) => setFormData({ ...formData, paidTo: e.target.value as "János" | "Sanyi" | "" })} className={inputClass}>
+              <option value="">Még nincs rögzítve</option>
+              <option value="János">János</option>
+              <option value="Sanyi">Sanyi</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      {/* Date pickers */}
+      <div className="grid gap-6 xl:grid-cols-2">
+        <div className="border border-[#bfc3c7] bg-[#f5f4f1] rounded-lg p-6">
+          <p className="text-xs font-bold text-[#3a3a3a] tracking-widest uppercase mb-4">Látogatás napja</p>
+          <AdminDatePicker selectedDate={formData.visitDate} onDateSelect={(date) => setFormData({ ...formData, visitDate: date })} highlightDays={availableDays.length > 0 ? availableDays : undefined} />
+        </div>
+        <div className="border border-[#bfc3c7] bg-[#f5f4f1] rounded-lg p-6">
+          <p className="text-xs font-bold text-[#3a3a3a] tracking-widest uppercase mb-4">Átvételi nap</p>
+          <AdminDatePicker selectedDate={formData.pickupDate} onDateSelect={(date) => setFormData({ ...formData, pickupDate: date })} highlightDays={retrievalDays.length > 0 ? retrievalDays : undefined} />
+        </div>
+      </div>
+
+      {/* Delete */}
+      <div className="border border-destructive/20 bg-destructive/4 rounded-lg p-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-xs font-bold text-destructive/70 tracking-widest uppercase mb-1">Veszélyes művelet</p>
+            <p className="text-sm text-[#4a4f4a] font-light">Csak akkor töröld, ha biztosan nincs már szükség erre a foglalásra.</p>
           </div>
           {!showDeleteConfirm ? (
-            <Button type="button" variant="outline" className="border-destructive/30 text-destructive hover:bg-destructive/10" onClick={() => setShowDeleteConfirm(true)}>
+            <button type="button" onClick={() => setShowDeleteConfirm(true)} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg border border-destructive/30 text-destructive text-sm font-medium hover:bg-destructive/8 transition-colors flex-shrink-0">
               <Trash2 className="h-4 w-4" />
               Foglalás törlése
-            </Button>
+            </button>
           ) : (
             <div className="flex flex-wrap gap-2">
-              <Button type="button" variant="outline" onClick={() => setShowDeleteConfirm(false)}>Mégse</Button>
-              <Button type="button" variant="destructive" onClick={handleDelete} disabled={isDeleting}>{isDeleting ? "Törlés..." : "Végleges törlés"}</Button>
+              <button type="button" onClick={() => setShowDeleteConfirm(false)} className="inline-flex items-center px-5 py-2.5 rounded-lg border border-[#bfc3c7] text-[#4a4f4a] text-sm font-medium hover:bg-[#4a4f4a]/5 transition-colors">
+                Mégse
+              </button>
+              <button type="button" onClick={handleDelete} disabled={isDeleting} className="inline-flex items-center px-5 py-2.5 rounded-lg bg-destructive text-white text-sm font-semibold hover:bg-destructive/90 transition-colors disabled:opacity-60">
+                {isDeleting ? "Törlés..." : "Végleges törlés"}
+              </button>
             </div>
           )}
         </div>
-      </Card>
+      </div>
 
-      <div className="fixed inset-x-0 bottom-[72px] z-40 border-t border-primary/10 bg-[rgba(255,253,249,0.96)] px-4 py-3 shadow-[0_-12px_32px_rgba(16,39,32,0.08)] backdrop-blur md:bottom-0 md:left-auto md:right-0 md:w-[420px] md:rounded-tl-[28px] md:border-l">
+      {/* Save bar */}
+      <div className="fixed inset-x-0 bottom-[72px] z-40 border-t border-[#bfc3c7] bg-[#ededed]/96 px-4 py-3 backdrop-blur-md md:bottom-0 md:left-auto md:right-0 md:w-[420px] md:rounded-tl-xl md:border-l">
         <div className="mx-auto flex max-w-3xl items-center gap-3">
-          <Button type="button" variant="outline" className="flex-1" onClick={() => router.push("/admin/reservations")}>Vissza</Button>
-          <Button type="button" className="flex-1" onClick={handleSave} disabled={isSaving}><Save className="h-4 w-4" />{isSaving ? "Mentés..." : "Mentés"}</Button>
+          <button type="button" onClick={() => router.push("/admin/reservations")} className="flex-1 inline-flex items-center justify-center h-11 rounded-lg border border-[#bfc3c7] text-[#4a4f4a] text-sm font-medium hover:bg-[#4a4f4a]/5 transition-colors">
+            Vissza
+          </button>
+          <button type="button" onClick={handleSave} disabled={isSaving} className="flex-1 inline-flex items-center justify-center gap-2 h-11 rounded-lg bg-[#4a4f4a] text-[#ededed] text-sm font-semibold hover:bg-[#4a4f4a]/90 transition-colors disabled:opacity-60">
+            <Save className="h-4 w-4" />
+            {isSaving ? "Mentés..." : "Mentés"}
+          </button>
         </div>
       </div>
+
     </div>
   )
 }
-

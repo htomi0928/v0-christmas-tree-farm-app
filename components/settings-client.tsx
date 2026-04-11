@@ -1,14 +1,19 @@
-﻿"use client"
+"use client"
 
 import { useState } from "react"
-import { CheckCircle2, SettingsIcon, AlertCircle, ChevronLeft, ChevronRight } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
+import { CheckCircle2, AlertCircle, ChevronLeft, ChevronRight, Save } from "lucide-react"
 import type { Settings } from "@/lib/types"
 
 interface Props {
   initialSettings: Settings
 }
+
+const inputClass = "w-full px-4 py-3 rounded-lg border border-[#bfc3c7] bg-white text-[#3a3a3a] placeholder:text-[#4a4f4a]/40 focus:outline-none focus:ring-2 focus:ring-[#6e7f6a] text-sm transition-all duration-150"
+const labelClass = "block text-xs font-bold text-[#3a3a3a] tracking-widest uppercase mb-2"
+
+const monthNames = ["január","február","március","április","május","június","július","augusztus","szeptember","október","november","december"]
+// Monday-first
+const dayNames = ["H","K","Sze","Cs","P","Szo","V"]
 
 export default function SettingsClient({ initialSettings }: Props) {
   const [isSaving, setIsSaving] = useState(false)
@@ -35,31 +40,13 @@ export default function SettingsClient({ initialSettings }: Props) {
   const toDateStr = (year: number, month: number, day: number) =>
     `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
 
-  const monthNames = [
-    "január",
-    "február",
-    "március",
-    "április",
-    "május",
-    "június",
-    "július",
-    "augusztus",
-    "szeptember",
-    "október",
-    "november",
-    "december",
-  ]
-
-  const dayNames = ["V", "H", "K", "Sze", "Cs", "P", "Szo"]
-
   const buildWeeks = (monthDate: Date) => {
     const daysInMonth = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 0).getDate()
-    const firstDay = new Date(monthDate.getFullYear(), monthDate.getMonth(), 1).getDay()
+    const firstDayRaw = new Date(monthDate.getFullYear(), monthDate.getMonth(), 1).getDay()
+    const firstDay = (firstDayRaw + 6) % 7 // Monday-based
     const days: (number | null)[] = []
-
     for (let i = 0; i < firstDay; i++) days.push(null)
     for (let i = 1; i <= daysInMonth; i++) days.push(i)
-
     const weeks: (number | null)[][] = []
     for (let i = 0; i < days.length; i += 7) weeks.push(days.slice(i, i + 7))
     return weeks
@@ -69,7 +56,7 @@ export default function SettingsClient({ initialSettings }: Props) {
     setFormData((prev) => ({
       ...prev,
       [key]: prev[key].includes(dateStr)
-        ? prev[key].filter((day) => day !== dateStr)
+        ? prev[key].filter((d) => d !== dateStr)
         : [...prev[key], dateStr],
     }))
   }
@@ -78,16 +65,13 @@ export default function SettingsClient({ initialSettings }: Props) {
     setIsSaving(true)
     setError("")
     setSuccess("")
-
     try {
       const response = await fetch("/api/admin/settings", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       })
-
       const data = await response.json()
-
       if (data.success) {
         setSuccess("A beállítások mentése sikerült.")
         setTimeout(() => setSuccess(""), 2500)
@@ -108,7 +92,7 @@ export default function SettingsClient({ initialSettings }: Props) {
     onMonthChange,
     dates,
     dayKey,
-    colorClass,
+    activeClass,
   }: {
     title: string
     subtitle: string
@@ -116,137 +100,102 @@ export default function SettingsClient({ initialSettings }: Props) {
     onMonthChange: (date: Date) => void
     dates: string[]
     dayKey: "availableDays" | "retrievalDays"
-    colorClass: string
+    activeClass: string
   }) => (
-    <Card className="admin-card px-6 py-6">
-      <div className="space-y-4 px-6">
-        <div>
-          <h2 className="text-2xl font-semibold text-primary">{title}</h2>
-          <p className="mt-2 text-sm leading-6 text-foreground/66">{subtitle}</p>
-        </div>
+    <div className="border border-[#bfc3c7] bg-[#f5f4f1] rounded-lg p-6">
+      <p className="text-xs font-bold text-[#3a3a3a] tracking-widest uppercase mb-1">{title}</p>
+      <p className="text-sm text-[#4a4f4a] font-light mb-5">{subtitle}</p>
 
-        <div className="flex items-center justify-between">
-          <button
-            type="button"
-            className="rounded-full border border-primary/10 p-2"
-            onClick={() => onMonthChange(new Date(month.getFullYear(), month.getMonth() - 1, 1))}
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </button>
-
-          <p className="text-sm font-semibold uppercase tracking-[0.14em] text-primary">
-            {month.getFullYear()}. {monthNames[month.getMonth()]}
-          </p>
-
-          <button
-            type="button"
-            className="rounded-full border border-primary/10 p-2"
-            onClick={() => onMonthChange(new Date(month.getFullYear(), month.getMonth() + 1, 1))}
-          >
-            <ChevronRight className="h-4 w-4" />
-          </button>
-        </div>
-
-        <div className="grid grid-cols-7 gap-2 text-center text-xs font-semibold text-foreground/48">
-          {dayNames.map((day) => (
-            <div key={day}>{day}</div>
-          ))}
-        </div>
-
-        <div className="space-y-2">
-          {buildWeeks(month).map((week, weekIndex) => (
-            <div key={weekIndex} className="grid grid-cols-7 gap-2">
-              {week.map((day, dayIndex) => {
-                if (!day) return <div key={`${weekIndex}-${dayIndex}`} className="h-10" />
-
-                const dateStr = toDateStr(month.getFullYear(), month.getMonth(), day)
-                const active = dates.includes(dateStr)
-
-                return (
-                  <button
-                    key={dateStr}
-                    type="button"
-                    onClick={() => toggleDay(dayKey, dateStr)}
-                    className={`h-10 rounded-2xl text-sm font-semibold transition ${
-                      active ? colorClass : "bg-secondary/50 text-foreground/68 hover:bg-secondary"
-                    }`}
-                  >
-                    {day}
-                  </button>
-                )
-              })}
-            </div>
-          ))}
-        </div>
+      <div className="flex items-center justify-between mb-4">
+        <button type="button" onClick={() => onMonthChange(new Date(month.getFullYear(), month.getMonth() - 1, 1))} className="p-2 rounded-lg border border-[#bfc3c7] hover:bg-[#4a4f4a]/5 transition-colors">
+          <ChevronLeft className="h-4 w-4 text-[#4a4f4a]" />
+        </button>
+        <p className="text-xs font-bold text-[#3a3a3a] tracking-widest uppercase">
+          {month.getFullYear()}. {monthNames[month.getMonth()]}
+        </p>
+        <button type="button" onClick={() => onMonthChange(new Date(month.getFullYear(), month.getMonth() + 1, 1))} className="p-2 rounded-lg border border-[#bfc3c7] hover:bg-[#4a4f4a]/5 transition-colors">
+          <ChevronRight className="h-4 w-4 text-[#4a4f4a]" />
+        </button>
       </div>
-    </Card>
+
+      <div className="grid grid-cols-7 gap-1 text-center text-xs font-bold text-[#4a4f4a]/40 tracking-widest uppercase mb-2">
+        {dayNames.map((d) => <div key={d}>{d}</div>)}
+      </div>
+
+      <div className="space-y-1">
+        {buildWeeks(month).map((week, wi) => (
+          <div key={wi} className="grid grid-cols-7 gap-1">
+            {week.map((day, di) => {
+              if (!day) return <div key={`${wi}-${di}`} className="h-10" />
+              const dateStr = toDateStr(month.getFullYear(), month.getMonth(), day)
+              const active = dates.includes(dateStr)
+              return (
+                <button
+                  key={dateStr}
+                  type="button"
+                  onClick={() => toggleDay(dayKey, dateStr)}
+                  className={`h-10 rounded-lg text-sm font-medium transition-all ${active ? activeClass : "bg-[#4a4f4a]/6 text-[#4a4f4a]/50 hover:bg-[#4a4f4a]/12"}`}
+                >
+                  {day}
+                </button>
+              )
+            })}
+          </div>
+        ))}
+      </div>
+    </div>
   )
 
   return (
-    <div className="space-y-6 pb-24">
-      <section>
-        <p className="section-kicker">Beállítások</p>
-        <h1 className="admin-section-title flex items-center gap-3">
-          <SettingsIcon className="h-7 w-7" />
-          Szezon és foglalási szabályok
-        </h1>
+    <div className="space-y-8 pb-28">
+
+      {/* Header */}
+      <section className="text-center">
+        <div className="section-label justify-center">Beállítások</div>
+        <h1 className="text-4xl font-bold text-[#3a3a3a] tracking-tight mb-2">Szezon beállításai</h1>
+        <p className="text-[#4a4f4a] font-light">Foglalási szabályok és elérhető napok kezelése.</p>
       </section>
 
+      {/* Alerts */}
       {error && (
-        <div className="rounded-2xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
-          <div className="flex gap-3">
-            <AlertCircle className="h-5 w-5" />
-            {error}
-          </div>
+        <div className="flex gap-3 p-4 border border-destructive/30 bg-destructive/8 rounded-lg text-sm text-destructive">
+          <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />{error}
         </div>
       )}
-
       {success && (
-        <div className="rounded-2xl border border-[color:var(--mint-border)] bg-[color:var(--mint-soft)] p-4 text-sm text-[color:var(--mint-strong)]">
-          <div className="flex gap-3">
-            <CheckCircle2 className="h-5 w-5" />
-            {success}
-          </div>
+        <div className="flex gap-3 p-4 border border-[#6e7f6a]/30 bg-[#6e7f6a]/8 rounded-lg text-sm text-[#6e7f6a]">
+          <CheckCircle2 className="h-5 w-5 flex-shrink-0 mt-0.5" />{success}
         </div>
       )}
 
-      <div className="grid gap-5 xl:grid-cols-[0.9fr_1.1fr]">
-        <Card className="admin-card px-7 py-7">
-          <div className="space-y-5 px-6">
-            <div>
-              <label className="mb-2 block text-sm font-semibold text-foreground">Maximális foglalás naponta</label>
-              <input
-                type="number"
-                min="1"
-                value={formData.maxBookingsPerDay}
-                onChange={(e) => setFormData({ ...formData, maxBookingsPerDay: Number.parseInt(e.target.value) || 0 })}
-                className="input-base"
-              />
-            </div>
+      <div className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
 
-            <div>
-              <label className="mb-2 block text-sm font-semibold text-foreground">Ár fánként (Ft)</label>
-              <input
-                type="number"
-                min="1"
-                value={formData.pricePerTree}
-                onChange={(e) => setFormData({ ...formData, pricePerTree: Number.parseInt(e.target.value) || 0 })}
-                className="input-base"
-              />
-            </div>
-
-            <div className="rounded-[24px] border border-primary/10 bg-secondary/35 p-5 text-sm leading-7 text-foreground/70">
-              <p>
-                <span className="font-semibold text-primary">Elérhető napok:</span> {formData.availableDays.length}
-              </p>
-              <p>
-                <span className="font-semibold text-primary">Átvételi napok:</span> {formData.retrievalDays.length}
-              </p>
-            </div>
+        {/* Left — numeric settings */}
+        <div className="border border-[#bfc3c7] bg-[#f5f4f1] rounded-lg p-6 space-y-5">
+          <p className="text-xs font-bold text-[#3a3a3a] tracking-widest uppercase">Általános</p>
+          <div>
+            <label className={labelClass}>Maximális foglalás naponta</label>
+            <input type="number" min="1" value={formData.maxBookingsPerDay} onChange={(e) => setFormData({ ...formData, maxBookingsPerDay: Number.parseInt(e.target.value) || 0 })} className={inputClass} />
           </div>
-        </Card>
+          <div>
+            <label className={labelClass}>Ár fánként (Ft)</label>
+            <input type="number" min="1" value={formData.pricePerTree} onChange={(e) => setFormData({ ...formData, pricePerTree: Number.parseInt(e.target.value) || 0 })} className={inputClass} />
+          </div>
+          <div className="border-t border-[#bfc3c7] pt-5 space-y-0">
+            {[
+              { label: "Elérhető napok", value: formData.availableDays.length },
+              { label: "Átvételi napok", value: formData.retrievalDays.length },
+            ].map((row) => (
+              <div key={row.label} className="flex justify-between py-3 border-b border-[#bfc3c7] last:border-b-0">
+                <span className="text-xs font-bold text-[#6e7f6a] tracking-widest uppercase">{row.label}</span>
+                <span className="text-sm font-bold text-[#3a3a3a]">{row.value}</span>
+              </div>
+            ))}
+          </div>
+        </div>
 
-        <div className="grid gap-5">
+        {/* Right — calendars */}
+        <div className="space-y-6">
           <CalendarBlock
             title="Foglalható napok"
             subtitle="Ezek a napok jelennek meg a publikus foglalási naptárban."
@@ -254,9 +203,8 @@ export default function SettingsClient({ initialSettings }: Props) {
             onMonthChange={setAvailableMonth}
             dates={formData.availableDays}
             dayKey="availableDays"
-            colorClass="bg-[color:var(--mint-soft)] text-[color:var(--mint-strong)]"
+            activeClass="bg-[#6e7f6a]/20 text-[#6e7f6a] font-semibold"
           />
-
           <CalendarBlock
             title="Átvételi napok"
             subtitle="Ezek a napok választhatók a későbbi átvételhez."
@@ -264,16 +212,19 @@ export default function SettingsClient({ initialSettings }: Props) {
             onMonthChange={setRetrievalMonth}
             dates={formData.retrievalDays}
             dayKey="retrievalDays"
-            colorClass="bg-[color:var(--sky-soft)] text-[color:var(--sky-strong)]"
+            activeClass="bg-[#4a4f4a]/15 text-[#3a3a3a] font-semibold"
           />
         </div>
       </div>
 
-      <div className="fixed inset-x-0 bottom-[72px] z-40 border-t border-primary/10 bg-[rgba(255,253,249,0.96)] px-4 py-3 shadow-[0_-12px_32px_rgba(16,39,32,0.08)] backdrop-blur md:bottom-0 md:left-auto md:right-0 md:w-[420px] md:rounded-tl-[28px] md:border-l">
-        <Button type="button" className="w-full" onClick={handleSave} disabled={isSaving}>
+      {/* Save bar */}
+      <div className="fixed inset-x-0 bottom-[72px] z-40 border-t border-[#bfc3c7] bg-[#ededed]/96 px-4 py-3 backdrop-blur-md md:bottom-0 md:left-auto md:right-0 md:w-[420px] md:rounded-tl-xl md:border-l">
+        <button type="button" onClick={handleSave} disabled={isSaving} className="w-full inline-flex items-center justify-center gap-2 h-11 rounded-lg bg-[#4a4f4a] text-[#ededed] text-sm font-semibold hover:bg-[#4a4f4a]/90 transition-colors disabled:opacity-60">
+          <Save className="h-4 w-4" />
           {isSaving ? "Mentés..." : "Beállítások mentése"}
-        </Button>
+        </button>
       </div>
+
     </div>
   )
 }
