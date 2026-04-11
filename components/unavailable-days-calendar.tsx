@@ -178,7 +178,7 @@ export default function UnavailableDaysCalendar({
                   disabled={!inSeason}
                   className={`
                     h-10 rounded-lg font-semibold transition-colors text-sm
-                    ${!inSeason ? "bg-transparent text-foreground/20 cursor-not-allowed" : ""}
+                    ${!inSeason ? "text-foreground/30 cursor-not-allowed" : ""}
                     ${inSeason && !isUnavailable ? "bg-green-100 text-green-900 hover:bg-green-200 cursor-pointer" : ""}
                     ${inSeason && isUnavailable ? "bg-destructive text-white hover:bg-destructive/90 cursor-pointer" : ""}
                   `}

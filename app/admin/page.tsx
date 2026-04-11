@@ -126,9 +126,11 @@ export default async function AdminDashboard() {
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {overviewCards.map((item) => (
           <div key={item.label} className="border border-[#bfc3c7] bg-[#f5f4f1] rounded-lg p-6">
-            <item.icon className="h-5 w-5 text-[#6e7f6a] mb-4" />
-            <p className="text-xs font-bold text-[#4a4f4a]/50 tracking-widest uppercase mb-2">{item.label}</p>
-            <p className="text-3xl font-bold text-[#3a3a3a] tracking-tight mb-1">{item.value}</p>
+            <div className="flex items-center justify-between mb-4">
+              <p className="text-xs font-bold text-[#4a4f4a]/50 tracking-widest uppercase">{item.label}</p>
+              <item.icon className="h-4 w-4 text-[#6e7f6a]" />
+            </div>
+            <p className="text-2xl font-bold text-[#3a3a3a] tracking-tight mb-1">{item.value}</p>
             <p className="text-sm text-[#4a4f4a] font-light">{item.help}</p>
           </div>
         ))}
