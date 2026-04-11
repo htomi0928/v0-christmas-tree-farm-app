@@ -116,7 +116,7 @@ export default function CalendarPicker({ selectedDate, onDateSelect, availableDa
                         ? "bg-primary text-primary-foreground"
                         : isAvailable
                           ? "bg-[color:var(--mint-soft)] text-[color:var(--mint-strong)] hover:brightness-95"
-                          : "bg-secondary/30 text-foreground/36"
+                          : "text-foreground/30 cursor-not-allowed"
                     }`}
                   >
                     {day}

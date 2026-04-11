@@ -39,6 +39,9 @@
   --sidebar-ring:                  #4a4f4a;
   --ease-premium:                  cubic-bezier(0.22, 1, 0.36, 1);
   --ease-card:                     cubic-bezier(0.45, 0, 0.15, 1);
+  --mint-soft:                     #d8ead8;
+  --mint-strong:                   #2d5430;
+  --mint-border:                   #b0c8b0;
 }
 
 .dark {
@@ -74,6 +77,9 @@
   --sidebar-accent-foreground: #272928;
   --sidebar-border:          #474a47;
   --sidebar-ring:            #8fa88b;
+  --mint-soft:               #2a4030;
+  --mint-strong:             #a8c8a4;
+  --mint-border:             #4a6648;
 }
 
 @theme inline {
