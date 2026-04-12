@@ -5,6 +5,33 @@ import { SpotlightCard } from "@/components/ui/spotlight-card"
 import { AnimateOnScroll } from "@/components/ui/animate-on-scroll"
 import { formatPrice } from "@/lib/utils"
 
+const treeVariants = [
+  {
+    number: "01",
+    size: "Kisebb fa",
+    height: "1–1,5 m",
+    description: "Kisebb helyiségekbe, lakásokba. Nem nyomasztó, de pont elég.",
+  },
+  {
+    number: "02",
+    size: "Közepes fa",
+    height: "1,5–2 m",
+    description: "A legtöbben ezt viszik. Bármilyen nappaliba belefér.",
+  },
+  {
+    number: "03",
+    size: "Nagy fa",
+    height: "2–2,5 m",
+    description: "Erős jelenléte van. Nagyobb szobákba, ahol van neki hely.",
+  },
+  {
+    number: "04",
+    size: "Extra magas fa",
+    height: "2,5 m felett",
+    description: "Magasabb terű helyiségekbe. Ritka, de van belőlük.",
+  },
+]
+
 export default function TreesPage() {
   const [pricePerTree, setPricePerTree] = useState<number>(8000)
 
@@ -16,33 +43,6 @@ export default function TreesPage() {
       })
       .catch(() => {})
   }, [])
-
-  const treeVariants = [
-    {
-      number: "01",
-      size: "Kisebb fa",
-      height: "1–1,5 m",
-      description: "Kisebb helyiségekbe, lakásokba. Nem nyomasztó, de pont elég.",
-    },
-    {
-      number: "02",
-      size: "Közepes fa",
-      height: "1,5–2 m",
-      description: "A legtöbben ezt viszik. Bármilyen nappaliba belefér.",
-    },
-    {
-      number: "03",
-      size: "Nagy fa",
-      height: "2–2,5 m",
-      description: "Erős jelenléte van. Nagyobb szobákba, ahol van neki hely.",
-    },
-    {
-      number: "04",
-      size: "Extra magas fa",
-      height: "2,5 m felett",
-      description: "Magasabb terű helyiségekbe. Ritka, de van belőlük.",
-    },
-  ]
 
   return (
     <div className="w-full">
