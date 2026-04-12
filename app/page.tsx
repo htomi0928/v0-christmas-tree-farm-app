@@ -1,10 +1,12 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { SpotlightCard } from "@/components/ui/spotlight-card"
 import { AnimateOnScroll } from "@/components/ui/animate-on-scroll"
 import MistBackground from "@/components/ui/mist-background"
+import { formatPrice } from "@/lib/utils"
 
 const treeVariants = [
   {
@@ -61,30 +63,40 @@ const steps = [
   },
 ]
 
-const cards = [
-  {
-    number: "01",
-    title: "Csak Nordmann fenyő",
-    body: "A legjobb, amit találsz — tűlevél-tartással, dús formával, frissen vágva.",
-  },
-  {
-    number: "02",
-    title: "Egységes ár: 8 000 Ft",
-    body: "Mérettől függetlenül. Nincs tárgyalás, nincs meglepetés.",
-  },
-  {
-    number: "03",
-    title: "Nyugodt, beszélgetős hangulat",
-    body: "Van idő körbenézni. Nem sürgetünk senkit.",
-  },
-  {
-    number: "04",
-    title: "Megjelöljük a fádat",
-    body: "Sorszámmal rögzítve. A kiválasztott fa a tied.",
-  },
-]
-
 export default function HomePage() {
+  const [pricePerTree, setPricePerTree] = useState<number>(8000)
+
+  useEffect(() => {
+    fetch("/api/admin/settings")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) setPricePerTree(data.settings.pricePerTree)
+      })
+      .catch(() => {})
+  }, [])
+
+  const cards = [
+    {
+      number: "01",
+      title: "Csak Nordmann fenyő",
+      body: "A legjobb, amit találsz — tűlevél-tartással, dús formával, frissen vágva.",
+    },
+    {
+      number: "02",
+      title: `Egységes ár: ${formatPrice(pricePerTree)}`,
+      body: "Mérettől függetlenül. Nincs tárgyalás, nincs meglepetés.",
+    },
+    {
+      number: "03",
+      title: "Nyugodt, beszélgetős hangulat",
+      body: "Van idő körbenézni. Nem sürgetünk senkit.",
+    },
+    {
+      number: "04",
+      title: "Megjelöljük a fádat",
+      body: "Sorszámmal rögzítve. A kiválasztott fa a tied.",
+    },
+  ]
 
   return (
     <div className="w-full">
@@ -224,7 +236,7 @@ export default function HomePage() {
                 </p>
                 <div className="border border-[#bfc3c7] rounded-lg px-6 py-5 w-full">
                   <p className="text-xs font-bold text-[#4a4f4a]/40 tracking-widest mb-1 uppercase">Egységes ár</p>
-                  <p className="text-3xl font-extrabold text-[#3a3a3a] tracking-tight">8 000 Ft</p>
+                  <p className="text-3xl font-extrabold text-[#3a3a3a] tracking-tight">{formatPrice(pricePerTree)}</p>
                   <p className="text-sm text-[#4a4f4a] font-light mt-1">Mérettől függetlenül.</p>
                 </div>
               </div>
@@ -274,7 +286,7 @@ export default function HomePage() {
       {/* Marquee strip */}
       <div aria-hidden="true" className="bg-primary py-4 overflow-hidden">
         <div className="marquee-track">
-          {"Nordmann · Zalaegerszeg · 8 000 Ft · Csak Nordmann fenyő · Időpontfoglalás · ".repeat(10)}
+          {`Nordmann · Zalaegerszeg · ${formatPrice(pricePerTree)} · Csak Nordmann fenyő · Időpontfoglalás · `.repeat(10)}
         </div>
       </div>
 

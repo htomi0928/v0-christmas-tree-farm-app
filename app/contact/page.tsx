@@ -51,8 +51,8 @@ export default function ContactPage() {
       <section className="min-h-screen flex items-center bg-[#6e7f6a]/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-16">
           <AnimateOnScroll>
-            <div className="section-label">Megközelítés</div>
-            <h2 className="text-3xl font-bold text-[#3a3a3a] mb-8 tracking-tight">A helyszín</h2>
+            <div className="section-label justify-center">Megközelítés</div>
+            <h2 className="text-3xl font-bold text-[#3a3a3a] mb-8 tracking-tight text-center">A helyszín</h2>
           </AnimateOnScroll>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
             <AnimateOnScroll>
@@ -92,12 +92,13 @@ export default function ContactPage() {
               </div>
               <div className="flex flex-col sm:flex-row gap-3">
                 <a
-                  href="https://www.google.com/maps/@46.8981178,16.793078,3a,75y,131.58h,73.3t/data=!3m7!1e1!3m5!1s-hT2m-kiN5YvOSq8pHqw9w!2e0!6shttps:%2F%2Fstreetviewpixels-pa.googleapis.com%2Fv1%2Fthumbnail%3Fcb_client%3Dmaps_sv.tactile%26w%3D900%26h%3D600%26pitch%3D16.704629455204085%26panoid%3D-hT2m-kiN5YvOSq8pHqw9w%26yaw%3D131.58103283271973!7i16384!8i8192"
+                  href="https://www.google.com/maps/dir/?api=1&destination=46.8981178,16.793078"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="cursor-pointer inline-flex items-center justify-center h-12 px-7 text-base font-semibold rounded-lg bg-[#4a4f4a] text-[#ededed] hover:bg-[#4a4f4a]/90 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(74,79,74,0.25)] active:translate-y-0 active:shadow-none transition-all duration-200"
+                  className="cursor-pointer inline-flex items-center justify-center gap-2 h-12 px-7 text-base font-semibold rounded-lg bg-[#4a4f4a] text-[#ededed] hover:bg-[#4a4f4a]/90 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(74,79,74,0.25)] active:translate-y-0 active:shadow-none transition-all duration-200"
                 >
-                  Térkép és megközelítés
+                  <MapPin className="h-4 w-4" />
+                  Útvonal ide
                 </a>
                 <a
                   href="https://www.facebook.com/karacsonyfak"
