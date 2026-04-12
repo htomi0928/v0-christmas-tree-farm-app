@@ -1,9 +1,22 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { SpotlightCard } from "@/components/ui/spotlight-card"
 import { AnimateOnScroll } from "@/components/ui/animate-on-scroll"
+import { formatPrice } from "@/lib/utils"
 
 export default function TreesPage() {
+  const [pricePerTree, setPricePerTree] = useState<number>(8000)
+
+  useEffect(() => {
+    fetch("/api/admin/settings")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) setPricePerTree(data.settings.pricePerTree)
+      })
+      .catch(() => {})
+  }, [])
+
   const treeVariants = [
     {
       number: "01",
@@ -60,7 +73,7 @@ export default function TreesPage() {
 
               <div className="border border-border rounded-lg px-6 py-5 mt-auto w-full">
                 <p className="text-xs font-bold text-muted-foreground/40 tracking-widest mb-1 uppercase">Egységes ár</p>
-                <p className="text-3xl font-extrabold text-foreground tracking-tight">8 000 Ft</p>
+                <p className="text-3xl font-extrabold text-foreground tracking-tight">{formatPrice(pricePerTree)}</p>
                 <p className="text-sm text-muted-foreground font-light mt-1">Mérettől függetlenül.</p>
               </div>
             </div>
