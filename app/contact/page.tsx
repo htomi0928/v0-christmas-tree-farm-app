@@ -51,8 +51,8 @@ export default function ContactPage() {
       <section className="min-h-screen flex items-center bg-[#6e7f6a]/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-16">
           <AnimateOnScroll>
-            <div className="section-label">Megközelítés</div>
-            <h2 className="text-3xl font-bold text-[#3a3a3a] mb-8 tracking-tight">A helyszín</h2>
+            <div className="section-label justify-center">Megközelítés</div>
+            <h2 className="text-3xl font-bold text-[#3a3a3a] mb-8 tracking-tight text-center">A helyszín</h2>
           </AnimateOnScroll>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
             <AnimateOnScroll>
