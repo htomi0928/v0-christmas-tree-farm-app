@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { CheckCircle2, AlertCircle } from "lucide-react"
 import Link from "next/link"
 import CalendarPicker from "@/components/calendar-picker"
+import { formatPrice } from "@/lib/utils"
 
 interface FormData {
   name: string
@@ -27,13 +28,6 @@ const inputClass = (hasError: boolean) =>
     hasError ? "border-destructive" : "border-[#bfc3c7]"
   }`
 
-const infoRows = [
-  { label: "Érkezés", value: "10:00 – 12:00 között" },
-  { label: "Ár", value: "8 000 Ft / fa" },
-  { label: "Fizetés", value: "Készpénz vagy bankkártya" },
-  { label: "Helyszín", value: "GPS-koordinátákkal (visszaigazolásban)" },
-]
-
 export default function BookingPage() {
   const [formData, setFormData] = useState<FormData>({
     name: "",
@@ -51,6 +45,13 @@ export default function BookingPage() {
   const [isSuccess, setIsSuccess] = useState(false)
   const [successData, setSuccessData] = useState<any>(null)
   const [settings, setSettings] = useState<any>(null)
+
+  const infoRows = [
+    { label: "Érkezés", value: "10:00 – 12:00 között" },
+    { label: "Ár", value: `${formatPrice(settings?.pricePerTree ?? 8000)} / fa` },
+    { label: "Fizetés", value: "Készpénz vagy bankkártya" },
+    { label: "Helyszín", value: "GPS-koordinátákkal (visszaigazolásban)" },
+  ]
 
   useEffect(() => {
     fetch("/api/admin/settings")
