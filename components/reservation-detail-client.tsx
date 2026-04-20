@@ -53,11 +53,49 @@ export default function ReservationDetailClient({ reservation: initialReservatio
   const requiresPaidTo = (status: ReservationStatus) =>
     status === ReservationStatus.PICKED_UP_PAID
 
+  // Parse tree numbers from comma-separated string, filtering invalid entries
+  const parseTreeNumbers = (input: string): { numbers: number[]; invalidEntries: string[] } => {
+    const parts = input.split(",").map((s) => s.trim()).filter(Boolean)
+    const numbers: number[] = []
+    const invalidEntries: string[] = []
+    for (const part of parts) {
+      const num = Number.parseInt(part, 10)
+      if (Number.isNaN(num) || num <= 0) {
+        invalidEntries.push(part)
+      } else {
+        numbers.push(num)
+      }
+    }
+    return { numbers, invalidEntries }
+  }
+
   const validate = (data: typeof formData): Record<string, string> => {
     const errors: Record<string, string> = {}
+
+    // Tree numbers validation
     if (requiresTreeNumber(data.status) && !data.treeNumbers.trim()) {
       errors.treeNumbers = "A fa sorszáma kötelező ennél a státusznál."
+    } else if (data.treeNumbers.trim()) {
+      const { numbers, invalidEntries } = parseTreeNumbers(data.treeNumbers)
+      if (invalidEntries.length > 0) {
+        errors.treeNumbers = `Érvénytelen sorszám(ok): ${invalidEntries.join(", ")}. Csak pozitív egész számok adhatók meg.`
+      } else {
+        // Check for duplicates within the input
+        const seen = new Set<number>()
+        const duplicates: number[] = []
+        for (const num of numbers) {
+          if (seen.has(num)) {
+            if (!duplicates.includes(num)) duplicates.push(num)
+          } else {
+            seen.add(num)
+          }
+        }
+        if (duplicates.length > 0) {
+          errors.treeNumbers = `Duplikált sorszám(ok): ${duplicates.join(", ")}. Minden sorszám csak egyszer szerepelhet.`
+        }
+      }
     }
+
     if (requiresPaidTo(data.status) && !data.paidTo) {
       errors.paidTo = "Az \"Átvéve és fizetve\" státuszhoz meg kell adni, kinek fizettek."
     }
