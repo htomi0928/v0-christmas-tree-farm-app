@@ -52,6 +52,11 @@ export async function requireAdminSessionResponse(): Promise<Response | null> {
 }
 
 export function enforceSameOrigin(request: Request): Response | null {
+  // Skip origin check in development (includes v0 preview environment)
+  if (process.env.NODE_ENV !== "production") {
+    return null
+  }
+
   const origin = request.headers.get("origin")
   if (!origin) return null
 
