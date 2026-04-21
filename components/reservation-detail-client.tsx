@@ -158,7 +158,7 @@ export default function ReservationDetailClient({ reservation: initialReservatio
   }
 
   return (
-    <div className="space-y-8 pb-28">
+    <div className="space-y-8 pb-10">
 
       {/* Back link */}
       <Link href="/admin/reservations" className="inline-flex items-center gap-2 text-sm text-[#4a4f4a]/60 hover:text-[#4a4f4a] transition-colors">
@@ -188,39 +188,15 @@ export default function ReservationDetailClient({ reservation: initialReservatio
       {/* Status */}
       <div className="border border-[#bfc3c7] bg-[#f5f4f1] rounded-lg p-6">
         <p className="text-xs font-bold text-[#3a3a3a] tracking-widest uppercase mb-4">Gyors státuszváltás</p>
-        <div className="grid grid-cols-5">
-          {Object.entries(reservationStatusMeta).map(([value, meta]) => {
-            const targetStatus = value as ReservationStatus
-            const wouldHaveErrors = Object.keys(validate({ ...formData, status: targetStatus })).length > 0
-            const isActive = formData.status === targetStatus
-            return (
-              <button
-                key={value}
-                type="button"
-                title={
-                  wouldHaveErrors && !isActive
-                    ? targetStatus === ReservationStatus.PICKED_UP_PAID
-                      ? "Ehhez a státuszhoz fa sorszám és kinek fizettek mező is szükséges."
-                      : "Ehhez a státuszhoz fa sorszám szükséges."
-                    : undefined
-                }
-                onClick={() => handleStatusChange(targetStatus)}
-                className={`relative py-2 px-2 text-sm font-medium text-center transition-colors duration-200 after:absolute after:bottom-0 after:left-1/4 after:right-1/4 after:h-px after:bg-current after:transition-transform after:duration-200 after:origin-left ${
-                  isActive
-                    ? "text-[#3a3a3a] after:scale-x-100"
-                    : wouldHaveErrors
-                      ? "text-[#4a4f4a]/30 cursor-not-allowed after:scale-x-0"
-                      : "text-[#4a4f4a]/40 hover:text-[#4a4f4a]/70 after:scale-x-0 hover:after:scale-x-100"
-                }`}
-              >
-                {meta.label}
-                {wouldHaveErrors && !isActive && (
-                  <span className="block text-[10px] leading-tight mt-0.5 text-[#4a4f4a]/40">hiányzó adat</span>
-                )}
-              </button>
-            )
-          })}
-        </div>
+        <select
+          value={formData.status}
+          onChange={(e) => handleStatusChange(e.target.value as ReservationStatus)}
+          className="w-full px-4 py-3 rounded-lg border border-[#bfc3c7] bg-white text-[#3a3a3a] text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#6e7f6a] transition-all duration-150 cursor-pointer"
+        >
+          {Object.entries(reservationStatusMeta).map(([value, meta]) => (
+            <option key={value} value={value}>{meta.label}</option>
+          ))}
+        </select>
       </div>
 
       {/* Basic data + Notes */}
@@ -338,17 +314,15 @@ export default function ReservationDetailClient({ reservation: initialReservatio
         </div>
       </div>
 
-      {/* Save bar */}
-      <div className="fixed inset-x-0 bottom-[72px] z-40 border-t border-[#bfc3c7] bg-[#ededed]/96 px-4 py-3 backdrop-blur-md md:bottom-0 md:left-auto md:right-0 md:w-[420px] md:rounded-tl-xl md:border-l">
-        <div className="mx-auto flex max-w-3xl items-center gap-3">
-          <button type="button" onClick={() => router.push("/admin/reservations")} className="flex-1 inline-flex items-center justify-center h-11 rounded-lg border border-[#bfc3c7] text-[#4a4f4a] text-sm font-medium hover:bg-[#4a4f4a]/5 transition-colors">
-            Vissza
-          </button>
-          <button type="button" onClick={handleSave} disabled={isSaving} className="flex-1 inline-flex items-center justify-center gap-2 h-11 rounded-lg bg-[#4a4f4a] text-[#ededed] text-sm font-semibold hover:bg-[#4a4f4a]/90 transition-colors disabled:opacity-60">
-            <Save className="h-4 w-4" />
-            {isSaving ? "Mentés..." : "Mentés"}
-          </button>
-        </div>
+      {/* Save / Back */}
+      <div className="flex gap-3">
+        <button type="button" onClick={() => router.push("/admin/reservations")} className="flex-1 inline-flex items-center justify-center h-11 rounded-lg border border-[#bfc3c7] text-[#4a4f4a] text-sm font-medium hover:bg-[#4a4f4a]/5 transition-colors">
+          Vissza
+        </button>
+        <button type="button" onClick={handleSave} disabled={isSaving} className="flex-1 inline-flex items-center justify-center gap-2 h-11 rounded-lg bg-[#4a4f4a] text-[#ededed] text-sm font-semibold hover:bg-[#4a4f4a]/90 transition-colors disabled:opacity-60">
+          <Save className="h-4 w-4" />
+          {isSaving ? "Mentés..." : "Mentés"}
+        </button>
       </div>
 
     </div>
