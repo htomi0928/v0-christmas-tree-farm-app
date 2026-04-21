@@ -1,11 +1,12 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { CheckCircle2, AlertCircle } from "lucide-react"
 import Link from "next/link"
 import CalendarPicker from "@/components/calendar-picker"
+import { formatPrice } from "@/lib/utils"
 
 interface FormData {
   name: string
@@ -27,13 +28,6 @@ const inputClass = (hasError: boolean) =>
     hasError ? "border-destructive" : "border-[#bfc3c7]"
   }`
 
-const infoRows = [
-  { label: "Érkezés", value: "10:00 – 12:00 között" },
-  { label: "Ár", value: "8 000 Ft / fa" },
-  { label: "Fizetés", value: "Készpénz vagy bankkártya" },
-  { label: "Helyszín", value: "GPS-koordinátákkal (visszaigazolásban)" },
-]
-
 export default function BookingPage() {
   const [formData, setFormData] = useState<FormData>({
     name: "",
@@ -46,11 +40,31 @@ export default function BookingPage() {
     acceptTerms: false,
   })
 
+  const [customTreeCount, setCustomTreeCount] = useState(false)
+  const [treeDropdownOpen, setTreeDropdownOpen] = useState(false)
+  const treeDropdownRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (treeDropdownRef.current && !treeDropdownRef.current.contains(e.target as Node)) {
+        setTreeDropdownOpen(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
   const [errors, setErrors] = useState<FormErrors>({})
   const [isLoading, setIsLoading] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const [successData, setSuccessData] = useState<any>(null)
   const [settings, setSettings] = useState<any>(null)
+
+  const infoRows = [
+    { label: "Érkezés", value: "10:00 – 12:00 között" },
+    { label: "Ár", value: `${formatPrice(settings?.pricePerTree ?? 8000)} / fa` },
+    { label: "Fizetés", value: "Készpénz vagy bankkártya" },
+    { label: "Helyszín", value: "GPS-koordinátákkal (visszaigazolásban)" },
+  ]
 
   useEffect(() => {
     fetch("/api/admin/settings")
@@ -186,7 +200,7 @@ export default function BookingPage() {
                   },
                   { label: "Fák száma", value: `${successData.treeCount} db` },
                   ...(settings?.pricePerTree ? [{
-                    label: "Becsült ár",
+                    label: "Fizetendő összeg",
                     value: `${(successData.treeCount * settings.pricePerTree).toLocaleString("hu-HU")} Ft`,
                   }] : []),
                 ].map((row) => (
@@ -213,12 +227,12 @@ export default function BookingPage() {
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.4fr] gap-12 lg:gap-20 items-start">
 
           {/* Left — sticky info */}
-          <div className="lg:sticky lg:top-24 text-center lg:text-left">
-            <div className="section-label justify-center lg:justify-start">Foglalás</div>
+          <div className="lg:sticky lg:top-24 text-center">
+            <div className="section-label justify-center">Foglalás</div>
             <h1 className="text-4xl sm:text-5xl font-bold text-[#3a3a3a] mb-4 tracking-tight leading-tight">
               Időpont&shy;foglalás
             </h1>
-            <p className="text-[#4a4f4a] font-light mb-10 max-w-xs mx-auto lg:mx-0">
+            <p className="text-[#4a4f4a] font-light mb-10 max-w-xs mx-auto">
               Válassz egy szombatot vagy vasárnapot. Percre pontos időpont nem kell.
             </p>
 
@@ -344,14 +358,37 @@ export default function BookingPage() {
                 </label>
                 <select
                   id="treeCount" name="treeCount"
-                  value={formData.treeCount} onChange={handleChange}
+                  value={customTreeCount ? "custom" : formData.treeCount}
+                  onChange={(e) => {
+                    if (e.target.value === "custom") {
+                      setCustomTreeCount(true)
+                      setFormData((prev) => ({ ...prev, treeCount: "" }))
+                    } else {
+                      setCustomTreeCount(false)
+                      setFormData((prev) => ({ ...prev, treeCount: e.target.value }))
+                    }
+                  }}
                   className={inputClass(!!errors.treeCount)}
                 >
                   <option value="1">1 fa</option>
                   <option value="2">2 fa</option>
                   <option value="3">3 fa</option>
-                  <option value="4">4+ fa</option>
+                  <option value="custom">Egyéni mennyiség megadása</option>
                 </select>
+                {customTreeCount && (
+                  <input
+                    type="number"
+                    min="1"
+                    inputMode="numeric"
+                    placeholder="Hány fát szeretnél?"
+                    value={formData.treeCount}
+                    onChange={(e) => {
+                      const v = e.target.value.replace(/[^0-9]/g, "")
+                      setFormData((prev) => ({ ...prev, treeCount: v }))
+                    }}
+                    className={`${inputClass(!!errors.treeCount)} mt-2`}
+                  />
+                )}
                 {errors.treeCount && <p className="text-destructive text-xs mt-1">{errors.treeCount}</p>}
               </div>
 
