@@ -9,9 +9,9 @@ export default function ContactPage() {
       <section className="min-h-[calc(100vh-4rem)] flex items-center bg-[#ededed]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-16">
           <AnimateOnScroll>
-            <div className="section-label justify-center sm:justify-start">Kapcsolat</div>
-            <h1 className="text-4xl sm:text-5xl font-bold text-[#3a3a3a] mb-4 tracking-tight text-center sm:text-left">Elérhetőség</h1>
-            <p className="text-lg text-[#4a4f4a] font-light max-w-xl mb-12 text-center sm:text-left">
+            <div className="section-label justify-center">Kapcsolat</div>
+            <h1 className="text-4xl sm:text-5xl font-bold text-[#3a3a3a] mb-4 tracking-tight text-center">Elérhetőség</h1>
+            <p className="text-lg text-[#4a4f4a] font-light max-w-xl mb-12 text-center mx-auto">
               Telefonon elérhetők vagyunk. GPS-koordinátákkal megtalálsz.
             </p>
           </AnimateOnScroll>

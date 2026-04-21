@@ -219,7 +219,7 @@ export default function SettingsClient({ initialSettings }: Props) {
 
       {/* Save bar */}
       <div className="border-t border-[#bfc3c7] pt-6">
-        <button type="button" onClick={handleSave} disabled={isSaving} className="w-full inline-flex items-center justify-center gap-2 h-11 rounded-lg bg-[#4a4f4a] text-[#ededed] text-sm font-semibold hover:bg-[#4a4f4a]/90 transition-colors disabled:opacity-60">
+        <button type="button" onClick={handleSave} disabled={isSaving} className="w-full inline-flex items-center justify-center gap-2 h-11 rounded-lg bg-[#4a4f4a] text-[#ededed] text-sm font-semibold hover:bg-[#4a4f4a]/90 transition-colors disabled:opacity-60 cursor-pointer">
           <Save className="h-4 w-4" />
           {isSaving ? "Mentés..." : "Beállítások mentése"}
         </button>
