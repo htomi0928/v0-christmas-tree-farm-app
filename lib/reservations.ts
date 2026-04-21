@@ -1,4 +1,4 @@
-﻿import "server-only"
+import "server-only"
 import { sql } from "./db"
 import { type Reservation, ReservationStatus, type CreateReservationData, type UpdateReservationData } from "./types"
 
@@ -233,6 +233,46 @@ export async function deleteReservation(id: number): Promise<{ success: boolean;
   }
   await sql`DELETE FROM reservations WHERE id = ${id}`
   return { success: true }
+}
+
+// Check for conflicting tree numbers across other reservations
+export async function findConflictingTreeNumbers(
+  treeNumbers: number[],
+  excludeReservationId?: number,
+): Promise<{ conflictingNumbers: number[]; reservationNames: Map<number, string> }> {
+  if (treeNumbers.length === 0) {
+    return { conflictingNumbers: [], reservationNames: new Map() }
+  }
+
+  // Get all reservations that have tree_numbers set (excluding the current one)
+  let query = "SELECT id, name, tree_numbers FROM reservations WHERE tree_numbers IS NOT NULL AND tree_numbers != ''"
+  const params: any[] = []
+
+  if (excludeReservationId) {
+    params.push(excludeReservationId)
+    query += ` AND id != $${params.length}`
+  }
+
+  const rows = await sql.query(query, params)
+
+  const conflictingNumbers: number[] = []
+  const reservationNames = new Map<number, string>()
+
+  for (const row of rows) {
+    const existingNumbers = (row.tree_numbers as string)
+      .split(",")
+      .map((s: string) => Number.parseInt(s.trim(), 10))
+      .filter((n: number) => !Number.isNaN(n) && n > 0)
+
+    for (const num of treeNumbers) {
+      if (existingNumbers.includes(num) && !conflictingNumbers.includes(num)) {
+        conflictingNumbers.push(num)
+        reservationNames.set(num, row.name as string)
+      }
+    }
+  }
+
+  return { conflictingNumbers, reservationNames }
 }
 
 // Get stats

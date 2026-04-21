@@ -34,6 +34,7 @@ export default function ReservationDetailClient({ reservation: initialReservatio
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({})
   const [retrievalDays, setRetrievalDays] = useState<string[]>([])
   const [availableDays, setAvailableDays] = useState<string[]>([])
 
@@ -44,7 +45,76 @@ export default function ReservationDetailClient({ reservation: initialReservatio
     }).catch(() => {})
   }, [])
 
+  const requiresTreeNumber = (status: ReservationStatus) =>
+    status === ReservationStatus.TREE_TAGGED ||
+    status === ReservationStatus.CUT ||
+    status === ReservationStatus.PICKED_UP_PAID
+
+  const requiresPaidTo = (status: ReservationStatus) =>
+    status === ReservationStatus.PICKED_UP_PAID
+
+  // Parse tree numbers from comma-separated string, filtering invalid entries
+  const parseTreeNumbers = (input: string): { numbers: number[]; invalidEntries: string[] } => {
+    const parts = input.split(",").map((s) => s.trim()).filter(Boolean)
+    const numbers: number[] = []
+    const invalidEntries: string[] = []
+    for (const part of parts) {
+      const num = Number.parseInt(part, 10)
+      if (Number.isNaN(num) || num <= 0) {
+        invalidEntries.push(part)
+      } else {
+        numbers.push(num)
+      }
+    }
+    return { numbers, invalidEntries }
+  }
+
+  const validate = (data: typeof formData): Record<string, string> => {
+    const errors: Record<string, string> = {}
+
+    // Tree numbers validation
+    if (requiresTreeNumber(data.status) && !data.treeNumbers.trim()) {
+      errors.treeNumbers = "A fa sorszáma kötelező ennél a státusznál."
+    } else if (data.treeNumbers.trim()) {
+      const { numbers, invalidEntries } = parseTreeNumbers(data.treeNumbers)
+      if (invalidEntries.length > 0) {
+        errors.treeNumbers = `Érvénytelen sorszám(ok): ${invalidEntries.join(", ")}. Csak pozitív egész számok adhatók meg.`
+      } else {
+        // Check for duplicates within the input
+        const seen = new Set<number>()
+        const duplicates: number[] = []
+        for (const num of numbers) {
+          if (seen.has(num)) {
+            if (!duplicates.includes(num)) duplicates.push(num)
+          } else {
+            seen.add(num)
+          }
+        }
+        if (duplicates.length > 0) {
+          errors.treeNumbers = `Duplikált sorszám(ok): ${duplicates.join(", ")}. Minden sorszám csak egyszer szerepelhet.`
+        }
+      }
+    }
+
+    if (requiresPaidTo(data.status) && !data.paidTo) {
+      errors.paidTo = "Az \"Átvéve és fizetve\" státuszhoz meg kell adni, kinek fizettek."
+    }
+    return errors
+  }
+
+  const handleStatusChange = (newStatus: ReservationStatus) => {
+    setFormData((prev) => ({ ...prev, status: newStatus }))
+    // Re-validate with new status so errors appear immediately when switching
+    setValidationErrors(validate({ ...formData, status: newStatus }))
+  }
+
   const handleSave = async () => {
+    const errors = validate(formData)
+    setValidationErrors(errors)
+    if (Object.keys(errors).length > 0) {
+      setError("Kérlek javítsd a hibás mezőket a mentés előtt.")
+      return
+    }
     setIsSaving(true)
     setError("")
     setSuccess("")
@@ -119,20 +189,37 @@ export default function ReservationDetailClient({ reservation: initialReservatio
       <div className="border border-[#bfc3c7] bg-[#f5f4f1] rounded-lg p-6">
         <p className="text-xs font-bold text-[#3a3a3a] tracking-widest uppercase mb-4">Gyors státuszváltás</p>
         <div className="grid grid-cols-5">
-          {Object.entries(reservationStatusMeta).map(([value, meta]) => (
-            <button
-              key={value}
-              type="button"
-              onClick={() => setFormData((prev) => ({ ...prev, status: value as ReservationStatus }))}
-              className={`relative py-2 px-2 text-sm font-medium text-center transition-colors duration-200 after:absolute after:bottom-0 after:left-1/4 after:right-1/4 after:h-px after:bg-current after:transition-transform after:duration-200 after:origin-left ${
-                formData.status === value
-                  ? "text-[#3a3a3a] after:scale-x-100"
-                  : "text-[#4a4f4a]/40 hover:text-[#4a4f4a]/70 after:scale-x-0 hover:after:scale-x-100"
-              }`}
-            >
-              {meta.label}
-            </button>
-          ))}
+          {Object.entries(reservationStatusMeta).map(([value, meta]) => {
+            const targetStatus = value as ReservationStatus
+            const wouldHaveErrors = Object.keys(validate({ ...formData, status: targetStatus })).length > 0
+            const isActive = formData.status === targetStatus
+            return (
+              <button
+                key={value}
+                type="button"
+                title={
+                  wouldHaveErrors && !isActive
+                    ? targetStatus === ReservationStatus.PICKED_UP_PAID
+                      ? "Ehhez a státuszhoz fa sorszám és kinek fizettek mező is szükséges."
+                      : "Ehhez a státuszhoz fa sorszám szükséges."
+                    : undefined
+                }
+                onClick={() => handleStatusChange(targetStatus)}
+                className={`relative py-2 px-2 text-sm font-medium text-center transition-colors duration-200 after:absolute after:bottom-0 after:left-1/4 after:right-1/4 after:h-px after:bg-current after:transition-transform after:duration-200 after:origin-left ${
+                  isActive
+                    ? "text-[#3a3a3a] after:scale-x-100"
+                    : wouldHaveErrors
+                      ? "text-[#4a4f4a]/30 cursor-not-allowed after:scale-x-0"
+                      : "text-[#4a4f4a]/40 hover:text-[#4a4f4a]/70 after:scale-x-0 hover:after:scale-x-100"
+                }`}
+              >
+                {meta.label}
+                {wouldHaveErrors && !isActive && (
+                  <span className="block text-[10px] leading-tight mt-0.5 text-[#4a4f4a]/40">hiányzó adat</span>
+                )}
+              </button>
+            )
+          })}
         </div>
       </div>
 
@@ -161,20 +248,55 @@ export default function ReservationDetailClient({ reservation: initialReservatio
         <div className="border border-[#bfc3c7] bg-[#f5f4f1] rounded-lg p-6 space-y-5">
           <p className="text-xs font-bold text-[#3a3a3a] tracking-widest uppercase">Sorszám és megjegyzés</p>
           <div>
-            <label className={labelClass}>Fa sorszáma(i)</label>
-            <input value={formData.treeNumbers} onChange={(e) => setFormData({ ...formData, treeNumbers: e.target.value })} placeholder="Például 12, 13" className={inputClass} />
+            <label className={labelClass}>
+              Fa sorszáma(i)
+              {requiresTreeNumber(formData.status) && <span className="ml-1 text-destructive">*</span>}
+            </label>
+            <input
+              value={formData.treeNumbers}
+              onChange={(e) => {
+                const updated = { ...formData, treeNumbers: e.target.value }
+                setFormData(updated)
+                setValidationErrors(validate(updated))
+              }}
+              placeholder="Például 12, 13"
+              className={`${inputClass} ${validationErrors.treeNumbers ? "border-destructive ring-1 ring-destructive/40" : ""}`}
+            />
+            {validationErrors.treeNumbers && (
+              <p className="mt-1.5 text-xs text-destructive flex items-center gap-1">
+                <AlertCircle className="h-3 w-3 flex-shrink-0" />
+                {validationErrors.treeNumbers}
+              </p>
+            )}
           </div>
           <div>
             <label className={labelClass}>Megjegyzés</label>
             <textarea value={formData.notes} onChange={(e) => setFormData({ ...formData, notes: e.target.value })} rows={4} className={inputClass + " resize-none"} />
           </div>
           <div>
-            <label className={labelClass}>Kinek fizettek?</label>
-            <select value={formData.paidTo} onChange={(e) => setFormData({ ...formData, paidTo: e.target.value as "János" | "Sanyi" | "" })} className={inputClass}>
+            <label className={labelClass}>
+              Kinek fizettek?
+              {requiresPaidTo(formData.status) && <span className="ml-1 text-destructive">*</span>}
+            </label>
+            <select
+              value={formData.paidTo}
+              onChange={(e) => {
+                const updated = { ...formData, paidTo: e.target.value as "János" | "Sanyi" | "" }
+                setFormData(updated)
+                setValidationErrors(validate(updated))
+              }}
+              className={`${inputClass} ${validationErrors.paidTo ? "border-destructive ring-1 ring-destructive/40" : ""}`}
+            >
               <option value="">Még nincs rögzítve</option>
               <option value="János">János</option>
               <option value="Sanyi">Sanyi</option>
             </select>
+            {validationErrors.paidTo && (
+              <p className="mt-1.5 text-xs text-destructive flex items-center gap-1">
+                <AlertCircle className="h-3 w-3 flex-shrink-0" />
+                {validationErrors.paidTo}
+              </p>
+            )}
           </div>
         </div>
       </div>
