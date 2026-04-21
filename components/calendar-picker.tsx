@@ -113,9 +113,9 @@ export default function CalendarPicker({ selectedDate, onDateSelect, availableDa
                     onClick={() => onDateSelect(isSelected ? "" : dateStr)}
                     className={`h-11 rounded-2xl text-sm font-semibold transition ${
                       isSelected
-                        ? "bg-primary text-primary-foreground"
+                        ? "bg-primary text-primary-foreground cursor-pointer"
                         : isAvailable
-                          ? "bg-[color:var(--mint-soft)] text-[color:var(--mint-strong)] hover:brightness-95"
+                          ? "bg-[color:var(--mint-soft)] text-[color:var(--mint-strong)] hover:brightness-95 cursor-pointer"
                           : "text-foreground/30 cursor-not-allowed"
                     }`}
                   >

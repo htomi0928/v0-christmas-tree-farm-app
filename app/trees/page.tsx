@@ -1,35 +1,48 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { SpotlightCard } from "@/components/ui/spotlight-card"
 import { AnimateOnScroll } from "@/components/ui/animate-on-scroll"
+import { formatPrice } from "@/lib/utils"
+
+const treeVariants = [
+  {
+    number: "01",
+    size: "Kisebb fa",
+    height: "1–1,5 m",
+    description: "Kisebb helyiségekbe, lakásokba. Nem nyomasztó, de pont elég.",
+  },
+  {
+    number: "02",
+    size: "Közepes fa",
+    height: "1,5–2 m",
+    description: "A legtöbben ezt viszik. Bármilyen nappaliba belefér.",
+  },
+  {
+    number: "03",
+    size: "Nagy fa",
+    height: "2–2,5 m",
+    description: "Erős jelenléte van. Nagyobb szobákba, ahol van neki hely.",
+  },
+  {
+    number: "04",
+    size: "Extra magas fa",
+    height: "2,5 m felett",
+    description: "Magasabb terű helyiségekbe. Ritka, de van belőlük.",
+  },
+]
 
 export default function TreesPage() {
-  const treeVariants = [
-    {
-      number: "01",
-      size: "Kisebb fa",
-      height: "1–1,5 m",
-      description: "Kisebb helyiségekbe, lakásokba. Nem nyomasztó, de pont elég.",
-    },
-    {
-      number: "02",
-      size: "Közepes fa",
-      height: "1,5–2 m",
-      description: "A legtöbben ezt viszik. Bármilyen nappaliba belefér.",
-    },
-    {
-      number: "03",
-      size: "Nagy fa",
-      height: "2–2,5 m",
-      description: "Erős jelenléte van. Nagyobb szobákba, ahol van neki hely.",
-    },
-    {
-      number: "04",
-      size: "Extra magas fa",
-      height: "2,5 m felett",
-      description: "Magasabb terű helyiségekbe. Ritka, de van belőlük.",
-    },
-  ]
+  const [pricePerTree, setPricePerTree] = useState<number>(8000)
+
+  useEffect(() => {
+    fetch("/api/admin/settings")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) setPricePerTree(data.settings.pricePerTree)
+      })
+      .catch(() => {})
+  }, [])
 
   return (
     <div className="w-full">
@@ -58,9 +71,9 @@ export default function TreesPage() {
                 Frissen vágva adjuk át. Nem hetekkel korábban vágott, ponyva alatt tárolt fa.
               </p>
 
-              <div className="border border-border rounded-lg px-6 py-5 mt-auto w-full">
+              <div className="border border-border rounded-lg px-6 py-5 mt-auto w-full text-center">
                 <p className="text-xs font-bold text-muted-foreground/40 tracking-widest mb-1 uppercase">Egységes ár</p>
-                <p className="text-3xl font-extrabold text-foreground tracking-tight">8 000 Ft</p>
+                <p className="text-3xl font-extrabold text-foreground tracking-tight">{formatPrice(pricePerTree)}</p>
                 <p className="text-sm text-muted-foreground font-light mt-1">Mérettől függetlenül.</p>
               </div>
             </div>
@@ -68,7 +81,7 @@ export default function TreesPage() {
             {/* Right — image */}
             <div className="bg-secondary/30 rounded-lg aspect-square overflow-hidden">
               <img
-                src="/nordmann-christmas-tree-close-up-green.jpg"
+                src="/fa.jpeg"
                 alt="Nordmann fa közelről"
                 className="w-full h-full object-cover"
               />
@@ -82,8 +95,10 @@ export default function TreesPage() {
       <section className="py-14 sm:py-20 bg-secondary/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <AnimateOnScroll>
-            <div className="section-label">Méretek</div>
-            <h2 className="text-3xl font-bold text-foreground mb-8 tracking-tight">Mekkora fát keresel?</h2>
+            <div className="text-center">
+              <div className="section-label justify-center">Méretek</div>
+              <h2 className="text-3xl font-bold text-foreground mb-8 tracking-tight">Mekkora fát keresel?</h2>
+            </div>
           </AnimateOnScroll>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {treeVariants.map((variant, index) => (

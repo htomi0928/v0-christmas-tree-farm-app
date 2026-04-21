@@ -149,7 +149,7 @@ export default function ExpensesPage() {
         <button
           type="button"
           onClick={() => setShowForm((v) => !v)}
-          className="inline-flex items-center gap-2 h-9 px-4 rounded-lg bg-[#4a4f4a] text-[#ededed] text-sm font-semibold hover:bg-[#4a4f4a]/90 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(74,79,74,0.25)] active:translate-y-0 active:shadow-none transition-all duration-200"
+          className="inline-flex items-center gap-2 h-9 px-4 rounded-lg bg-[#4a4f4a] text-[#ededed] text-sm font-semibold hover:bg-[#4a4f4a]/90 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(74,79,74,0.25)] active:translate-y-0 active:shadow-none transition-all duration-200 cursor-pointer"
         >
           <Plus className="h-4 w-4" />
           Új kiadás
@@ -174,7 +174,7 @@ export default function ExpensesPage() {
               <button
                 type="button"
                 onClick={() => handleDelete(expense.id)}
-                className="flex-shrink-0 p-2 rounded-lg border border-destructive/20 text-destructive hover:bg-destructive/8 transition-colors mt-1"
+                className="flex-shrink-0 p-2 rounded-lg border border-destructive/20 text-destructive hover:bg-destructive/8 transition-colors mt-1 cursor-pointer"
               >
                 <Trash2 className="h-4 w-4" />
               </button>
