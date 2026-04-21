@@ -4,7 +4,11 @@ import { sql } from "./db"
 const SESSION_DURATION_SECONDS = 8 * 60 * 60
 const textEncoder = new TextEncoder()
 const JWT_ALGORITHM = "HS256"
-const AUTH_SECRET = process.env.AUTH_SECRET || "fallback-secret-for-dev-only"
+const AUTH_SECRET = process.env.AUTH_SECRET
+
+if (!AUTH_SECRET) {
+  throw new Error("AUTH_SECRET environment variable is required")
+}
 
 type SessionPayload = {
   sub: string

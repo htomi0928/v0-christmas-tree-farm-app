@@ -1,6 +1,6 @@
-﻿import "server-only"
+import "server-only"
 import { z } from "zod"
-import { deleteReservation, getReservationById, updateReservation } from "@/lib/reservations"
+import { deleteReservation, findConflictingTreeNumbers, getReservationById, updateReservation } from "@/lib/reservations"
 import { ReservationStatus } from "@/lib/types"
 import { enforceSameOrigin, logApiError, parseJsonBody, parseNumericId, requireAdminSessionResponse } from "@/lib/api"
 
@@ -78,6 +78,28 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     if (!parsedBody.success) return parsedBody.response
 
     const data = parsedBody.data
+
+    // Check for conflicting tree numbers if treeNumbers is being updated
+    if (data.treeNumbers && data.treeNumbers.trim()) {
+      const treeNumbers = data.treeNumbers
+        .split(",")
+        .map((s) => Number.parseInt(s.trim(), 10))
+        .filter((n) => !Number.isNaN(n) && n > 0)
+
+      if (treeNumbers.length > 0) {
+        const { conflictingNumbers, reservationNames } = await findConflictingTreeNumbers(treeNumbers, reservationId)
+        if (conflictingNumbers.length > 0) {
+          const details = conflictingNumbers
+            .map((num) => `${num} (${reservationNames.get(num)})`)
+            .join(", ")
+          return Response.json(
+            { success: false, error: `A következő fa sorszámok már foglaltak: ${details}` },
+            { status: 400 },
+          )
+        }
+      }
+    }
+
     const result = await updateReservation(reservationId, {
       name: data.name,
       phone: data.phone,
