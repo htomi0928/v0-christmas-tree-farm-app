@@ -1,6 +1,9 @@
 ﻿import { z } from "zod"
 import { createReservation } from "@/lib/reservations"
 import { logApiError, parseJsonBody } from "@/lib/api"
+import { sendNewReservationNotification } from "@/lib/reservation-notifications"
+
+export const runtime = "nodejs"
 
 const reservationSchema = z.object({
   name: z.string().trim().min(1).max(120),
@@ -38,6 +41,12 @@ export async function POST(request: Request) {
       )
     }
 
+    try {
+      await sendNewReservationNotification(result.data)
+    } catch (error) {
+      logApiError("reservation notification email failed", error)
+    }
+
     return Response.json({
       success: true,
       data: result.data,
@@ -53,4 +62,3 @@ export async function POST(request: Request) {
     )
   }
 }
-

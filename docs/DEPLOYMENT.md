@@ -51,6 +51,43 @@ postgresql://user:password@host.neon.tech/dbname?sslmode=require
 3. Paste the connection string
 4. Apply to: Production, Preview, Development
 
+#### `RESEND_API_KEY`
+API key used to send reservation notification emails through Resend.
+
+**Set in Vercel:**
+1. Go to Project Settings → Environment Variables
+2. Add variable: `RESEND_API_KEY`
+3. Paste the API key from Resend
+4. Apply to: Production, Preview, Development
+
+#### `RESERVATION_NOTIFY_TO`
+Comma-separated list of internal email recipients for new reservation notifications.
+
+**Example:**
+```env
+RESERVATION_NOTIFY_TO=owner@example.com,staff@example.com
+```
+
+**Set in Vercel:**
+1. Go to Project Settings → Environment Variables
+2. Add variable: `RESERVATION_NOTIFY_TO`
+3. Paste the recipient list
+4. Apply to: Production, Preview, Development
+
+#### `RESERVATION_EMAIL_FROM`
+Verified sender identity in Resend.
+
+**Example:**
+```env
+RESERVATION_EMAIL_FROM=Foglalás <noreply@yourdomain.tld>
+```
+
+**Set in Vercel:**
+1. Go to Project Settings → Environment Variables
+2. Add variable: `RESERVATION_EMAIL_FROM`
+3. Paste the verified sender identity
+4. Apply to: Production, Preview, Development
+
 ## Database Setup
 
 ### Initial Setup
@@ -191,6 +228,16 @@ For production errors:
 3. Ensure Neon database is active and running
 4. Verify IP whitelist settings in Neon
 
+### Reservation Email Issues
+
+**Problem:** New reservations are saved but notification emails are not sent
+
+**Solutions:**
+1. Verify `RESEND_API_KEY` is set in Vercel
+2. Verify `RESERVATION_NOTIFY_TO` contains valid comma-separated email addresses
+3. Verify `RESERVATION_EMAIL_FROM` is a verified sender in Resend
+4. Check function logs in Vercel for `[email]` warnings and API errors
+
 ### Authentication Issues
 
 **Problem:** Can't log in to admin panel
@@ -226,6 +273,9 @@ Before deploying to production:
 
 - [ ] `AUTH_SECRET` is set to a strong random value
 - [ ] `DATABASE_URL` uses a secure connection string (postgresql://)
+- [ ] `RESEND_API_KEY` is configured
+- [ ] `RESERVATION_NOTIFY_TO` includes at least one valid recipient
+- [ ] `RESERVATION_EMAIL_FROM` is verified in Resend
 - [ ] Database credentials are not in code
 - [ ] CORS checks are enabled for production
 - [ ] All environment variables are configured

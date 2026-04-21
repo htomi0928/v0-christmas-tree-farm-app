@@ -78,6 +78,9 @@ Required environment variables (set in Vercel):
 ```env
 AUTH_SECRET              # Secret key for session signing
 DATABASE_URL            # Neon PostgreSQL connection string
+RESEND_API_KEY          # API key from Resend
+RESERVATION_NOTIFY_TO   # Comma-separated internal recipients
+RESERVATION_EMAIL_FROM  # Verified sender, e.g. Foglalás <noreply@yourdomain.tld>
 ```
 
 ## Development
