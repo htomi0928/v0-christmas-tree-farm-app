@@ -4,7 +4,7 @@ import { Plus_Jakarta_Sans } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import "./globals.css"
 import { Navigation } from "@/components/navigation"
-import { Footer } from "@/components/footer"
+import { ConditionalFooter } from "@/components/conditional-footer"
 import { PageTransition } from "@/components/ui/page-transition"
 
 const plusJakarta = Plus_Jakarta_Sans({
@@ -37,7 +37,7 @@ export default function RootLayout({
         <main className="flex-1 pt-16">
           <PageTransition>{children}</PageTransition>
         </main>
-        <Footer />
+        <ConditionalFooter />
         <Analytics />
       </body>
     </html>

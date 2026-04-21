@@ -111,7 +111,7 @@ export default async function AdminDashboard() {
   ]
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-10 pb-24">
 
       {/* Header */}
       <section className="text-center">
