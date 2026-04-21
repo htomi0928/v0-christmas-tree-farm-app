@@ -46,7 +46,7 @@ export function AdminShellNav() {
           <button
             type="button"
             onClick={handleLogout}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-[#bfc3c7] text-sm font-medium text-[#4a4f4a] hover:bg-[#4a4f4a]/5 transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-[#bfc3c7] text-sm font-medium text-[#4a4f4a] hover:bg-[#4a4f4a]/5 transition-colors cursor-pointer"
           >
             <LogOut className="h-4 w-4" />
             <span className="hidden sm:inline">Kijelentkezés</span>

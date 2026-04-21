@@ -71,7 +71,7 @@ export default function TreesPage() {
                 Frissen vágva adjuk át. Nem hetekkel korábban vágott, ponyva alatt tárolt fa.
               </p>
 
-              <div className="border border-border rounded-lg px-6 py-5 mt-auto w-full">
+              <div className="border border-border rounded-lg px-6 py-5 mt-auto w-full text-center">
                 <p className="text-xs font-bold text-muted-foreground/40 tracking-widest mb-1 uppercase">Egységes ár</p>
                 <p className="text-3xl font-extrabold text-foreground tracking-tight">{formatPrice(pricePerTree)}</p>
                 <p className="text-sm text-muted-foreground font-light mt-1">Mérettől függetlenül.</p>
@@ -81,7 +81,7 @@ export default function TreesPage() {
             {/* Right — image */}
             <div className="bg-secondary/30 rounded-lg aspect-square overflow-hidden">
               <img
-                src="/nordmann-christmas-tree-close-up-green.jpg"
+                src="/fa.jpeg"
                 alt="Nordmann fa közelről"
                 className="w-full h-full object-cover"
               />
@@ -95,8 +95,10 @@ export default function TreesPage() {
       <section className="py-14 sm:py-20 bg-secondary/20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <AnimateOnScroll>
-            <div className="section-label">Méretek</div>
-            <h2 className="text-3xl font-bold text-foreground mb-8 tracking-tight">Mekkora fát keresel?</h2>
+            <div className="text-center">
+              <div className="section-label justify-center">Méretek</div>
+              <h2 className="text-3xl font-bold text-foreground mb-8 tracking-tight">Mekkora fát keresel?</h2>
+            </div>
           </AnimateOnScroll>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {treeVariants.map((variant, index) => (

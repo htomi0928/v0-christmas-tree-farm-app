@@ -42,6 +42,18 @@
   --mint-soft:                     #d8ead8;
   --mint-strong:                   #2d5430;
   --mint-border:                   #b0c8b0;
+  --sky-soft:                      #daeaf5;
+  --sky-strong:                    #1e4a6e;
+  --sky-border:                    #a8c8e0;
+  --champagne-soft:                #f5edd8;
+  --champagne-strong:              #6b4f1a;
+  --champagne-border:              #ddc89a;
+  --peach-soft:                    #fae0d0;
+  --peach-strong:                  #7a3010;
+  --peach-border:                  #f0b898;
+  --rose-soft:                     #f5d8d8;
+  --rose-strong:                   #7a1e1e;
+  --rose-border:                   #e0a8a8;
 }
 
 .dark {
@@ -153,6 +165,18 @@ h1, h2, h3, h4, h5, h6 {
 body {
   font-weight: 300;
   line-height: 1.7;
+}
+
+/* ── Status pill ──────────────────────────────────────────────── */
+.status-pill {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  border-width: 1px;
+  border-style: solid;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
 }
 
 /* ── Section label (e.g. ── RÓLUNK ──) ────────────────────────── */

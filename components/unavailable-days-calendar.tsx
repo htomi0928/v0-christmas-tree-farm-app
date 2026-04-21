@@ -95,7 +95,7 @@ export default function UnavailableDaysCalendar({
         <div className="flex items-center justify-between mb-5">
           <button
             onClick={handlePrevMonth}
-            className="rounded-full border border-primary/10 p-2"
+            className="rounded-full border border-primary/10 p-2 cursor-pointer"
             type="button"
           >
             <ChevronLeft className="h-4 w-4" />
@@ -107,7 +107,7 @@ export default function UnavailableDaysCalendar({
 
           <button
             onClick={handleNextMonth}
-            className="rounded-full border border-primary/10 p-2"
+            className="rounded-full border border-primary/10 p-2 cursor-pointer"
             type="button"
           >
             <ChevronRight className="h-4 w-4" />

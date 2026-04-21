@@ -227,12 +227,12 @@ export default function BookingPage() {
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.4fr] gap-12 lg:gap-20 items-start">
 
           {/* Left — sticky info */}
-          <div className="lg:sticky lg:top-24 text-center lg:text-left">
-            <div className="section-label justify-center lg:justify-start">Foglalás</div>
+          <div className="lg:sticky lg:top-24 text-center">
+            <div className="section-label justify-center">Foglalás</div>
             <h1 className="text-4xl sm:text-5xl font-bold text-[#3a3a3a] mb-4 tracking-tight leading-tight">
               Időpont&shy;foglalás
             </h1>
-            <p className="text-[#4a4f4a] font-light mb-10 max-w-xs mx-auto lg:mx-0">
+            <p className="text-[#4a4f4a] font-light mb-10 max-w-xs mx-auto">
               Válassz egy szombatot vagy vasárnapot. Percre pontos időpont nem kell.
             </p>
 
