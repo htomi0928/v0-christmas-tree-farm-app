@@ -4,7 +4,7 @@ A full-stack web application for managing Christmas tree farm operations, includ
 
 *Automatically synced with your [v0.app](https://v0.app) deployments*
 
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/tomihollosi-9631s-projects/v0-christmas-tree-farm-app)
+[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/hollositamas-projects/v0-christmas-tree-farm-app)
 [![Built with v0](https://img.shields.io/badge/Built%20with-v0.app-black?style=for-the-badge)](https://v0.app/chat/uLhcWiTTbMh)
 
 ## Overview
@@ -104,7 +104,7 @@ pnpm start
 
 Your project is live at:
 
-**[https://vercel.com/tomihollosi-9631s-projects/v0-christmas-tree-farm-app](https://vercel.com/tomihollosi-9631s-projects/v0-christmas-tree-farm-app)**
+**[https://vercel.com/hollositamas-projects/v0-christmas-tree-farm-app](https://vercel.com/hollositamas-projects/v0-christmas-tree-farm-app)**
 
 ### How It Works
 
