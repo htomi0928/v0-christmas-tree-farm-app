@@ -118,7 +118,7 @@ export default function ReservationFilters({ reservations }: Props) {
                     <p><span className="font-semibold text-[#3a3a3a]">Sorszám:</span> <span className="font-light">{reservation.treeNumbers || "Még nincs"}</span></p>
                   </div>
                 </div>
-                <div className="flex flex-col items-start gap-2 md:items-end flex-shrink-0">
+                <div className="flex flex-row items-center justify-between gap-2 md:flex-col md:items-end flex-shrink-0">
                   <span className={`inline-block rounded-full px-4 py-1 text-xs font-medium border ${meta.pillClassName}`}>{meta.label}</span>
                   <span className="text-xs font-semibold text-[#6e7f6a] tracking-widest uppercase">Megnyitás →</span>
                 </div>

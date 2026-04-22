@@ -8,7 +8,14 @@ export function PageTransition({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
 
   useEffect(() => {
-    window.scrollTo(0, 0)
+    if (window.location.hash) {
+      setTimeout(() => {
+        const el = document.querySelector(window.location.hash)
+        if (el) el.scrollIntoView({ behavior: "smooth" })
+      }, 400)
+    } else {
+      window.scrollTo(0, 0)
+    }
   }, [pathname])
 
   return (

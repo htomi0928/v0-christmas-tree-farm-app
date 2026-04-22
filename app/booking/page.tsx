@@ -54,6 +54,15 @@ export default function BookingPage() {
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
   const [errors, setErrors] = useState<FormErrors>({})
+  const errorRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (Object.keys(errors).length > 0) {
+      setTimeout(() => {
+        const el = document.querySelector<HTMLElement>('[data-error]')
+        el?.scrollIntoView({ behavior: "smooth", block: "center" })
+      }, 50)
+    }
+  }, [errors])
   const [isLoading, setIsLoading] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const [successData, setSuccessData] = useState<any>(null)
@@ -223,47 +232,45 @@ export default function BookingPage() {
   /* ── Booking form ── */
   return (
     <div className="bg-[#ededed] min-h-[calc(100vh-4rem)]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-16">
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.4fr] gap-12 lg:gap-20 items-start">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 w-full py-16">
 
-          {/* Left — sticky info */}
-          <div className="lg:sticky lg:top-24 text-center">
-            <div className="section-label justify-center">Foglalás</div>
-            <h1 className="text-4xl sm:text-5xl font-bold text-[#3a3a3a] mb-4 tracking-tight leading-tight">
-              Időpont&shy;foglalás
-            </h1>
-            <p className="text-[#4a4f4a] font-light mb-10 max-w-xs mx-auto">
-              Válassz egy szombatot vagy vasárnapot. Percre pontos időpont nem kell.
-            </p>
+        {/* Top heading */}
+        <div className="text-center mb-10">
+          <div className="section-label justify-center">Foglalás</div>
+          <h1 className="text-4xl sm:text-5xl font-bold text-[#3a3a3a] mb-4 tracking-tight leading-tight">
+            Időpont&shy;foglalás
+          </h1>
+          <p className="text-[#4a4f4a] font-light max-w-sm mx-auto">
+            Válassz egy szombatot vagy vasárnapot. Percre pontos időpont nem kell.
+          </p>
+        </div>
 
-            {settings?.pricePerTree && (
-              <div className="border border-[#bfc3c7] rounded-lg px-5 py-4 mb-8 w-full text-center">
-                <p className="text-xs font-bold text-[#4a4f4a]/40 tracking-widest uppercase mb-1">Jelenlegi ár</p>
-                <p className="text-2xl font-extrabold text-[#3a3a3a] tracking-tight">
-                  {settings.pricePerTree.toLocaleString("hu-HU")} Ft
-                </p>
-                <p className="text-xs text-[#4a4f4a] font-light mt-0.5">Mérettől függetlenül</p>
-              </div>
-            )}
-
-            <div className="space-y-0">
-              {infoRows.map((row) => (
-                <div key={row.label} className="flex gap-4 py-3 border-b border-[#bfc3c7] last:border-b-0">
-                  <span className="text-xs font-bold text-[#6e7f6a] uppercase tracking-widest w-20 flex-shrink-0 mt-0.5">
-                    {row.label}
-                  </span>
-                  <span className="text-sm text-[#4a4f4a] font-light">{row.value}</span>
-                </div>
-              ))}
+        {/* Info strip */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
+          {infoRows.map((row) => (
+            <div key={row.label} className="bg-[#f5f4f1] border border-[#bfc3c7] rounded-lg px-4 py-3">
+              <p className="text-[10px] font-bold tracking-widest text-[#6e7f6a] uppercase mb-1">{row.label}</p>
+              <p className="text-xs font-medium text-[#3a3a3a] leading-snug">{row.value}</p>
             </div>
-          </div>
+          ))}
+        </div>
 
-          {/* Right — form */}
-          <div className="lg:sticky lg:top-24 lg:max-h-[calc(100vh-8rem)] lg:overflow-y-auto lg:overscroll-contain lg:[scroll-behavior:smooth] lg:[-webkit-overflow-scrolling:touch] border border-[#bfc3c7] bg-[#f5f4f1] rounded-lg p-6 sm:p-10">
+        {settings?.pricePerTree && (
+          <div className="border border-[#bfc3c7] rounded-lg px-5 py-4 mb-8 text-center bg-[#f5f4f1]">
+            <p className="text-xs font-bold text-[#4a4f4a]/40 tracking-widest uppercase mb-1">Jelenlegi ár</p>
+            <p className="text-2xl font-extrabold text-[#3a3a3a] tracking-tight">
+              {settings.pricePerTree.toLocaleString("hu-HU")} Ft
+            </p>
+            <p className="text-xs text-[#4a4f4a] font-light mt-0.5">Mérettől függetlenül</p>
+          </div>
+        )}
+
+        {/* Form card */}
+        <div className="border border-[#bfc3c7] bg-[#f5f4f1] rounded-lg p-6 sm:p-10">
             <form onSubmit={handleSubmit} className="space-y-6">
 
               {errors.submit && (
-                <div className="flex gap-3 p-4 bg-destructive/10 border border-destructive rounded-lg">
+                <div ref={errorRef} data-error className="flex gap-3 p-4 bg-destructive/10 border border-destructive rounded-lg">
                   <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
                   <p className="text-destructive text-sm">{errors.submit}</p>
                 </div>
@@ -281,7 +288,7 @@ export default function BookingPage() {
                     placeholder="pl. Kovács István"
                     className={inputClass(!!errors.name)}
                   />
-                  {errors.name && <p className="text-destructive text-xs mt-1">{errors.name}</p>}
+                  {errors.name && <p data-error className="text-destructive text-xs mt-1">{errors.name}</p>}
                 </div>
                 <div>
                   <label htmlFor="phone" className="block text-xs font-bold text-[#3a3a3a] tracking-widest uppercase mb-2">
@@ -293,7 +300,7 @@ export default function BookingPage() {
                     placeholder="+36 (30) 123 4567"
                     className={inputClass(!!errors.phone)}
                   />
-                  {errors.phone && <p className="text-destructive text-xs mt-1">{errors.phone}</p>}
+                  {errors.phone && <p data-error className="text-destructive text-xs mt-1">{errors.phone}</p>}
                 </div>
               </div>
 
@@ -308,7 +315,7 @@ export default function BookingPage() {
                   placeholder="nev@email.com"
                   className={inputClass(!!errors.email)}
                 />
-                {errors.email && <p className="text-destructive text-xs mt-1">{errors.email}</p>}
+                {errors.email && <p data-error className="text-destructive text-xs mt-1">{errors.email}</p>}
               </div>
 
               {/* Date picker */}
@@ -322,7 +329,7 @@ export default function BookingPage() {
                   availableDates={settings?.availableDays}
                 />
                 <p className="text-[#4a4f4a] text-xs mt-1">Válassz egy elérhető napot — szombat vagy vasárnap, 10–12 között</p>
-                {errors.visitDate && <p className="text-destructive text-xs mt-1">{errors.visitDate}</p>}
+                {errors.visitDate && <p data-error className="text-destructive text-xs mt-1">{errors.visitDate}</p>}
               </div>
 
               {/* Pickup date (conditional) */}
@@ -347,7 +354,7 @@ export default function BookingPage() {
                       )
                     })}
                   </select>
-                  {errors.pickupDate && <p className="text-destructive text-xs mt-1">{errors.pickupDate}</p>}
+                  {errors.pickupDate && <p data-error className="text-destructive text-xs mt-1">{errors.pickupDate}</p>}
                 </div>
               )}
 
@@ -389,7 +396,7 @@ export default function BookingPage() {
                     className={`${inputClass(!!errors.treeCount)} mt-2`}
                   />
                 )}
-                {errors.treeCount && <p className="text-destructive text-xs mt-1">{errors.treeCount}</p>}
+                {errors.treeCount && <p data-error className="text-destructive text-xs mt-1">{errors.treeCount}</p>}
               </div>
 
               {/* Notes */}
@@ -434,7 +441,6 @@ export default function BookingPage() {
             </form>
           </div>
 
-        </div>
       </div>
     </div>
   )

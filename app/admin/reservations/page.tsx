@@ -7,7 +7,7 @@ export default async function ReservationsPage() {
   const reservations = await listReservations()
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-24">
       <section className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="section-kicker">Foglalások</p>
