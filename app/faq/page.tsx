@@ -59,9 +59,9 @@ function FAQItem({ question, answer, icon: Icon }: { question: string; answer: s
         </div>
       </button>
 
-      {isOpen && (
+      <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? "max-h-40 opacity-100" : "max-h-0 opacity-0"}`}>
         <p className="pb-5 pl-14 text-base text-[#4a4f4a] font-light leading-relaxed">{answer}</p>
-      )}
+      </div>
     </div>
   )
 }
@@ -70,10 +70,10 @@ export default function FAQPage() {
   return (
     <div className="bg-[#ededed]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-12">
-        <div className="relative flex flex-col lg:block lg:min-h-[700px]">
+        <div className="grid lg:grid-cols-2 lg:gap-16 lg:items-center">
 
-          {/* Left — absolutely positioned so it never moves when accordion expands */}
-          <div className="text-center lg:absolute lg:inset-y-0 lg:left-0 lg:w-[calc(50%-2.5rem)] lg:flex lg:flex-col lg:justify-center">
+          {/* Left */}
+          <div className="text-center mb-10 lg:mb-0 lg:transition-all lg:duration-300 lg:ease-in-out">
             <div className="section-label justify-center mb-3">Kérdések</div>
             <h1 className="text-4xl sm:text-5xl font-bold text-[#3a3a3a] mb-4 tracking-tight leading-tight">
               GYAKRAN ISMÉTELT KÉRDÉSEK
@@ -83,8 +83,8 @@ export default function FAQPage() {
             </p>
           </div>
 
-          {/* Right — absolutely positioned, centered vertically */}
-          <div className="lg:absolute lg:inset-y-0 lg:right-0 lg:w-[calc(50%-2.5rem)] lg:flex lg:flex-col lg:justify-center">
+          {/* Right */}
+          <div>
             {faqs.map((faq, index) => (
               <FAQItem key={index} question={faq.question} answer={faq.answer} icon={faq.icon} />
             ))}
