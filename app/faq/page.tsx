@@ -1,47 +1,66 @@
 "use client"
 
 import { useState } from "react"
-import { ChevronDown } from "lucide-react"
+import { Plus, Minus, CreditCard, CircleHelp, TreePine, CloudRain, Truck } from "lucide-react"
+import type { LucideIcon } from "lucide-react"
 
-const faqs = [
+const faqs: { question: string; answer: string; icon: LucideIcon }[] = [
   {
     question: "Lehet bankkártyával fizetni?",
     answer: "Igen. Készpénz és bankkártya is elfogadott a helyszínen.",
+    icon: CreditCard,
   },
   {
     question: "Mi van, ha nem tudok eljönni a foglalt napon?",
     answer: "Hívj fel telefonon, és megbeszélünk egy másik napot. Nem ragaszkodunk a dátumhoz.",
+    icon: CircleHelp,
   },
   {
     question: "Több fát is vihetek egy foglalással?",
     answer: "Igen. Jelezd a várható darabszámot a foglalási űrlapon, hogy felkészülhessünk.",
+    icon: TreePine,
   },
   {
     question: "Mi van, ha rossz idő van?",
     answer: "Esőben és szélben is nyitva vagyunk. Ha tényleg szélsőséges az időjárás, telefonon egyeztetünk.",
+    icon: CloudRain,
   },
   {
     question: "Van házhozszállítás?",
     answer: "Külön egyeztetéssel, plusz díjért Zalaegerszegen és közvetlen környékén igen. Érdeklődj telefonon.",
+    icon: Truck,
   },
 ]
 
-function FAQItem({ question, answer }: { question: string; answer: string }) {
+function FAQItem({ question, answer, icon: Icon }: { question: string; answer: string; icon: LucideIcon }) {
   const [isOpen, setIsOpen] = useState(false)
 
   return (
-    <div className="border-b border-[#bfc3c7] last:border-b-0">
+    <div className="border-b border-[#bfc3c7] last:border-b-0 group">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full py-5 flex items-start justify-between text-left cursor-pointer hover:text-[#3a3a3a]/70 transition-colors"
+        className="w-full py-5 flex items-center gap-4 text-left cursor-pointer"
       >
-        <h3 className="font-semibold text-[#3a3a3a] pr-4 tracking-tight text-base">{question}</h3>
-        <ChevronDown
-          className={`h-5 w-5 text-[#6e7f6a] flex-shrink-0 mt-0.5 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
-        />
+        {/* Icon container */}
+        <div className="flex-shrink-0 w-10 h-10 rounded-full border border-[#bfc3c7] bg-[#ededed] flex items-center justify-center transition-colors duration-200 group-hover:bg-[#6e7f6a] group-hover:border-[#6e7f6a]">
+          <Icon className="h-4 w-4 text-[#6e7f6a] transition-colors duration-200 group-hover:text-white" strokeWidth={1.5} />
+        </div>
+
+        {/* Text */}
+        <div className="flex-1 min-w-0">
+          <h3 className="font-semibold text-[#3a3a3a] tracking-tight text-base group-hover:text-[#3a3a3a]/70 transition-colors">
+            {question}
+          </h3>
+        </div>
+
+        {/* Toggle */}
+        <div className="flex-shrink-0 text-[#6e7f6a]">
+          {isOpen ? <Minus className="h-4 w-4" strokeWidth={1.5} /> : <Plus className="h-4 w-4" strokeWidth={1.5} />}
+        </div>
       </button>
+
       {isOpen && (
-        <p className="pb-5 text-base text-[#4a4f4a] font-light leading-relaxed">{answer}</p>
+        <p className="pb-5 pl-14 text-base text-[#4a4f4a] font-light leading-relaxed">{answer}</p>
       )}
     </div>
   )
@@ -67,7 +86,7 @@ export default function FAQPage() {
           {/* Right — accordion */}
           <div>
             {faqs.map((faq, index) => (
-              <FAQItem key={index} question={faq.question} answer={faq.answer} />
+              <FAQItem key={index} question={faq.question} answer={faq.answer} icon={faq.icon} />
             ))}
           </div>
 
