@@ -156,7 +156,7 @@ export default function HomePage() {
               preset="blur"
               as="h1"
               delay={0.35}
-              className="text-[clamp(1.75rem,8vw,3rem)] sm:text-5xl lg:text-6xl font-extrabold text-white leading-[0.95] tracking-tight mb-6 max-w-2xl"
+              className="text-[clamp(1.75rem,8vw,3rem)] sm:text-5xl lg:text-6xl font-extrabold text-white leading-tight tracking-tight mb-6 max-w-2xl"
             >
               KARÁCSONYFA, ZALAEGERSZEG HATÁRÁBAN
             </TextEffect>
