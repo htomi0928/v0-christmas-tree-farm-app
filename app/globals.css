@@ -39,6 +39,8 @@
   --sidebar-ring:                  #4a4f4a;
   --ease-premium:                  cubic-bezier(0.22, 1, 0.36, 1);
   --ease-card:                     cubic-bezier(0.45, 0, 0.15, 1);
+  --brand:                         110 25% 46%;
+  --brand-foreground:              110 20% 58%;
   --mint-soft:                     #d8ead8;
   --mint-strong:                   #2d5430;
   --mint-border:                   #b0c8b0;
@@ -92,6 +94,8 @@
   --mint-soft:               #2a4030;
   --mint-strong:             #a8c8a4;
   --mint-border:             #4a6648;
+  --brand:                   110 20% 58%;
+  --brand-foreground:        110 25% 46%;
 }
 
 @theme inline {
@@ -269,6 +273,10 @@ body {
 
 /* ── Animation keyframes (disabled when reduced-motion preferred) */
 @media (prefers-reduced-motion: no-preference) {
+@keyframes appear-zoom {
+    from { opacity: 0; transform: scale(0.95); }
+    to   { opacity: 1; transform: scale(1); }
+  }
 @keyframes fade-in-up {
     from { opacity: 0; transform: translateY(24px); }
     to   { opacity: 1; transform: translateY(0); }
