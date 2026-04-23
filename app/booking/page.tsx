@@ -69,10 +69,10 @@ export default function BookingPage() {
   const [settings, setSettings] = useState<any>(null)
 
   const infoRows = [
-    { label: "Érkezés", value: "10:00 – 12:00 között" },
-    { label: "Ár", value: `${formatPrice(settings?.pricePerTree ?? 8000)} / fa` },
-    { label: "Fizetés", value: "Készpénz vagy bankkártya" },
-    { label: "Helyszín", value: "GPS-koordinátákkal (visszaigazolásban)" },
+    { label: "Érkezés", value: "10:00 – 12:00 között", href: undefined },
+    { label: "Ár", value: `${formatPrice(settings?.pricePerTree ?? 8000)} / fa`, href: undefined },
+    { label: "Fizetés", value: "Készpénz vagy bankkártya", href: undefined },
+    { label: "Helyszín", value: "GPS-koordinátákkal (kattints ide!)", href: "https://www.google.com/maps/dir/?api=1&destination=46.8981178,16.793078" },
   ]
 
   useEffect(() => {
@@ -247,16 +247,34 @@ export default function BookingPage() {
 
         {/* Info strip */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
-          {infoRows.map((row) => (
-            <div key={row.label} className="bg-[#f5f4f1] border border-[#bfc3c7] rounded-lg px-4 py-3">
-              <p className="text-[10px] font-bold tracking-widest text-[#6e7f6a] uppercase mb-1">{row.label}</p>
-              <p className="text-xs font-medium text-[#3a3a3a] leading-snug">{row.value}</p>
-            </div>
-          ))}
+          {infoRows.map((row) => {
+            const inner = (
+              <>
+                <p className="text-[10px] font-bold tracking-widest text-[#6e7f6a] uppercase mb-1">{row.label}</p>
+                <p className="text-xs font-medium text-[#3a3a3a] leading-snug">{row.value}</p>
+              </>
+            )
+            return row.href ? (
+              <a
+                key={row.label}
+                href={row.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-[#f5f4f1] border border-[#bfc3c7] rounded-lg px-4 py-3 text-center hover:border-[#6e7f6a] hover:bg-[#6e7f6a]/10 transition-colors duration-150 block"
+                style={{ boxShadow: "0 8px 32px rgba(10, 20, 10, 0.10), 0 2px 8px rgba(10, 20, 10, 0.06)" }}
+              >
+                {inner}
+              </a>
+            ) : (
+              <div key={row.label} className="bg-[#f5f4f1] border border-[#bfc3c7] rounded-lg px-4 py-3 text-center" style={{ boxShadow: "0 8px 32px rgba(10, 20, 10, 0.10), 0 2px 8px rgba(10, 20, 10, 0.06)" }}>
+                {inner}
+              </div>
+            )
+          })}
         </div>
 
         {settings?.pricePerTree && (
-          <div className="border border-[#bfc3c7] rounded-lg px-5 py-4 mb-8 text-center bg-[#f5f4f1]">
+          <div className="border border-[#bfc3c7] rounded-lg px-5 py-4 mb-8 text-center bg-[#f5f4f1]" style={{ boxShadow: "0 8px 32px rgba(10, 20, 10, 0.10), 0 2px 8px rgba(10, 20, 10, 0.06)" }}>
             <p className="text-xs font-bold text-[#4a4f4a]/40 tracking-widest uppercase mb-1">Jelenlegi ár</p>
             <p className="text-2xl font-extrabold text-[#3a3a3a] tracking-tight">
               {settings.pricePerTree.toLocaleString("hu-HU")} Ft
@@ -266,7 +284,7 @@ export default function BookingPage() {
         )}
 
         {/* Form card */}
-        <div className="border border-[#bfc3c7] bg-[#f5f4f1] rounded-lg p-6 sm:p-10">
+        <div className="border border-[#bfc3c7] bg-[#f5f4f1] rounded-lg p-6 sm:p-10" style={{ boxShadow: "0 8px 32px rgba(10, 20, 10, 0.10), 0 2px 8px rgba(10, 20, 10, 0.06)" }}>
             <form onSubmit={handleSubmit} className="space-y-6">
 
               {errors.submit && (

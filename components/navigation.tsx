@@ -8,8 +8,8 @@ import { Button } from "@/components/ui/button"
 import { motion, AnimatePresence } from "framer-motion"
 
 const navigationItems = [
-  { label: "Hogyan működik?", href: "/#hogyan-mukodik" },
   { label: "Fenyőink",        href: "/#fenyoink" },
+  { label: "Hogyan működik?", href: "/#hogyan-mukodik" },
   { label: "GYIK",            href: "/faq" },
   { label: "Elérhetőség",     href: "/contact" },
 ]
