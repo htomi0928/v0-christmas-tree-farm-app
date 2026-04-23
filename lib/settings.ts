@@ -21,7 +21,7 @@ export async function getSettings(): Promise<Settings> {
     availableDays: row.available_days ? row.available_days.split(",").filter(Boolean) : [],
     maxBookingsPerDay: row.max_bookings_per_day,
     retrievalDays: row.retrieval_days ? row.retrieval_days.split(",").filter(Boolean) : [],
-    pricePerTree: row.price,
+    pricePerTree: Number(row.price),
   }
 }
 
