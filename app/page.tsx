@@ -310,7 +310,7 @@ export default function HomePage() {
       <div aria-hidden="true" className="bg-primary overflow-hidden">
         <Marquee3D
           items={["Nordmann", "Zalaegerszeg", `${formatPrice(pricePerTree)}`, "Csak Nordmann fenyő", "Időpontfoglalás", "Frissen vágva"]}
-          speed={22}
+          speed={60}
         />
       </div>
 

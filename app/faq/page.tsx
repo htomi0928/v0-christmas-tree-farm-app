@@ -70,10 +70,10 @@ export default function FAQPage() {
   return (
     <div className="bg-[#ededed]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+        <div className="relative flex flex-col lg:block lg:min-h-[700px]">
 
-          {/* Left — heading */}
-          <div className="text-center">
+          {/* Left — absolutely positioned so it never moves when accordion expands */}
+          <div className="text-center lg:absolute lg:inset-y-0 lg:left-0 lg:w-[calc(50%-2.5rem)] lg:flex lg:flex-col lg:justify-center">
             <div className="section-label justify-center mb-3">Kérdések</div>
             <h1 className="text-4xl sm:text-5xl font-bold text-[#3a3a3a] mb-4 tracking-tight leading-tight">
               GYAKRAN ISMÉTELT KÉRDÉSEK
@@ -83,8 +83,8 @@ export default function FAQPage() {
             </p>
           </div>
 
-          {/* Right — accordion */}
-          <div>
+          {/* Right — absolutely positioned, centered vertically */}
+          <div className="lg:absolute lg:inset-y-0 lg:right-0 lg:w-[calc(50%-2.5rem)] lg:flex lg:flex-col lg:justify-center">
             {faqs.map((faq, index) => (
               <FAQItem key={index} question={faq.question} answer={faq.answer} icon={faq.icon} />
             ))}
