@@ -4,7 +4,12 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { SpotlightCard } from "@/components/ui/spotlight-card"
+import { SpotlightEffect } from "@/components/ui/spotlight-effect"
 import { AnimateOnScroll } from "@/components/ui/animate-on-scroll"
+import { TextEffect } from "@/components/ui/text-effect"
+import { AnimatedNumber } from "@/components/ui/animated-number"
+import { AnimatedList } from "@/components/ui/animated-list"
+import { Marquee3D } from "@/components/ui/marquee-3d"
 import MistBackground from "@/components/ui/mist-background"
 import { formatPrice } from "@/lib/utils"
 
@@ -145,12 +150,15 @@ export default function HomePage() {
             >
               Zalaegerszeg · Nordmann fenyők
             </p>
-            <h1
+            <TextEffect
+              per="word"
+              preset="blur"
+              as="h1"
+              delay={0.35}
               className="text-5xl sm:text-6xl lg:text-8xl font-extrabold text-white leading-[0.95] tracking-tight mb-6 max-w-2xl"
-              style={{ animation: "fade-in-up 0.6s var(--ease-premium) 0.35s both" }}
             >
-              Karácsonyfa,<br />ahogy kell.
-            </h1>
+              Karácsonyfa, ahogy kell.
+            </TextEffect>
             <p
               className="text-base sm:text-lg text-white/60 font-light mb-8 max-w-sm"
               style={{ animation: "fade-in-up 0.6s var(--ease-premium) 0.5s both" }}
@@ -188,7 +196,8 @@ export default function HomePage() {
       </section>
 
       {/* Why Choose Us Section */}
-      <section className="min-h-screen flex items-center bg-[#6e7f6a]/15">
+      <section className="relative min-h-screen flex items-center bg-[#6e7f6a]/15 overflow-hidden">
+        <SpotlightEffect fill="#6e7f6a" className="opacity-30" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-16">
           <AnimateOnScroll>
             <div className="section-label justify-center">Miért minket?</div>
@@ -236,7 +245,9 @@ export default function HomePage() {
                 </p>
                 <div className="border border-[#bfc3c7] rounded-lg px-6 py-5 w-full text-center">
                   <p className="text-xs font-bold text-[#4a4f4a]/40 tracking-widest mb-1 uppercase">Egységes ár</p>
-                  <p className="text-3xl font-extrabold text-[#3a3a3a] tracking-tight">{formatPrice(pricePerTree)}</p>
+                  <p className="text-3xl font-extrabold text-[#3a3a3a] tracking-tight">
+                    <AnimatedNumber value={pricePerTree} suffix=" Ft" springOptions={{ stiffness: 50, damping: 18 }} />
+                  </p>
                   <p className="text-sm text-[#4a4f4a] font-light mt-1">Mérettől függetlenül.</p>
                 </div>
               </div>
@@ -296,10 +307,11 @@ export default function HomePage() {
       </section>
 
       {/* Marquee strip */}
-      <div aria-hidden="true" className="bg-primary py-4 overflow-hidden">
-        <div className="marquee-track">
-          {`Nordmann · Zalaegerszeg · ${formatPrice(pricePerTree)} · Csak Nordmann fenyő · Időpontfoglalás · `.repeat(10)}
-        </div>
+      <div aria-hidden="true" className="bg-primary overflow-hidden">
+        <Marquee3D
+          items={["Nordmann", "Zalaegerszeg", `${formatPrice(pricePerTree)}`, "Csak Nordmann fenyő", "Időpontfoglalás", "Frissen vágva"]}
+          speed={22}
+        />
       </div>
 
       {/* Hogyan Működik Section */}
@@ -318,20 +330,21 @@ export default function HomePage() {
                   Az online foglalástól az átvételig öt lépés.
                 </p>
                 <div className="w-full mb-8">
-                  {steps.map((step, index) => (
-                    <div
-                      key={step.number}
-                      className={`flex gap-5 items-start py-4 text-left ${index < steps.length - 1 ? "border-b border-[#bfc3c7]" : ""}`}
-                    >
-                      <span className="text-xs font-bold text-[#4a4f4a]/40 w-6 flex-shrink-0 mt-1 tabular-nums">
-                        {step.number}
-                      </span>
-                      <div>
-                        <h3 className="text-sm font-semibold text-[#3a3a3a] mb-0.5 tracking-tight">{step.title}</h3>
-                        <p className="text-sm text-[#4a4f4a] font-light leading-relaxed">{step.description}</p>
+                  <AnimatedList
+                    staggerDelay={0.1}
+                    itemClassName="border-b border-[#bfc3c7] last:border-b-0"
+                    items={steps.map((step, index) => (
+                      <div key={step.number} className="flex gap-5 items-start py-4 text-left">
+                        <span className="text-xs font-bold text-[#4a4f4a]/40 w-6 flex-shrink-0 mt-1 tabular-nums">
+                          {step.number}
+                        </span>
+                        <div>
+                          <h3 className="text-sm font-semibold text-[#3a3a3a] mb-0.5 tracking-tight">{step.title}</h3>
+                          <p className="text-sm text-[#4a4f4a] font-light leading-relaxed">{step.description}</p>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
+                  />
                 </div>
                 <Link href="/booking">
                   <Button className="h-12 px-7 text-base rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(74,79,74,0.25)] active:translate-y-0 active:shadow-none font-semibold">

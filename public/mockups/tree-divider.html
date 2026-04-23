@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tree Divider Mockup</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: system-ui, sans-serif; background: #fff; color: #0a0a0a; }
+
+  /* ── Toggle ── */
+  .toggle-bar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 20px; background: #f0f0f0; border-bottom: 1px solid #ddd;
+    font-size: 13px; font-weight: 500;
+  }
+  .toggle-bar button {
+    padding: 4px 14px; border-radius: 20px; border: 1px solid #ccc;
+    background: #fff; cursor: pointer; font-size: 13px;
+    transition: all 0.2s;
+  }
+  .toggle-bar button.active { background: #0a0a0a; color: #fff; border-color: #0a0a0a; }
+  .spacer { height: 45px; }
+
+  /* ── Page sections (fake content) ── */
+  .section {
+    padding: 60px 40px; text-align: center;
+  }
+  .section h2 { font-size: 28px; font-weight: 700; margin-bottom: 12px; letter-spacing: -0.02em; }
+  .section p { font-size: 15px; opacity: 0.5; font-weight: 300; }
+
+  /* ── Tree divider ── */
+  .tree-divider {
+    width: 100%;
+    overflow: hidden;
+    line-height: 0;
+    display: block;
+  }
+  .tree-divider svg {
+    display: block;
+    width: 100%;
+  }
+
+  /* ── Dark mode ── */
+  body.dark { background: #131a0f; color: #d8e0cc; }
+  body.dark .toggle-bar { background: #1a2416; border-color: #2a3825; color: #d8e0cc; }
+  body.dark .toggle-bar button { background: #253020; color: #d8e0cc; border-color: #2a3825; }
+  body.dark .toggle-bar button.active { background: #5a9e4f; color: #131a0f; border-color: #5a9e4f; }
+  body.dark .section { background: #131a0f; }
+</style>
+</head>
+<body>
+
+<div class="toggle-bar">
+  <span>Mode:</span>
+  <button class="active" onclick="setMode('light')">Light</button>
+  <button onclick="setMode('dark')">Dark</button>
+  <span style="margin-left:20px">Style:</span>
+  <button class="active" onclick="setStyle('classic')">Classic layers</button>
+  <button onclick="setStyle('warm')">Warm tones</button>
+  <button onclick="setStyle('mono')">Monochrome</button>
+</div>
+<div class="spacer"></div>
+
+<!-- SECTION 1 -->
+<div class="section" id="s1">
+  <h2>Csak Nordmann fenyő</h2>
+  <p>A legjobb, amit találsz — tűlevél-tartással, dús formával, frissen vágva.</p>
+</div>
+
+<!-- DIVIDER 1 -->
+<div class="tree-divider" id="divider1"></div>
+
+<!-- SECTION 2 -->
+<div class="section" id="s2">
+  <h2>Egységes ár: 8 000 Ft</h2>
+  <p>Mérettől függetlenül. Nincs tárgyalás, nincs meglepetés.</p>
+</div>
+
+<!-- DIVIDER 2 -->
+<div class="tree-divider" id="divider2"></div>
+
+<!-- SECTION 3 -->
+<div class="section" id="s3">
+  <h2>Egy kis family farm</h2>
+  <p>Egy kis farm Zalaegerszeg határán. Nem ipar — a fák között van idő elbeszélgetni.</p>
+</div>
+
+<!-- DIVIDER 3 -->
+<div class="tree-divider" id="divider3"></div>
+
+<!-- SECTION 4 -->
+<div class="section" id="s4">
+  <h2>Időpontfoglalás</h2>
+  <p>Foglalj időpontot és mi személyesen fogadunk.</p>
+</div>
+
+<script>
+  let currentMode = 'light';
+  let currentStyle = 'classic';
+
+  const styles = {
+    classic: {
+      light: {
+        bg: '#fafaf8',
+        layers: ['#c8d8c0', '#9ebf93', '#6ea165', '#4a7a40', '#2d5a24'],
+        ground: '#e8f0e0',
+      },
+      dark: {
+        bg: '#131a0f',
+        layers: ['#1f3018', '#253d1e', '#2d4e24', '#3a652e', '#4a7a3a'],
+        ground: '#1a2416',
+      }
+    },
+    warm: {
+      light: {
+        bg: '#faf8f5',
+        layers: ['#d4c8a8', '#b8a87a', '#8a7a50', '#6a5e38', '#4a4228'],
+        ground: '#ede8d8',
+      },
+      dark: {
+        bg: '#1a1508',
+        layers: ['#2a2010', '#3a2e18', '#4a3e22', '#5a4e2e', '#6a5e3a'],
+        ground: '#221c0c',
+      }
+    },
+    mono: {
+      light: {
+        bg: '#fafafa',
+        layers: ['#d8d8d8', '#b0b0b0', '#888888', '#606060', '#3a3a3a'],
+        ground: '#ebebeb',
+      },
+      dark: {
+        bg: '#0a0a0a',
+        layers: ['#1a1a1a', '#252525', '#333333', '#444444', '#585858'],
+        ground: '#141414',
+      }
+    }
+  };
+
+  function nordmannTree(x, baseY, height, width) {
+    // Nordmann fir: tall conical with tiered branches
+    const tiers = 6;
+    const trunkH = height * 0.08;
+    const trunkW = width * 0.06;
+    const tipX = x;
+    const tipY = baseY - height;
+
+    let d = '';
+    // Build from tip down in tiers
+    for (let i = 0; i < tiers; i++) {
+      const t = (i + 1) / tiers;
+      const tierY = tipY + (height - trunkH) * t;
+      const tierW = width * t * (0.7 + i * 0.06);
+      const overhang = width * 0.06 * t; // drooping branch tips
+      const prevTierY = i === 0 ? tipY : tipY + (height - trunkH) * (i / tiers);
+      const prevTierW = i === 0 ? 0 : width * (i / tiers) * (0.7 + (i-1) * 0.06);
+
+      if (i === 0) {
+        d += `M ${tipX} ${tipY} `;
+      }
+      // right side: go out and slightly down (drooping)
+      d += `L ${tipX + tierW / 2} ${tierY + overhang} `;
+      // notch back in before next tier
+      if (i < tiers - 1) {
+        d += `L ${tipX + prevTierW * 0.3} ${tierY} `;
+      }
+    }
+    // bottom right of canopy
+    d += `L ${tipX + width * 0.5} ${baseY - trunkH} `;
+    // trunk right
+    d += `L ${tipX + trunkW / 2} ${baseY - trunkH} `;
+    d += `L ${tipX + trunkW / 2} ${baseY} `;
+    d += `L ${tipX - trunkW / 2} ${baseY} `;
+    d += `L ${tipX - trunkW / 2} ${baseY - trunkH} `;
+    // trunk left → bottom left of canopy
+    d += `L ${tipX - width * 0.5} ${baseY - trunkH} `;
+
+    // left side (mirror)
+    for (let i = tiers - 1; i >= 0; i--) {
+      const t = (i + 1) / tiers;
+      const tierY = tipY + (height - trunkH) * t;
+      const tierW = width * t * (0.7 + i * 0.06);
+      const overhang = width * 0.06 * t;
+      const prevTierW = i === 0 ? 0 : width * (i / tiers) * (0.7 + (i-1) * 0.06);
+
+      if (i < tiers - 1) {
+        d += `L ${tipX - prevTierW * 0.3} ${tierY} `;
+      }
+      d += `L ${tipX - tierW / 2} ${tierY + overhang} `;
+    }
+    d += 'Z';
+    return d;
+  }
+
+  function buildDivider(containerId, fromBg, toBg, palette) {
+    const W = 1440;
+    const H = 180;
+    const layers = palette.layers;
+    const ground = palette.ground;
+
+    // Layer config: each layer has trees at different scales/positions
+    const layerConfigs = [
+      // back layer — small, many trees
+      { y: H * 0.55, heights: [H*0.52, H*0.44, H*0.48, H*0.50, H*0.46, H*0.52, H*0.44], xs: [0.04,0.12,0.22,0.32,0.42,0.52,0.62,0.72,0.82,0.92,1.00], scale: 0.55 },
+      { y: H * 0.62, heights: [H*0.56, H*0.50, H*0.54, H*0.52], xs: [0.00,0.08,0.17,0.26,0.35,0.44,0.53,0.62,0.71,0.80,0.89,0.98], scale: 0.65 },
+      { y: H * 0.72, heights: [H*0.65, H*0.58, H*0.62], xs: [0.02,0.13,0.24,0.36,0.48,0.60,0.72,0.84,0.96], scale: 0.78 },
+      { y: H * 0.83, heights: [H*0.76, H*0.68, H*0.72], xs: [0.00,0.14,0.28,0.42,0.57,0.71,0.85,0.99], scale: 0.90 },
+      // front layer — large trees
+      { y: H * 0.96, heights: [H*0.88, H*0.78, H*0.84, H*0.90], xs: [0.00,0.17,0.34,0.51,0.68,0.85], scale: 1.05 },
+    ];
+
+    let treePaths = '';
+    layerConfigs.forEach((cfg, li) => {
+      let layerPath = '';
+      cfg.xs.forEach((xFrac, ti) => {
+        const x = xFrac * W;
+        const baseY = cfg.y;
+        const h = cfg.heights[ti % cfg.heights.length];
+        const w = h * 0.42 * cfg.scale;
+        layerPath += nordmannTree(x, baseY, h, w);
+      });
+      treePaths += `<path d="${layerPath}" fill="${layers[li]}" />`;
+    });
+
+    // Ground fill
+    const groundPath = `<rect x="0" y="${H * 0.88}" width="${W}" height="${H * 0.12}" fill="${ground}" />`;
+
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice">
+  <rect width="${W}" height="${H}" fill="${fromBg}" />
+  ${treePaths}
+  ${groundPath}
+</svg>`;
+
+    document.getElementById(containerId).innerHTML = svg;
+  }
+
+  function applyStyles() {
+    const palette = styles[currentStyle][currentMode];
+    const sections = document.querySelectorAll('.section');
+    sections.forEach(s => s.style.background = palette.bg);
+
+    buildDivider('divider1', palette.bg, palette.bg, palette);
+    buildDivider('divider2', palette.bg, palette.bg, palette);
+    buildDivider('divider3', palette.bg, palette.bg, palette);
+  }
+
+  function setMode(mode) {
+    currentMode = mode;
+    document.body.className = mode === 'dark' ? 'dark' : '';
+    document.querySelectorAll('.toggle-bar button').forEach(b => {
+      if (b.textContent === (mode === 'dark' ? 'Dark' : 'Light')) b.classList.add('active');
+      else if (b.textContent === 'Dark' || b.textContent === 'Light') b.classList.remove('active');
+    });
+    applyStyles();
+  }
+
+  function setStyle(style) {
+    currentStyle = style;
+    document.querySelectorAll('.toggle-bar button').forEach(b => {
+      const map = { classic: 'Classic layers', warm: 'Warm tones', mono: 'Monochrome' };
+      if (b.textContent === map[style]) b.classList.add('active');
+      else if (['Classic layers','Warm tones','Monochrome'].includes(b.textContent)) b.classList.remove('active');
+    });
+    applyStyles();
+  }
+
+  applyStyles();
+</script>
+</body>
+</html>
