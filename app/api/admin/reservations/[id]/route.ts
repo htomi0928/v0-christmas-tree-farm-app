@@ -108,8 +108,8 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       pickupDate: data.pickupDate === "" ? undefined : data.pickupDate ?? undefined,
       treeCount: data.treeCount,
       status: data.status,
-      treeNumbers: data.treeNumbers === "" ? undefined : data.treeNumbers ?? undefined,
-      notes: data.notes === "" ? undefined : data.notes ?? undefined,
+      treeNumbers: data.treeNumbers,
+      notes: data.notes,
       paidTo: data.paidTo === "" ? undefined : data.paidTo ?? undefined,
     })
 
