@@ -79,7 +79,8 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
     const data = parsedBody.data
 
-    // Check for conflicting tree numbers if treeNumbers is being updated
+    // Check for conflicting tree numbers if treeNumbers is being updated.
+    // Conflicts are scoped to the reservation's own year — same tree number is fine across years.
     if (data.treeNumbers && data.treeNumbers.trim()) {
       const treeNumbers = data.treeNumbers
         .split(",")
@@ -87,7 +88,15 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         .filter((n) => !Number.isNaN(n) && n > 0)
 
       if (treeNumbers.length > 0) {
-        const { conflictingNumbers, reservationNames } = await findConflictingTreeNumbers(treeNumbers, reservationId)
+        const existing = await getReservationById(reservationId)
+        if (!existing) {
+          return Response.json({ success: false, error: "Foglalás nem található" }, { status: 404 })
+        }
+        const { conflictingNumbers, reservationNames } = await findConflictingTreeNumbers(
+          treeNumbers,
+          existing.year,
+          reservationId,
+        )
         if (conflictingNumbers.length > 0) {
           const details = conflictingNumbers
             .map((num) => `${num} (${reservationNames.get(num)})`)
@@ -151,6 +160,13 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
     const reservationId = parseNumericId(id)
     if (!reservationId) {
       return Response.json({ success: false, error: "Érvénytelen foglalás azonosító" }, { status: 400 })
+    }
+
+    // Check if reservation exists and has tree numbers before deletion
+    const reservation = await getReservationById(reservationId)
+    if (reservation && reservation.treeNumbers && reservation.treeNumbers.trim()) {
+      // Log warning about deleting reservation with assigned tree numbers
+      console.warn(`WARNING: Deleting reservation ${reservationId} (${reservation.name}) with assigned tree numbers: ${reservation.treeNumbers}. These tree numbers will be permanently lost and cannot be reused.`)
     }
 
     const result = await deleteReservation(reservationId)

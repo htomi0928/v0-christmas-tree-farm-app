@@ -93,53 +93,98 @@ RESERVATION_EMAIL_FROM=Foglalás <noreply@yourdomain.tld>
 ### Initial Setup
 
 1. **Create Database** in Neon
-2. **Run migrations** to create tables:
+2. **Create tables** by running the SQL in [Required Tables](#required-tables) below against your Neon database (via the Neon SQL editor or `psql`). There are no automated migrations — `/scripts/test-db-connection.ts` only verifies connectivity.
+
+   After tables exist, seed an admin via:
    ```bash
-   pnpm run build
-   # Then manually run SQL scripts from /scripts directory
+   curl -X POST "$DEPLOYED_URL/api/seed-admin" \
+     -H "x-seed-key: $SEED_ADMIN_KEY" \
+     -H "content-type: application/json" \
+     -d '{"username":"admin","password":"<at-least-12-chars>"}'
    ```
 
 ### Required Tables
 
-The app requires the following tables in PostgreSQL:
+The app requires the following tables in PostgreSQL. Field names below match what the code reads/writes (see `lib/db.ts`, `lib/reservations.ts`, `lib/expenses.ts`, `lib/settings.ts`, `lib/years.ts`, `lib/auth.ts`).
 
-#### `users` table
+Operational data is partitioned by calendar year: `reservations`, `expenses`, and `settings` all have a `year` column with an FK to `years.year`. The `years` table is the source of truth for which seasons exist and which one is currently active (used by the public booking page).
+
+For an existing database that predates this partitioning, run [scripts/add-year-partitioning.sql](../scripts/add-year-partitioning.sql) once — it adds the `year` columns, backfills 2026, creates the `years` table, and adds the FK constraints.
+
+#### `admin_users` table
 ```sql
-CREATE TABLE users (
+CREATE TABLE admin_users (
   id SERIAL PRIMARY KEY,
-  email VARCHAR(255) UNIQUE NOT NULL,
-  password_hash VARCHAR(255) NOT NULL,
+  username VARCHAR(100) UNIQUE NOT NULL,
+  password_hash TEXT NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 ```
+
+`password_hash` stores PBKDF2-SHA256 output as `<salt-hex>:<hash-hex>` (100k iterations, 16-byte salt). Use `POST /api/seed-admin` with the `SEED_ADMIN_KEY` header to insert the initial admin without hashing manually.
+
+#### `years` table
+```sql
+CREATE TABLE years (
+  year       INTEGER PRIMARY KEY,
+  is_active  BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE UNIQUE INDEX years_one_active ON years (is_active) WHERE is_active = TRUE;
+
+INSERT INTO years (year, is_active) VALUES (2026, TRUE);
+```
+
+The partial unique index enforces that at most one row has `is_active = TRUE`. The app's `activateYear` helper runs the swap in a transaction.
 
 #### `reservations` table
 ```sql
 CREATE TABLE reservations (
   id SERIAL PRIMARY KEY,
-  name VARCHAR(255) NOT NULL,
-  email VARCHAR(255) NOT NULL,
-  phone VARCHAR(20),
-  date DATE NOT NULL,
-  trees INTEGER NOT NULL,
-  status VARCHAR(50) DEFAULT 'PENDING',
-  tree_numbers TEXT,
-  paid_to VARCHAR(50),
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  year INTEGER NOT NULL REFERENCES years(year),
+  name TEXT NOT NULL,
+  phone TEXT NOT NULL,
+  email TEXT,
+  visit_date DATE NOT NULL,
+  pickup_date DATE,
+  tree_count INTEGER NOT NULL,
+  notes TEXT,
+  tree_numbers TEXT,            -- comma-separated integers; uniqueness enforced in app code, scoped per year
+  status VARCHAR(50) NOT NULL DEFAULT 'BOOKED',
+  paid_to VARCHAR(50),          -- 'János' or 'Sanyi' once paid
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+CREATE INDEX reservations_year_idx ON reservations (year);
 ```
 
 #### `expenses` table
 ```sql
 CREATE TABLE expenses (
   id SERIAL PRIMARY KEY,
-  description VARCHAR(255) NOT NULL,
-  amount DECIMAL(10, 2) NOT NULL,
-  category VARCHAR(50),
+  year INTEGER NOT NULL REFERENCES years(year),
+  person VARCHAR(50) NOT NULL,  -- 'János' or 'Sanyi'
+  amount NUMERIC(12, 2) NOT NULL,
+  description TEXT NOT NULL,
   date DATE NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+CREATE INDEX expenses_year_idx ON expenses (year);
+```
+
+#### `settings` table
+
+One row per year. Created automatically when `createYear` runs; if missing, the app falls back to in-memory defaults (see `lib/years.ts` `defaultSettingsFor`).
+
+```sql
+CREATE TABLE settings (
+  year INTEGER PRIMARY KEY REFERENCES years(year),
+  available_days TEXT,                            -- comma-separated YYYY-MM-DD
+  max_bookings_per_day INTEGER NOT NULL DEFAULT 20,
+  retrieval_days TEXT,                            -- comma-separated YYYY-MM-DD
+  price NUMERIC NOT NULL DEFAULT 8000             -- price per tree in HUF
+);
+
+INSERT INTO settings (year, max_bookings_per_day, price) VALUES (2026, 20, 8000);
 ```
 
 ## Deployment Process
@@ -277,7 +322,7 @@ Before deploying to production:
 - [ ] `RESERVATION_NOTIFY_TO` includes at least one valid recipient
 - [ ] `RESERVATION_EMAIL_FROM` is verified in Resend
 - [ ] Database credentials are not in code
-- [ ] CORS checks are enabled for production
+- [ ] Same-origin (`enforceSameOrigin`) checks active in production (automatic when `NODE_ENV=production`)
 - [ ] All environment variables are configured
 - [ ] SSL/TLS is enabled for custom domains
 - [ ] Database backups are configured in Neon

@@ -1,7 +1,8 @@
-﻿import "server-only"
+import "server-only"
 import { z } from "zod"
 import { createExpense, listExpenses } from "@/lib/expenses"
 import { enforceSameOrigin, logApiError, parseJsonBody, requireAdminSessionResponse } from "@/lib/api"
+import { getViewYear } from "@/lib/years"
 
 const createExpenseSchema = z.object({
   person: z.union([z.literal("János"), z.literal("Sanyi")]),
@@ -15,8 +16,9 @@ export async function GET() {
     const authError = await requireAdminSessionResponse()
     if (authError) return authError
 
-    const expenses = await listExpenses()
-    return Response.json({ success: true, expenses })
+    const year = await getViewYear()
+    const expenses = await listExpenses({ year })
+    return Response.json({ success: true, expenses, year })
   } catch (error) {
     logApiError("admin expenses list failed", error)
     return Response.json({ success: false, error: "Szerver hiba" }, { status: 500 })
@@ -34,7 +36,8 @@ export async function POST(request: Request) {
     const parsedBody = await parseJsonBody(request, createExpenseSchema)
     if (!parsedBody.success) return parsedBody.response
 
-    const result = await createExpense(parsedBody.data)
+    const year = await getViewYear()
+    const result = await createExpense(parsedBody.data, year)
 
     if (result.success) {
       return Response.json({ success: true, expense: result.data })
@@ -46,4 +49,3 @@ export async function POST(request: Request) {
     return Response.json({ success: false, error: "Szerver hiba" }, { status: 500 })
   }
 }
-

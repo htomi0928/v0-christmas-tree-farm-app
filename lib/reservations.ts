@@ -17,6 +17,24 @@ function formatDate(value: any): string {
   return `${year}-${month}-${day}`
 }
 
+function rowToReservation(row: any): Reservation {
+  return {
+    id: row.id,
+    year: Number(row.year),
+    name: row.name,
+    phone: row.phone,
+    email: row.email || undefined,
+    visitDate: formatDate(row.visit_date),
+    pickupDate: row.pickup_date ? formatDate(row.pickup_date) : undefined,
+    treeCount: row.tree_count,
+    notes: row.notes || undefined,
+    treeNumbers: row.tree_numbers || undefined,
+    status: row.status as ReservationStatus,
+    paidTo: row.paid_to || undefined,
+    createdAt: row.created_at,
+  }
+}
+
 // Validation
 function validateReservationData(data: CreateReservationData): string[] {
   const errors: string[] = []
@@ -32,19 +50,21 @@ function validateReservationData(data: CreateReservationData): string[] {
   return errors
 }
 
-// List reservations with optional filters
-export async function listReservations(filters?: { visitDate?: string; status?: ReservationStatus }): Promise<
-  Reservation[]
-> {
-  let query = "SELECT * FROM reservations WHERE 1=1"
-  const params: any[] = []
+// List reservations for a given year, with optional secondary filters.
+export async function listReservations(filters: {
+  year: number
+  visitDate?: string
+  status?: ReservationStatus
+}): Promise<Reservation[]> {
+  let query = "SELECT * FROM reservations WHERE year = $1"
+  const params: any[] = [filters.year]
 
-  if (filters?.visitDate) {
+  if (filters.visitDate) {
     params.push(filters.visitDate)
     query += ` AND visit_date = $${params.length}`
   }
 
-  if (filters?.status) {
+  if (filters.status) {
     params.push(filters.status)
     query += ` AND status = $${params.length}`
   }
@@ -52,49 +72,21 @@ export async function listReservations(filters?: { visitDate?: string; status?: 
   query += " ORDER BY visit_date DESC, created_at DESC"
 
   const rows = await sql.query(query, params)
-
-  return rows.map((row: any) => ({
-    id: row.id,
-    name: row.name,
-    phone: row.phone,
-    email: row.email || undefined,
-    visitDate: formatDate(row.visit_date),
-    pickupDate: row.pickup_date ? formatDate(row.pickup_date) : undefined,
-    treeCount: row.tree_count,
-    notes: row.notes || undefined,
-    treeNumbers: row.tree_numbers || undefined,
-    status: row.status as ReservationStatus,
-    paidTo: row.paid_to || undefined,
-    createdAt: row.created_at,
-  }))
+  return rows.map(rowToReservation)
 }
 
 // Get single reservation
 export async function getReservationById(id: number): Promise<Reservation | null> {
   const rows = await sql`SELECT * FROM reservations WHERE id = ${id}`
-
   if (rows.length === 0) return null
-
-  const row = rows[0]
-  return {
-    id: row.id,
-    name: row.name,
-    phone: row.phone,
-    email: row.email || undefined,
-    visitDate: formatDate(row.visit_date),
-    pickupDate: row.pickup_date ? formatDate(row.pickup_date) : undefined,
-    treeCount: row.tree_count,
-    notes: row.notes || undefined,
-    treeNumbers: row.tree_numbers || undefined,
-    status: row.status as ReservationStatus,
-    paidTo: row.paid_to || undefined,
-    createdAt: row.created_at,
-  }
+  return rowToReservation(rows[0])
 }
 
-// Create reservation
+// Create reservation. Year is decided server-side (active year for public, view year is unused
+// here because the public route is the only entry point that creates reservations).
 export async function createReservation(
   data: CreateReservationData,
+  year: number,
 ): Promise<{ success: boolean; data?: Reservation; errors?: string[] }> {
   const errors = validateReservationData(data)
   if (errors.length > 0) {
@@ -102,28 +94,22 @@ export async function createReservation(
   }
 
   const rows = await sql`
-    INSERT INTO reservations (name, phone, email, visit_date, pickup_date, tree_count, notes, status)
-    VALUES (${data.name}, ${data.phone}, ${data.email || null}, ${data.visitDate}, ${data.pickupDate || null}, ${data.treeCount}, ${data.notes || null}, ${ReservationStatus.BOOKED})
+    INSERT INTO reservations (year, name, phone, email, visit_date, pickup_date, tree_count, notes, status)
+    VALUES (
+      ${year},
+      ${data.name},
+      ${data.phone},
+      ${data.email || null},
+      ${data.visitDate},
+      ${data.pickupDate || null},
+      ${data.treeCount},
+      ${data.notes || null},
+      ${ReservationStatus.BOOKED}
+    )
     RETURNING *
   `
 
-  const row = rows[0]
-  const reservation: Reservation = {
-    id: row.id,
-    name: row.name,
-    phone: row.phone,
-    email: row.email || undefined,
-    visitDate: formatDate(row.visit_date),
-    pickupDate: row.pickup_date ? formatDate(row.pickup_date) : undefined,
-    treeCount: row.tree_count,
-    notes: row.notes || undefined,
-    treeNumbers: row.tree_numbers || undefined,
-    status: row.status as ReservationStatus,
-    paidTo: row.paid_to || undefined,
-    createdAt: row.created_at,
-  }
-
-  return { success: true, data: reservation }
+  return { success: true, data: rowToReservation(rows[0]) }
 }
 
 // Update reservation
@@ -149,6 +135,20 @@ export async function updateReservation(
     if (errors.length > 0) {
       return { success: false, error: errors[0] }
     }
+  }
+
+  // Determine final status and treeNumbers for validation
+  const finalStatus = data.status ?? existing.status
+  const finalTreeNumbers = data.treeNumbers !== undefined ? data.treeNumbers : existing.treeNumbers
+
+  // Prevent clearing tree numbers when status requires them
+  const requiresTreeNumber = (status: ReservationStatus) =>
+    status === ReservationStatus.TREE_TAGGED ||
+    status === ReservationStatus.CUT ||
+    status === ReservationStatus.PICKED_UP_PAID
+
+  if (requiresTreeNumber(finalStatus) && (!finalTreeNumbers || finalTreeNumbers.trim() === "")) {
+    return { success: false, error: "A fa sorszáma kötelező ennél a státusznál és nem lehet üres." }
   }
 
   // Build update query dynamically
@@ -205,24 +205,7 @@ export async function updateReservation(
   const query = `UPDATE reservations SET ${updates.join(", ")} WHERE id = $${paramIndex} RETURNING *`
 
   const rows = await sql.query(query, values)
-  const row = rows[0]
-
-  const updated: Reservation = {
-    id: row.id,
-    name: row.name,
-    phone: row.phone,
-    email: row.email || undefined,
-    visitDate: formatDate(row.visit_date),
-    pickupDate: row.pickup_date ? formatDate(row.pickup_date) : undefined,
-    treeCount: row.tree_count,
-    notes: row.notes || undefined,
-    treeNumbers: row.tree_numbers || undefined,
-    status: row.status as ReservationStatus,
-    paidTo: row.paid_to || undefined,
-    createdAt: row.created_at,
-  }
-
-  return { success: true, data: updated }
+  return { success: true, data: rowToReservation(rows[0]) }
 }
 
 // Delete reservation
@@ -235,18 +218,20 @@ export async function deleteReservation(id: number): Promise<{ success: boolean;
   return { success: true }
 }
 
-// Check for conflicting tree numbers across other reservations
+// Check for conflicting tree numbers within the same year. The same physical tree number
+// can be reused across years, since the tagged trees are different each season.
 export async function findConflictingTreeNumbers(
   treeNumbers: number[],
+  year: number,
   excludeReservationId?: number,
 ): Promise<{ conflictingNumbers: number[]; reservationNames: Map<number, string> }> {
   if (treeNumbers.length === 0) {
     return { conflictingNumbers: [], reservationNames: new Map() }
   }
 
-  // Get all reservations that have tree_numbers set (excluding the current one)
-  let query = "SELECT id, name, tree_numbers FROM reservations WHERE tree_numbers IS NOT NULL AND tree_numbers != ''"
-  const params: any[] = []
+  let query =
+    "SELECT id, name, tree_numbers FROM reservations WHERE year = $1 AND tree_numbers IS NOT NULL AND tree_numbers != ''"
+  const params: any[] = [year]
 
   if (excludeReservationId) {
     params.push(excludeReservationId)
@@ -275,8 +260,8 @@ export async function findConflictingTreeNumbers(
   return { conflictingNumbers, reservationNames }
 }
 
-// Get stats
-export async function getReservationStats(): Promise<{
+// Get stats for a single year. Revenue uses the price stored on that year's settings row.
+export async function getReservationStats(year: number): Promise<{
   totalReservations: number
   totalTrees: number
   upcomingWeekend: number
@@ -284,37 +269,36 @@ export async function getReservationStats(): Promise<{
   revenueSanyi: number
   totalRevenue: number
 }> {
-  // Get totals
   const totalsRows = await sql`
-    SELECT 
-      COUNT(*) as total_reservations,
-      COALESCE(SUM(tree_count), 0) as total_trees
+    SELECT
+      COUNT(*) AS total_reservations,
+      COALESCE(SUM(tree_count), 0) AS total_trees
     FROM reservations
+    WHERE year = ${year}
   `
 
-  // Get upcoming weekend count (Saturday = 6, Sunday = 0 in SQL)
   const today = new Date().toISOString().split("T")[0]
   const upcomingRows = await sql`
-    SELECT COUNT(*) as upcoming_weekend
+    SELECT COUNT(*) AS upcoming_weekend
     FROM reservations
-    WHERE visit_date >= ${today}
-    AND EXTRACT(DOW FROM visit_date) IN (0, 6)
+    WHERE year = ${year}
+      AND visit_date >= ${today}
+      AND EXTRACT(DOW FROM visit_date) IN (0, 6)
   `
 
-  // Get revenue per person from paid reservations
   const revenueRows = await sql`
-    SELECT 
+    SELECT
       paid_to,
-      SUM(tree_count) as total_trees
+      SUM(tree_count) AS total_trees
     FROM reservations
-    WHERE status = ${ReservationStatus.PICKED_UP_PAID}
-    AND paid_to IS NOT NULL
+    WHERE year = ${year}
+      AND status = ${ReservationStatus.PICKED_UP_PAID}
+      AND paid_to IS NOT NULL
     GROUP BY paid_to
   `
 
-  // Get price from settings
-  const settingsRows = await sql`SELECT price FROM settings WHERE id = 1`
-  const price = settingsRows[0]?.price || 8000
+  const settingsRows = await sql`SELECT price FROM settings WHERE year = ${year}`
+  const price = settingsRows[0]?.price ? Number(settingsRows[0].price) : 8000
 
   let revenueJanos = 0
   let revenueSanyi = 0
@@ -337,4 +321,3 @@ export async function getReservationStats(): Promise<{
     totalRevenue: revenueJanos + revenueSanyi,
   }
 }
-

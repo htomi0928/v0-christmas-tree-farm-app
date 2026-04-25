@@ -67,6 +67,7 @@ export default function BookingPage() {
   const [isSuccess, setIsSuccess] = useState(false)
   const [successData, setSuccessData] = useState<any>(null)
   const [settings, setSettings] = useState<any>(null)
+  const [seasonClosed, setSeasonClosed] = useState(false)
 
   const infoRows = [
     { label: "Érkezés", value: "10:00 – 12:00 között", href: undefined },
@@ -77,9 +78,16 @@ export default function BookingPage() {
 
   useEffect(() => {
     fetch("/api/admin/settings")
-      .then((res) => res.json())
+      .then(async (res) => {
+        // 503 from the settings route means there is no active year configured.
+        if (res.status === 503) {
+          setSeasonClosed(true)
+          return null
+        }
+        return res.json()
+      })
       .then((data) => {
-        if (data.success) setSettings(data.settings)
+        if (data?.success) setSettings(data.settings)
       })
       .catch(() => {})
   }, [])
@@ -224,6 +232,28 @@ export default function BookingPage() {
             </div>
 
           </div>
+        </div>
+      </div>
+    )
+  }
+
+  /* ── Season closed (no active year) ── */
+  if (seasonClosed) {
+    return (
+      <div className="bg-[#ededed] min-h-[calc(100vh-4rem)]">
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 w-full py-24 text-center">
+          <div className="section-label justify-center">Foglalás</div>
+          <h1 className="text-4xl sm:text-5xl font-bold text-[#3a3a3a] mb-4 tracking-tight leading-tight">
+            Foglalás jelenleg nem elérhető
+          </h1>
+          <p className="text-[#4a4f4a] font-light max-w-md mx-auto mb-10">
+            A következő szezon foglalása hamarosan nyílik. Hívj minket, ha kérdésed van: +36 (30) 123 4567.
+          </p>
+          <Link href="/">
+            <Button className="h-12 px-7 text-base rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 font-semibold">
+              Vissza a főoldalra
+            </Button>
+          </Link>
         </div>
       </div>
     )

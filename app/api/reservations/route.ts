@@ -1,7 +1,8 @@
-﻿import { z } from "zod"
+import { z } from "zod"
 import { createReservation } from "@/lib/reservations"
 import { logApiError, parseJsonBody } from "@/lib/api"
 import { sendNewReservationNotification } from "@/lib/reservation-notifications"
+import { getActiveYear } from "@/lib/years"
 
 export const runtime = "nodejs"
 
@@ -17,19 +18,33 @@ const reservationSchema = z.object({
 
 export async function POST(request: Request) {
   try {
+    const activeYear = await getActiveYear()
+    if (activeYear === null) {
+      return Response.json(
+        {
+          success: false,
+          errors: ["Foglalás jelenleg nem elérhető"],
+        },
+        { status: 503 },
+      )
+    }
+
     const parsedBody = await parseJsonBody(request, reservationSchema)
     if (!parsedBody.success) return parsedBody.response
 
     const data = parsedBody.data
-    const result = await createReservation({
-      name: data.name,
-      phone: data.phone,
-      email: data.email || undefined,
-      visitDate: data.visitDate,
-      pickupDate: data.pickupDate || undefined,
-      treeCount: data.treeCount,
-      notes: data.notes || undefined,
-    })
+    const result = await createReservation(
+      {
+        name: data.name,
+        phone: data.phone,
+        email: data.email || undefined,
+        visitDate: data.visitDate,
+        pickupDate: data.pickupDate || undefined,
+        treeCount: data.treeCount,
+        notes: data.notes || undefined,
+      },
+      activeYear,
+    )
 
     if (!result.success) {
       return Response.json(
