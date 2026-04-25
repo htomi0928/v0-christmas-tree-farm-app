@@ -1,4 +1,4 @@
-﻿export enum ReservationStatus {
+export enum ReservationStatus {
   BOOKED = "BOOKED",
   TREE_TAGGED = "TREE_TAGGED",
   CUT = "CUT",
@@ -8,6 +8,7 @@
 
 export interface Reservation {
   id: number
+  year: number
   name: string
   phone: string
   email?: string
@@ -46,6 +47,7 @@ export interface UpdateReservationData {
 
 export interface Expense {
   id: number
+  year: number
   person: "János" | "Sanyi"
   amount: number
   description: string
@@ -61,8 +63,20 @@ export interface CreateExpenseData {
 }
 
 export interface Settings {
+  year: number
   availableDays: string[]
   maxBookingsPerDay: number
   retrievalDays: string[]
   pricePerTree: number
+}
+
+export interface Year {
+  year: number
+  isActive: boolean
+  createdAt: string
+}
+
+export interface YearWithCounts extends Year {
+  reservationCount: number
+  expenseCount: number
 }

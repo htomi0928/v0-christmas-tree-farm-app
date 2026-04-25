@@ -39,11 +39,13 @@ export default function ReservationDetailClient({ reservation: initialReservatio
   const [availableDays, setAvailableDays] = useState<string[]>([])
 
   useEffect(() => {
-    fetch("/api/admin/settings").then((response) => response.json()).then((data) => {
+    // Load the settings for this reservation's own year, not the admin's current view year —
+    // editing a 2025 reservation should still see 2025's available_days.
+    fetch(`/api/admin/settings?year=${initialReservation.year}`).then((response) => response.json()).then((data) => {
       if (data.settings?.retrievalDays) setRetrievalDays(data.settings.retrievalDays.sort())
       if (data.settings?.availableDays) setAvailableDays(data.settings.availableDays.sort())
     }).catch(() => {})
-  }, [])
+  }, [initialReservation.year])
 
   const requiresTreeNumber = (status: ReservationStatus) =>
     status === ReservationStatus.TREE_TAGGED ||

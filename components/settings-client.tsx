@@ -1,11 +1,12 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { CheckCircle2, AlertCircle, ChevronLeft, ChevronRight, Save } from "lucide-react"
 import type { Settings } from "@/lib/types"
 
 interface Props {
   initialSettings: Settings
+  year: number
 }
 
 const inputClass = "w-full px-4 py-3 rounded-lg border border-[#bfc3c7] bg-white text-[#3a3a3a] placeholder:text-[#4a4f4a]/40 focus:outline-none focus:ring-2 focus:ring-[#6e7f6a] text-sm transition-all duration-150"
@@ -15,7 +16,7 @@ const monthNames = ["január","február","március","április","május","június
 // Monday-first
 const dayNames = ["H","K","Sze","Cs","P","Szo","V"]
 
-export default function SettingsClient({ initialSettings }: Props) {
+export default function SettingsClient({ initialSettings, year }: Props) {
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
@@ -25,6 +26,17 @@ export default function SettingsClient({ initialSettings }: Props) {
     retrievalDays: initialSettings.retrievalDays || [],
     pricePerTree: initialSettings.pricePerTree,
   })
+
+  // Re-sync form when the parent re-renders for a different year
+  // (e.g. after the admin changes the view year in the nav).
+  useEffect(() => {
+    setFormData({
+      availableDays: initialSettings.availableDays || [],
+      maxBookingsPerDay: initialSettings.maxBookingsPerDay,
+      retrievalDays: initialSettings.retrievalDays || [],
+      pricePerTree: initialSettings.pricePerTree,
+    })
+  }, [initialSettings])
 
   const firstDateMonth = (dates: string[]) => {
     if (dates.length > 0) {
@@ -151,7 +163,7 @@ export default function SettingsClient({ initialSettings }: Props) {
 
       {/* Header */}
       <section className="text-center">
-        <div className="section-label justify-center">Beállítások</div>
+        <div className="section-label justify-center">Beállítások · {year}</div>
         <h1 className="text-4xl font-bold text-[#3a3a3a] tracking-tight mb-2">Szezon beállításai</h1>
         <p className="text-[#4a4f4a] font-light">Foglalási szabályok és elérhető napok kezelése.</p>
       </section>

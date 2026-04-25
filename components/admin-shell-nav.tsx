@@ -1,13 +1,25 @@
 "use client"
 
+import { useState, useTransition } from "react"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { LogOut } from "lucide-react"
+import { usePathname, useRouter } from "next/navigation"
+import { LogOut, Settings } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { adminNavigation } from "@/lib/site"
+import type { Year } from "@/lib/types"
+import { YearsManagerDialog } from "@/components/years-manager-dialog"
 
-export function AdminShellNav() {
+interface AdminShellNavProps {
+  years: Year[]
+  viewYear: number
+  activeYear: number | null
+}
+
+export function AdminShellNav({ years, viewYear, activeYear }: AdminShellNavProps) {
   const pathname = usePathname()
+  const router = useRouter()
+  const [isPending, startTransition] = useTransition()
+  const [managerOpen, setManagerOpen] = useState(false)
 
   const isActive = (href: string) => {
     if (href === "/admin") return pathname === href
@@ -19,12 +31,61 @@ export function AdminShellNav() {
     window.location.href = "/admin-login"
   }
 
+  const handleYearChange = async (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const next = Number.parseInt(event.target.value, 10)
+    if (!Number.isInteger(next) || next === viewYear) return
+    const response = await fetch("/api/admin/view-year", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ year: next }),
+    })
+    if (response.ok) {
+      startTransition(() => router.refresh())
+    }
+  }
+
+  const yearLabel = (year: Year) => (year.year === activeYear ? `${year.year} (aktív)` : String(year.year))
+
+  // Ensure the current view year shows up even if it's somehow missing from the years list
+  // (shouldn't happen post-migration, but the cookie can outlive a deletion).
+  const yearOptions = years.some((y) => y.year === viewYear)
+    ? years
+    : [{ year: viewYear, isActive: viewYear === activeYear, createdAt: "" }, ...years]
+
+  const yearControls = (
+    <div className="flex items-center gap-1.5">
+      <select
+        value={viewYear}
+        onChange={handleYearChange}
+        disabled={isPending}
+        aria-label="Megjelenített év"
+        className="h-8 rounded-lg border border-[#bfc3c7] bg-white px-2 pr-7 text-sm font-medium text-[#4a4f4a] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4a4f4a]/30 disabled:opacity-50"
+      >
+        {yearOptions.map((y) => (
+          <option key={y.year} value={y.year}>
+            {yearLabel(y)}
+          </option>
+        ))}
+      </select>
+      <button
+        type="button"
+        onClick={() => setManagerOpen(true)}
+        aria-label="Évek kezelése"
+        title="Évek kezelése"
+        className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[#bfc3c7] bg-white text-[#4a4f4a] hover:bg-[#4a4f4a]/5 transition-colors cursor-pointer"
+      >
+        <Settings className="h-4 w-4" />
+      </button>
+    </div>
+  )
+
   return (
     <>
       <header className="sticky top-16 z-40 border-b border-[#bfc3c7] bg-[#ededed]/95 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4 py-3">
           <div className="flex items-center gap-3">
             <span className="text-xs font-bold tracking-widest uppercase text-[#6e7f6a]">Admin</span>
+            {yearControls}
             <div className="hidden md:flex items-center gap-1 ml-4">
               {adminNavigation.map((item) => (
                 <Link
@@ -71,6 +132,13 @@ export function AdminShellNav() {
           ))}
         </div>
       </nav>
+
+      <YearsManagerDialog
+        open={managerOpen}
+        onOpenChange={setManagerOpen}
+        viewYear={viewYear}
+        activeYear={activeYear}
+      />
     </>
   )
 }

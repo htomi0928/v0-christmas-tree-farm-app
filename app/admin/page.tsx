@@ -1,14 +1,14 @@
-﻿import Link from "next/link"
 import { CalendarDays, DollarSign, Trees, TrendingDown, TrendingUp, Wallet } from "lucide-react"
 import { listReservations } from "@/lib/reservations"
 import { getSettings } from "@/lib/settings"
 import { getExpensesSummary } from "@/lib/expenses"
 import { ReservationStatus } from "@/lib/types"
+import { getViewYear } from "@/lib/years"
 
-async function getStats() {
-  const reservations = await listReservations()
-  const settings = await getSettings()
-  const expensesSummary = await getExpensesSummary()
+async function getStats(year: number) {
+  const reservations = await listReservations({ year })
+  const settings = await getSettings(year)
+  const expensesSummary = await getExpensesSummary(year)
 
   const totalReservations = reservations.length
   const totalTrees = reservations.reduce((sum, reservation) => sum + reservation.treeCount, 0)
@@ -68,7 +68,8 @@ function money(value: number) {
 }
 
 export default async function AdminDashboard() {
-  const stats = await getStats()
+  const year = await getViewYear()
+  const stats = await getStats(year)
 
   const overviewCards = [
     { label: "Összes foglalás", value: stats.totalReservations, help: "Minden rögzített foglalás", icon: CalendarDays },
@@ -115,7 +116,7 @@ export default async function AdminDashboard() {
 
       {/* Header */}
       <section className="text-center">
-        <div className="section-label justify-center">Áttekintés</div>
+        <div className="section-label justify-center">Áttekintés · {year}</div>
         <h1 className="text-4xl sm:text-5xl font-bold text-[#3a3a3a] mb-3 tracking-tight">Dashboard</h1>
         <p className="text-[#4a4f4a] font-light max-w-md mx-auto">A legfontosabb számok és gyors műveletek egy helyen.</p>
       </section>
