@@ -137,19 +137,37 @@ export async function updateReservation(
     }
   }
 
-  // Determine final status and treeNumbers for validation
+  // Determine final values for status-based field gating
   const finalStatus = data.status ?? existing.status
   const finalTreeNumbers = data.treeNumbers !== undefined ? data.treeNumbers : existing.treeNumbers
+  const finalPaidTo = data.paidTo !== undefined ? data.paidTo : existing.paidTo
 
-  // Prevent clearing tree numbers when status requires them
   const requiresTreeNumber = (status: ReservationStatus) =>
     status === ReservationStatus.TREE_TAGGED ||
     status === ReservationStatus.CUT ||
-    status === ReservationStatus.PICKED_UP_PAID ||
+    status === ReservationStatus.PICKED_UP ||
     status === ReservationStatus.FREE
+  const allowsTreeNumbers = (status: ReservationStatus) =>
+    status !== ReservationStatus.BOOKED && status !== ReservationStatus.NO_SHOW
+  const allowsPaidTo = (status: ReservationStatus) =>
+    status === ReservationStatus.TREE_TAGGED ||
+    status === ReservationStatus.CUT ||
+    status === ReservationStatus.PICKED_UP
 
   if (requiresTreeNumber(finalStatus) && (!finalTreeNumbers || finalTreeNumbers.trim() === "")) {
     return { success: false, error: "A fa sorszáma kötelező ennél a státusznál és nem lehet üres." }
+  }
+  if (!allowsTreeNumbers(finalStatus) && finalTreeNumbers && finalTreeNumbers.trim() !== "") {
+    return {
+      success: false,
+      error: "Ennél a státusznál nem lehet fa sorszám. Töröld a sorszámot, vagy válassz másik státuszt.",
+    }
+  }
+  if (!allowsPaidTo(finalStatus) && finalPaidTo) {
+    return {
+      success: false,
+      error: "Ennél a státusznál nem rögzíthető fizetés. Töröld a fizetést, vagy válassz másik státuszt.",
+    }
   }
 
   // Build update query dynamically
@@ -293,7 +311,6 @@ export async function getReservationStats(year: number): Promise<{
       SUM(tree_count) AS total_trees
     FROM reservations
     WHERE year = ${year}
-      AND status = ${ReservationStatus.PICKED_UP_PAID}
       AND paid_to IS NOT NULL
     GROUP BY paid_to
   `
