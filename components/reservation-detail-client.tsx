@@ -50,7 +50,8 @@ export default function ReservationDetailClient({ reservation: initialReservatio
   const requiresTreeNumber = (status: ReservationStatus) =>
     status === ReservationStatus.TREE_TAGGED ||
     status === ReservationStatus.CUT ||
-    status === ReservationStatus.PICKED_UP_PAID
+    status === ReservationStatus.PICKED_UP_PAID ||
+    status === ReservationStatus.FREE
 
   const requiresPaidTo = (status: ReservationStatus) =>
     status === ReservationStatus.PICKED_UP_PAID

@@ -3,6 +3,7 @@ export enum ReservationStatus {
   TREE_TAGGED = "TREE_TAGGED",
   CUT = "CUT",
   PICKED_UP_PAID = "PICKED_UP_PAID",
+  FREE = "FREE",
   NO_SHOW = "NO_SHOW",
 }
 

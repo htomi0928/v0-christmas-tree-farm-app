@@ -6,7 +6,7 @@ import { logApiError, parseJsonBody } from "@/lib/api"
 
 const seedSchema = z.object({
   username: z.string().trim().min(1).max(100).default("admin"),
-  password: z.string().min(12).max(200),
+  password: z.string().min(5).max(200),
 })
 
 export async function POST(req: Request) {

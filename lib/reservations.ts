@@ -145,7 +145,8 @@ export async function updateReservation(
   const requiresTreeNumber = (status: ReservationStatus) =>
     status === ReservationStatus.TREE_TAGGED ||
     status === ReservationStatus.CUT ||
-    status === ReservationStatus.PICKED_UP_PAID
+    status === ReservationStatus.PICKED_UP_PAID ||
+    status === ReservationStatus.FREE
 
   if (requiresTreeNumber(finalStatus) && (!finalTreeNumbers || finalTreeNumbers.trim() === "")) {
     return { success: false, error: "A fa sorszáma kötelező ennél a státusznál és nem lehet üres." }

@@ -50,6 +50,12 @@ export const reservationStatusMeta: Record<
     pillClassName:
       "border-[color:var(--mint-border)] bg-[color:var(--mint-soft)] text-[color:var(--mint-strong)]",
   },
+  [ReservationStatus.FREE]: {
+    label: "Ingyenes",
+    className: "bg-[color:var(--slate-soft)] text-[color:var(--slate-strong)]",
+    pillClassName:
+      "border-[color:var(--slate-border)] bg-[color:var(--slate-soft)] text-[color:var(--slate-strong)]",
+  },
   [ReservationStatus.NO_SHOW]: {
     label: "Nem érkezett meg",
     className: "bg-[color:var(--rose-soft)] text-[color:var(--rose-strong)]",
