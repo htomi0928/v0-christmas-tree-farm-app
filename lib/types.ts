@@ -33,6 +33,19 @@ export interface CreateReservationData {
   notes?: string
 }
 
+export interface CreateAdminQuickReservationData {
+  treeCount: number
+  name?: string
+  phone?: string
+  email?: string
+  visitDate?: string
+  pickupDate?: string
+  notes?: string
+  status?: ReservationStatus
+  treeNumbers?: string
+  paidTo?: "JÃ¡nos" | "Sanyi"
+}
+
 export interface UpdateReservationData {
   status?: ReservationStatus
   treeNumbers?: string

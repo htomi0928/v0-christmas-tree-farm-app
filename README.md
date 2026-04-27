@@ -134,6 +134,7 @@ Key tables:
 - `POST /api/admin/login` - Admin authentication (body: `{ username, password }`)
 - `POST /api/admin/logout` - Clear session cookie
 - `GET /api/admin/reservations` - List reservations for the admin's view year (optional `?status=` filter)
+- `POST /api/admin/reservations/quick` - Admin quick-create reservation for the active year (treeCount required, other fields optional)
 - `GET /api/admin/reservations/[id]` - Get specific reservation (any year)
 - `PATCH /api/admin/reservations/[id]` - Update reservation with validation
 - `DELETE /api/admin/reservations/[id]` - Delete reservation

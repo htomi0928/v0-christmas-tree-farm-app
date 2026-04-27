@@ -70,7 +70,7 @@ export default function ReservationDetailClient({ reservation: initialReservatio
     const invalidEntries: string[] = []
     for (const part of parts) {
       const num = Number.parseInt(part, 10)
-      if (Number.isNaN(num) || num <= 0) {
+      if (Number.isNaN(num) || num < 0) {
         invalidEntries.push(part)
       } else {
         numbers.push(num)
@@ -91,7 +91,7 @@ export default function ReservationDetailClient({ reservation: initialReservatio
     } else if (data.treeNumbers.trim()) {
       const { numbers, invalidEntries } = parseTreeNumbers(data.treeNumbers)
       if (invalidEntries.length > 0) {
-        errors.treeNumbers = `Érvénytelen sorszám(ok): ${invalidEntries.join(", ")}. Csak pozitív egész számok adhatók meg.`
+        errors.treeNumbers = `Érvénytelen sorszám(ok): ${invalidEntries.join(", ")}. Csak 0 vagy pozitív egész számok adhatók meg.`
       } else {
         // Check for duplicates within the input
         const seen = new Set<number>()
