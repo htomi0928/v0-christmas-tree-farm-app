@@ -2,7 +2,7 @@ import "server-only"
 import { z } from "zod"
 import { createAdminQuickReservation } from "@/lib/reservations"
 import { ReservationStatus } from "@/lib/types"
-import { enforceSameOrigin, logApiError, parseJsonBody, requireAdminSessionResponse } from "@/lib/api"
+import { enforceSameOrigin, logApiError, parseJsonBody, requireAdminSessionResponse, requireAdminUser } from "@/lib/api"
 import { getActiveYear } from "@/lib/years"
 
 const quickCreateReservationSchema = z.object({
@@ -25,6 +25,10 @@ export async function POST(request: Request) {
 
     const authError = await requireAdminSessionResponse()
     if (authError) return authError
+    const currentAdminUser = await requireAdminUser()
+    if (!currentAdminUser) {
+      return Response.json({ success: false, error: "Nincs hitelesites" }, { status: 401 })
+    }
 
     const activeYear = await getActiveYear()
     if (activeYear === null) {
@@ -35,6 +39,10 @@ export async function POST(request: Request) {
     if (!parsedBody.success) return parsedBody.response
 
     const data = parsedBody.data
+    const adminComment = `Hozzáadva ${currentAdminUser} által`
+    const normalizedNotes = data.notes?.trim()
+    const notesWithAdminComment = normalizedNotes ? `${normalizedNotes}\n${adminComment}` : adminComment
+
     const result = await createAdminQuickReservation(
       {
         treeCount: data.treeCount,
@@ -43,7 +51,7 @@ export async function POST(request: Request) {
         email: data.email || undefined,
         visitDate: data.visitDate || undefined,
         pickupDate: data.pickupDate || undefined,
-        notes: data.notes || undefined,
+        notes: notesWithAdminComment,
         status: data.status,
         treeNumbers: data.treeNumbers || undefined,
         paidTo: data.paidTo || undefined,

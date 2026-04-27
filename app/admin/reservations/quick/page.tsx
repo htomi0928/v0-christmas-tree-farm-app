@@ -1,8 +1,15 @@
+import { cookies } from "next/headers"
 import Link from "next/link"
 import { ArrowLeft } from "lucide-react"
 import QuickReservationForm from "@/components/quick-reservation-form"
+import { getSessionUser } from "@/lib/auth"
+import { paidToForUsername } from "@/lib/admin-users"
 
-export default function QuickReservationPage() {
+export default async function QuickReservationPage() {
+  const cookieStore = await cookies()
+  const sessionId = cookieStore.get("admin_session")?.value
+  const currentAdminPaidTo = paidToForUsername(sessionId ? await getSessionUser(sessionId) : null)
+
   return (
     <div className="space-y-8 pb-24">
       <Link
@@ -21,8 +28,7 @@ export default function QuickReservationPage() {
         </p>
       </section>
 
-      <QuickReservationForm />
+      <QuickReservationForm currentAdminPaidTo={currentAdminPaidTo} />
     </div>
   )
 }
-

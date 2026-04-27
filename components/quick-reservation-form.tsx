@@ -11,10 +11,15 @@ const inputClass =
   "w-full px-4 py-3 rounded-lg border border-[#bfc3c7] bg-white text-[#3a3a3a] placeholder:text-[#4a4f4a]/40 focus:outline-none focus:ring-2 focus:ring-[#6e7f6a] text-sm transition-all duration-150"
 const labelClass = "block text-xs font-bold text-[#3a3a3a] tracking-widest uppercase mb-2"
 
-export default function QuickReservationForm() {
+interface QuickReservationFormProps {
+  currentAdminPaidTo: "Sanyi" | "János" | null
+}
+
+export default function QuickReservationForm({ currentAdminPaidTo }: QuickReservationFormProps) {
   const now = new Date()
   const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`
   const adminNamePlaceholder = `Admin foglalas ${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}${String(now.getDate()).padStart(2, "0")}-${String(now.getHours()).padStart(2, "0")}${String(now.getMinutes()).padStart(2, "0")}`
+  const startsAsPickedUp = currentAdminPaidTo !== null
 
   const router = useRouter()
   const [isSaving, setIsSaving] = useState(false)
@@ -24,12 +29,12 @@ export default function QuickReservationForm() {
     phone: "",
     email: "",
     visitDate: today,
-    pickupDate: "",
+    pickupDate: startsAsPickedUp ? today : "",
     treeCount: 1,
     notes: "",
-    status: ReservationStatus.BOOKED,
-    treeNumbers: "",
-    paidTo: "",
+    status: startsAsPickedUp ? ReservationStatus.PICKED_UP : ReservationStatus.BOOKED,
+    treeNumbers: startsAsPickedUp ? "0" : "",
+    paidTo: currentAdminPaidTo ?? "",
   })
 
   const handleSubmit = async (event: FormEvent) => {
@@ -105,7 +110,9 @@ export default function QuickReservationForm() {
           onChange={(e) => handleStatusChange(e.target.value as ReservationStatus)}
           className={inputClass}
         >
-          {Object.entries(reservationStatusMeta).map(([value, meta]) => (
+          {Object.entries(reservationStatusMeta)
+            .filter(([value]) => value !== ReservationStatus.NO_SHOW)
+            .map(([value, meta]) => (
             <option key={value} value={value}>
               {meta.label}
             </option>
@@ -197,3 +204,4 @@ export default function QuickReservationForm() {
     </form>
   )
 }
+
