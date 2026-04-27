@@ -76,6 +76,58 @@ Lists reservations for the admin's current view year (resolved from the `admin_v
 }
 ```
 
+### Quick-create reservation (admin)
+
+**POST** `/api/admin/reservations/quick`
+
+Creates a reservation for the currently active public year. Requires a valid admin session.
+Unlike the public create endpoint, this quick-create route does **not** send reservation notification emails.
+
+Only `treeCount` is required in the request body. All other fields are optional:
+
+```json
+{
+  "treeCount": 1,
+  "name": "",
+  "phone": "",
+  "email": "",
+  "visitDate": "",
+  "pickupDate": "",
+  "notes": "",
+  "status": "BOOKED",
+  "treeNumbers": "",
+  "paidTo": ""
+}
+```
+
+**Auto-fill behavior when optional fields are empty:**
+- `name` → `Admin foglalas YYYYMMDD-HHMM`
+- `phone` → `"N/A"`
+- `visitDate` → today's local date (`YYYY-MM-DD`)
+- `status` defaults to `BOOKED`
+- if `status` requires tree numbers (`TREE_TAGGED`, `CUT`, `PICKED_UP`, `FREE`) and `treeNumbers` is empty, the API stores `"0"`
+
+`"0"` is treated as a sentinel meaning "tree number not assigned yet". Multiple reservations may use `"0"`. Conflict checks still apply to real tree numbers.
+
+**Response (200):**
+```json
+{
+  "success": true,
+  "reservation": {
+    "id": 101,
+    "year": 2026,
+    "name": "Admin foglalas 20261128-1015",
+    "phone": "N/A",
+    "visitDate": "2026-11-28",
+    "treeCount": 1,
+    "status": "BOOKED",
+    "createdAt": "2026-11-28T10:15:30.000Z"
+  }
+}
+```
+
+**Errors:** `400` validation error, `401` unauthenticated, `403` origin check, `503` if no active year is configured.
+
 ### Get one reservation
 
 **GET** `/api/admin/reservations/[id]` → `{ "success": true, "reservation": { ... } }`

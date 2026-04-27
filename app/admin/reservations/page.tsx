@@ -12,11 +12,16 @@ export default async function ReservationsPage() {
     <div className="space-y-6 pb-24">
       <section className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="section-kicker">Foglalások · {year}</p>
-          <h1 className="admin-section-title">Kereshető, szűrhető, mobilbarát foglaláslista.</h1>
-          <p className="mt-3 max-w-3xl text-base leading-7 text-foreground/70">A kártyás nézet telefonon gyorsabban áttekinthető, az asztali nézet pedig ugyanebből a struktúrából épül fel.</p>
+          <p className="section-kicker">Foglalasok - {year}</p>
+          <h1 className="admin-section-title">Keresheto, szurheto, mobilbarat foglalaslista.</h1>
+          <p className="mt-3 max-w-3xl text-base leading-7 text-foreground/70">
+            A kartyas nezet telefonon gyorsabban attekintheto, az asztali nezet pedig ugyanebbol a strukturabol epul fel.
+          </p>
         </div>
-        <Button asChild size="lg"><Link href="/booking">Új foglalás</Link></Button>
+        <div className="flex flex-wrap gap-2">
+          <Button asChild size="lg"><Link href="/admin/reservations/quick">Gyors foglalas</Link></Button>
+          <Button asChild size="lg" variant="outline"><Link href="/booking">Nyilvanos foglalo oldal</Link></Button>
+        </div>
       </section>
 
       <ReservationFilters reservations={reservations} />

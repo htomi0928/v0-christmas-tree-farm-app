@@ -1,7 +1,8 @@
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
-import { validateSession } from "@/lib/auth"
+import { getSessionUser, validateSession } from "@/lib/auth"
 import { getReservationById } from "@/lib/reservations"
+import { paidToForUsername } from "@/lib/admin-users"
 import ReservationDetailClient from "@/components/reservation-detail-client"
 
 export default async function ReservationDetailPage({
@@ -24,5 +25,7 @@ export default async function ReservationDetailPage({
     redirect("/admin/reservations")
   }
 
-  return <ReservationDetailClient reservation={reservation} />
+  const currentAdminPaidTo = paidToForUsername(await getSessionUser(sessionId))
+
+  return <ReservationDetailClient reservation={reservation} currentAdminPaidTo={currentAdminPaidTo} />
 }

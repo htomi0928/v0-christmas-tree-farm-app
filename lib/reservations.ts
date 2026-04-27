@@ -1,6 +1,12 @@
 import "server-only"
 import { sql } from "./db"
-import { type Reservation, ReservationStatus, type CreateReservationData, type UpdateReservationData } from "./types"
+import {
+  type Reservation,
+  ReservationStatus,
+  type CreateReservationData,
+  type CreateAdminQuickReservationData,
+  type UpdateReservationData,
+} from "./types"
 
 // Format a database date value to YYYY-MM-DD string without timezone shift
 function formatDate(value: any): string {
@@ -48,6 +54,24 @@ function validateReservationData(data: CreateReservationData): string[] {
   if (data.email && !data.email.includes("@")) errors.push("Érvénytelen email cím")
 
   return errors
+}
+
+function formatTodayLocal(): string {
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = String(now.getMonth() + 1).padStart(2, "0")
+  const day = String(now.getDate()).padStart(2, "0")
+  return `${year}-${month}-${day}`
+}
+
+function makeAdminPlaceholderName(): string {
+  const now = new Date()
+  const yyyy = now.getFullYear()
+  const mm = String(now.getMonth() + 1).padStart(2, "0")
+  const dd = String(now.getDate()).padStart(2, "0")
+  const hh = String(now.getHours()).padStart(2, "0")
+  const min = String(now.getMinutes()).padStart(2, "0")
+  return `Admin foglalas ${yyyy}${mm}${dd}-${hh}${min}`
 }
 
 // List reservations for a given year, with optional secondary filters.
@@ -112,6 +136,96 @@ export async function createReservation(
   return { success: true, data: rowToReservation(rows[0]) }
 }
 
+function requiresTreeNumber(status: ReservationStatus) {
+  return (
+    status === ReservationStatus.TREE_TAGGED ||
+    status === ReservationStatus.CUT ||
+    status === ReservationStatus.PICKED_UP ||
+    status === ReservationStatus.FREE
+  )
+}
+
+function allowsTreeNumbers(status: ReservationStatus) {
+  return status !== ReservationStatus.BOOKED && status !== ReservationStatus.NO_SHOW
+}
+
+function allowsPaidTo(status: ReservationStatus) {
+  return (
+    status === ReservationStatus.TREE_TAGGED ||
+    status === ReservationStatus.CUT ||
+    status === ReservationStatus.PICKED_UP
+  )
+}
+
+// Admin quick-create allows minimal input and auto-fills DB-required fields.
+export async function createAdminQuickReservation(
+  data: CreateAdminQuickReservationData,
+  year: number,
+): Promise<{ success: boolean; data?: Reservation; error?: string }> {
+  if (!Number.isInteger(data.treeCount) || data.treeCount < 1 || data.treeCount > 20) {
+    return { success: false, error: "Fak szama 1 es 20 kozott lehet." }
+  }
+
+  const status = data.status ?? ReservationStatus.BOOKED
+  const normalizedTreeNumbersRaw = data.treeNumbers?.trim() ?? ""
+  const treeNumbers = requiresTreeNumber(status)
+    ? normalizedTreeNumbersRaw || "0"
+    : normalizedTreeNumbersRaw || undefined
+  const paidTo = data.paidTo || undefined
+
+  if (!allowsTreeNumbers(status) && treeNumbers && treeNumbers.trim() !== "") {
+    return {
+      success: false,
+      error: "Ennel a statusznal nem lehet fa sorszam. Torold a sorszamot, vagy valassz masik statuszt.",
+    }
+  }
+  if (!allowsPaidTo(status) && paidTo) {
+    return {
+      success: false,
+      error: "Ennel a statusznal nem rogzitheto fizetes. Torold a fizetest, vagy valassz masik statuszt.",
+    }
+  }
+
+  const parsedTreeNumbers = (treeNumbers || "")
+    .split(",")
+    .map((s) => Number.parseInt(s.trim(), 10))
+    .filter((n) => !Number.isNaN(n) && n > 0)
+
+  if (parsedTreeNumbers.length > 0) {
+    const { conflictingNumbers } = await findConflictingTreeNumbers(parsedTreeNumbers, year)
+    if (conflictingNumbers.length > 0) {
+      return {
+        success: false,
+        error: `A kovetkezo fa sorszamok mar foglaltak: ${conflictingNumbers.join(", ")}`,
+      }
+    }
+  }
+
+  const name = data.name?.trim() || makeAdminPlaceholderName()
+  const phone = data.phone?.trim() || "N/A"
+  const visitDate = data.visitDate?.trim() || formatTodayLocal()
+
+  const rows = await sql`
+    INSERT INTO reservations (year, name, phone, email, visit_date, pickup_date, tree_count, notes, status, tree_numbers, paid_to)
+    VALUES (
+      ${year},
+      ${name},
+      ${phone},
+      ${data.email?.trim() || null},
+      ${visitDate},
+      ${data.pickupDate?.trim() || null},
+      ${data.treeCount},
+      ${data.notes?.trim() || null},
+      ${status},
+      ${treeNumbers || null},
+      ${paidTo || null}
+    )
+    RETURNING *
+  `
+
+  return { success: true, data: rowToReservation(rows[0]) }
+}
+
 // Update reservation
 export async function updateReservation(
   id: number,
@@ -137,18 +251,25 @@ export async function updateReservation(
     }
   }
 
-  // Determine final status and treeNumbers for validation
+  // Determine final values for status-based field gating
   const finalStatus = data.status ?? existing.status
   const finalTreeNumbers = data.treeNumbers !== undefined ? data.treeNumbers : existing.treeNumbers
-
-  // Prevent clearing tree numbers when status requires them
-  const requiresTreeNumber = (status: ReservationStatus) =>
-    status === ReservationStatus.TREE_TAGGED ||
-    status === ReservationStatus.CUT ||
-    status === ReservationStatus.PICKED_UP_PAID
+  const finalPaidTo = data.paidTo !== undefined ? data.paidTo : existing.paidTo
 
   if (requiresTreeNumber(finalStatus) && (!finalTreeNumbers || finalTreeNumbers.trim() === "")) {
     return { success: false, error: "A fa sorszáma kötelező ennél a státusznál és nem lehet üres." }
+  }
+  if (!allowsTreeNumbers(finalStatus) && finalTreeNumbers && finalTreeNumbers.trim() !== "") {
+    return {
+      success: false,
+      error: "Ennél a státusznál nem lehet fa sorszám. Töröld a sorszámot, vagy válassz másik státuszt.",
+    }
+  }
+  if (!allowsPaidTo(finalStatus) && finalPaidTo) {
+    return {
+      success: false,
+      error: "Ennél a státusznál nem rögzíthető fizetés. Töröld a fizetést, vagy válassz másik státuszt.",
+    }
   }
 
   // Build update query dynamically
@@ -292,7 +413,6 @@ export async function getReservationStats(year: number): Promise<{
       SUM(tree_count) AS total_trees
     FROM reservations
     WHERE year = ${year}
-      AND status = ${ReservationStatus.PICKED_UP_PAID}
       AND paid_to IS NOT NULL
     GROUP BY paid_to
   `

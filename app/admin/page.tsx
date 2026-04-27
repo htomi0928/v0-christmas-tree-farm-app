@@ -2,7 +2,6 @@ import { CalendarDays, DollarSign, Trees, TrendingDown, TrendingUp, Wallet } fro
 import { listReservations } from "@/lib/reservations"
 import { getSettings } from "@/lib/settings"
 import { getExpensesSummary } from "@/lib/expenses"
-import { ReservationStatus } from "@/lib/types"
 import { getViewYear } from "@/lib/years"
 
 async function getStats(year: number) {
@@ -19,7 +18,7 @@ async function getStats(year: number) {
     return visitDate >= nextWeekend.start && visitDate <= nextWeekend.end
   })
 
-  const paidReservations = reservations.filter((reservation) => reservation.status === ReservationStatus.PICKED_UP_PAID)
+  const paidReservations = reservations.filter((reservation) => reservation.paidTo)
   const revenueJanos = paidReservations.filter((reservation) => reservation.paidTo === "János").reduce((sum, reservation) => sum + reservation.treeCount * settings.pricePerTree, 0)
   const revenueSanyi = paidReservations.filter((reservation) => reservation.paidTo === "Sanyi").reduce((sum, reservation) => sum + reservation.treeCount * settings.pricePerTree, 0)
   const totalRevenue = revenueJanos + revenueSanyi

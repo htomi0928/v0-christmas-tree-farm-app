@@ -2,7 +2,8 @@ export enum ReservationStatus {
   BOOKED = "BOOKED",
   TREE_TAGGED = "TREE_TAGGED",
   CUT = "CUT",
-  PICKED_UP_PAID = "PICKED_UP_PAID",
+  PICKED_UP = "PICKED_UP",
+  FREE = "FREE",
   NO_SHOW = "NO_SHOW",
 }
 
@@ -30,6 +31,19 @@ export interface CreateReservationData {
   pickupDate?: string
   treeCount: number
   notes?: string
+}
+
+export interface CreateAdminQuickReservationData {
+  treeCount: number
+  name?: string
+  phone?: string
+  email?: string
+  visitDate?: string
+  pickupDate?: string
+  notes?: string
+  status?: ReservationStatus
+  treeNumbers?: string
+  paidTo?: "JÃ¡nos" | "Sanyi"
 }
 
 export interface UpdateReservationData {

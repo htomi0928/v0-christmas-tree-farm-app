@@ -56,6 +56,9 @@
   --rose-soft:                     #f5d8d8;
   --rose-strong:                   #7a1e1e;
   --rose-border:                   #e0a8a8;
+  --slate-soft:                    #e3e6ea;
+  --slate-strong:                  #3a4654;
+  --slate-border:                  #c1c8d2;
 }
 
 .dark {

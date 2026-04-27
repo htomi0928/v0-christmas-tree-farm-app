@@ -10,12 +10,14 @@ import AdminDatePicker from "@/components/admin-date-picker"
 
 interface Props {
   reservation: Reservation
+  currentAdminPaidTo: "Sanyi" | "János" | null
 }
 
 const inputClass = "w-full px-4 py-3 rounded-lg border border-[#bfc3c7] bg-white text-[#3a3a3a] placeholder:text-[#4a4f4a]/40 focus:outline-none focus:ring-2 focus:ring-[#6e7f6a] text-sm transition-all duration-150"
+const disabledInputClass = "w-full px-4 py-3 rounded-lg border border-[#bfc3c7] bg-[#f0efec] text-[#4a4f4a]/60 placeholder:text-[#4a4f4a]/40 text-sm cursor-not-allowed"
 const labelClass = "block text-xs font-bold text-[#3a3a3a] tracking-widest uppercase mb-2"
 
-export default function ReservationDetailClient({ reservation: initialReservation }: Props) {
+export default function ReservationDetailClient({ reservation: initialReservation, currentAdminPaidTo }: Props) {
   const router = useRouter()
   const [formData, setFormData] = useState({
     name: initialReservation.name,
@@ -50,10 +52,16 @@ export default function ReservationDetailClient({ reservation: initialReservatio
   const requiresTreeNumber = (status: ReservationStatus) =>
     status === ReservationStatus.TREE_TAGGED ||
     status === ReservationStatus.CUT ||
-    status === ReservationStatus.PICKED_UP_PAID
+    status === ReservationStatus.PICKED_UP ||
+    status === ReservationStatus.FREE
 
-  const requiresPaidTo = (status: ReservationStatus) =>
-    status === ReservationStatus.PICKED_UP_PAID
+  const allowsTreeNumbers = (status: ReservationStatus) =>
+    status !== ReservationStatus.BOOKED && status !== ReservationStatus.NO_SHOW
+
+  const allowsPaidTo = (status: ReservationStatus) =>
+    status === ReservationStatus.TREE_TAGGED ||
+    status === ReservationStatus.CUT ||
+    status === ReservationStatus.PICKED_UP
 
   // Parse tree numbers from comma-separated string, filtering invalid entries
   const parseTreeNumbers = (input: string): { numbers: number[]; invalidEntries: string[] } => {
@@ -62,7 +70,7 @@ export default function ReservationDetailClient({ reservation: initialReservatio
     const invalidEntries: string[] = []
     for (const part of parts) {
       const num = Number.parseInt(part, 10)
-      if (Number.isNaN(num) || num <= 0) {
+      if (Number.isNaN(num) || num < 0) {
         invalidEntries.push(part)
       } else {
         numbers.push(num)
@@ -75,12 +83,15 @@ export default function ReservationDetailClient({ reservation: initialReservatio
     const errors: Record<string, string> = {}
 
     // Tree numbers validation
-    if (requiresTreeNumber(data.status) && !data.treeNumbers.trim()) {
+    if (!allowsTreeNumbers(data.status) && data.treeNumbers.trim()) {
+      errors.treeNumbers =
+        "Ennél a státusznál nem lehet fa sorszám. Töröld a sorszámot, vagy válassz másik státuszt."
+    } else if (requiresTreeNumber(data.status) && !data.treeNumbers.trim()) {
       errors.treeNumbers = "A fa sorszáma kötelező ennél a státusznál."
     } else if (data.treeNumbers.trim()) {
       const { numbers, invalidEntries } = parseTreeNumbers(data.treeNumbers)
       if (invalidEntries.length > 0) {
-        errors.treeNumbers = `Érvénytelen sorszám(ok): ${invalidEntries.join(", ")}. Csak pozitív egész számok adhatók meg.`
+        errors.treeNumbers = `Érvénytelen sorszám(ok): ${invalidEntries.join(", ")}. Csak 0 vagy pozitív egész számok adhatók meg.`
       } else {
         // Check for duplicates within the input
         const seen = new Set<number>()
@@ -98,16 +109,32 @@ export default function ReservationDetailClient({ reservation: initialReservatio
       }
     }
 
-    if (requiresPaidTo(data.status) && !data.paidTo) {
-      errors.paidTo = "Az \"Átvéve és fizetve\" státuszhoz meg kell adni, kinek fizettek."
+    if (!allowsPaidTo(data.status) && data.paidTo) {
+      errors.paidTo =
+        "Ennél a státusznál nem rögzíthető fizetés. Töröld a fizetést, vagy válassz másik státuszt."
     }
     return errors
   }
 
   const handleStatusChange = (newStatus: ReservationStatus) => {
-    setFormData((prev) => ({ ...prev, status: newStatus }))
-    // Re-validate with new status so errors appear immediately when switching
-    setValidationErrors(validate({ ...formData, status: newStatus }))
+    // Auto-fill paidTo on transition INTO PICKED_UP (the pickup moment, where
+    // payment most commonly happens). Only triggers when paidTo is empty —
+    // never overwrites an existing value. Earlier transitions (TREE_TAGGED,
+    // CUT) intentionally don't auto-fill, since those are tree-workflow
+    // events, not payment events.
+    const shouldAutoFillPaidTo =
+      currentAdminPaidTo !== null &&
+      !formData.paidTo &&
+      formData.status !== ReservationStatus.PICKED_UP &&
+      newStatus === ReservationStatus.PICKED_UP
+
+    const updated = {
+      ...formData,
+      status: newStatus,
+      paidTo: shouldAutoFillPaidTo ? currentAdminPaidTo : formData.paidTo,
+    }
+    setFormData(updated)
+    setValidationErrors(validate(updated))
   }
 
   const handleSave = async () => {
@@ -232,49 +259,52 @@ export default function ReservationDetailClient({ reservation: initialReservatio
             </label>
             <input
               value={formData.treeNumbers}
+              disabled={!allowsTreeNumbers(formData.status)}
               onChange={(e) => {
                 const updated = { ...formData, treeNumbers: e.target.value }
                 setFormData(updated)
                 setValidationErrors(validate(updated))
               }}
               placeholder="Például 12, 13"
-              className={`${inputClass} ${validationErrors.treeNumbers ? "border-destructive ring-1 ring-destructive/40" : ""}`}
+              className={`${allowsTreeNumbers(formData.status) ? inputClass : disabledInputClass} ${validationErrors.treeNumbers ? "border-destructive ring-1 ring-destructive/40" : ""}`}
             />
-            {validationErrors.treeNumbers && (
+            {validationErrors.treeNumbers ? (
               <p className="mt-1.5 text-xs text-destructive flex items-center gap-1">
                 <AlertCircle className="h-3 w-3 flex-shrink-0" />
                 {validationErrors.treeNumbers}
               </p>
-            )}
+            ) : !allowsTreeNumbers(formData.status) ? (
+              <p className="mt-1.5 text-xs text-[#4a4f4a]/60 font-light">A jelenlegi státusznál nem állítható be.</p>
+            ) : null}
           </div>
           <div>
             <label className={labelClass}>Megjegyzés</label>
             <textarea value={formData.notes} onChange={(e) => setFormData({ ...formData, notes: e.target.value })} rows={4} className={inputClass + " resize-none"} />
           </div>
           <div>
-            <label className={labelClass}>
-              Kinek fizettek?
-              {requiresPaidTo(formData.status) && <span className="ml-1 text-destructive">*</span>}
-            </label>
+            <label className={labelClass}>Kinek fizettek?</label>
             <select
               value={formData.paidTo}
+              disabled={!allowsPaidTo(formData.status)}
               onChange={(e) => {
                 const updated = { ...formData, paidTo: e.target.value as "János" | "Sanyi" | "" }
                 setFormData(updated)
                 setValidationErrors(validate(updated))
               }}
-              className={`${inputClass} ${validationErrors.paidTo ? "border-destructive ring-1 ring-destructive/40" : ""}`}
+              className={`${allowsPaidTo(formData.status) ? inputClass : disabledInputClass} ${validationErrors.paidTo ? "border-destructive ring-1 ring-destructive/40" : ""}`}
             >
               <option value="">Még nincs rögzítve</option>
               <option value="János">János</option>
               <option value="Sanyi">Sanyi</option>
             </select>
-            {validationErrors.paidTo && (
+            {validationErrors.paidTo ? (
               <p className="mt-1.5 text-xs text-destructive flex items-center gap-1">
                 <AlertCircle className="h-3 w-3 flex-shrink-0" />
                 {validationErrors.paidTo}
               </p>
-            )}
+            ) : !allowsPaidTo(formData.status) ? (
+              <p className="mt-1.5 text-xs text-[#4a4f4a]/60 font-light">A jelenlegi státusznál nem állítható be.</p>
+            ) : null}
           </div>
         </div>
       </div>

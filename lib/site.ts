@@ -44,11 +44,17 @@ export const reservationStatusMeta: Record<
     pillClassName:
       "border-[color:var(--peach-border)] bg-[color:var(--peach-soft)] text-[color:var(--peach-strong)]",
   },
-  [ReservationStatus.PICKED_UP_PAID]: {
-    label: "Átvéve és fizetve",
+  [ReservationStatus.PICKED_UP]: {
+    label: "Átvéve",
     className: "bg-[color:var(--mint-soft)] text-[color:var(--mint-strong)]",
     pillClassName:
       "border-[color:var(--mint-border)] bg-[color:var(--mint-soft)] text-[color:var(--mint-strong)]",
+  },
+  [ReservationStatus.FREE]: {
+    label: "Ingyenes",
+    className: "bg-[color:var(--slate-soft)] text-[color:var(--slate-strong)]",
+    pillClassName:
+      "border-[color:var(--slate-border)] bg-[color:var(--slate-soft)] text-[color:var(--slate-strong)]",
   },
   [ReservationStatus.NO_SHOW]: {
     label: "Nem érkezett meg",
