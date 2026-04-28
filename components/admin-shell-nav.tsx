@@ -1,13 +1,15 @@
 "use client"
 
+import type React from "react"
 import { useState, useTransition } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { LogOut, Settings } from "lucide-react"
+import { LogOut, Settings, Plus } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { adminNavigation } from "@/lib/site"
 import type { Year } from "@/lib/types"
 import { YearsManagerDialog } from "@/components/years-manager-dialog"
+import { useUnsavedChanges } from "@/contexts/unsaved-changes-context"
 
 interface AdminShellNavProps {
   years: Year[]
@@ -20,6 +22,14 @@ export function AdminShellNav({ years, viewYear, activeYear }: AdminShellNavProp
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [managerOpen, setManagerOpen] = useState(false)
+  const { isDirty, navigate } = useUnsavedChanges()
+
+  const guardedClick = (e: React.MouseEvent, href: string) => {
+    if (isDirty) {
+      e.preventDefault()
+      navigate(href)
+    }
+  }
 
   const isActive = (href: string) => {
     if (href === "/admin") return pathname === href
@@ -91,6 +101,7 @@ export function AdminShellNav({ years, viewYear, activeYear }: AdminShellNavProp
                 <Link
                   key={item.href}
                   href={item.href}
+                  onClick={(e) => guardedClick(e, item.href)}
                   className={cn(
                     "inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors",
                     isActive(item.href)
@@ -104,14 +115,25 @@ export function AdminShellNav({ years, viewYear, activeYear }: AdminShellNavProp
               ))}
             </div>
           </div>
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-[#bfc3c7] text-sm font-medium text-[#4a4f4a] hover:bg-[#4a4f4a]/5 transition-colors cursor-pointer"
-          >
-            <LogOut className="h-4 w-4" />
-            <span className="hidden sm:inline">Kijelentkezés</span>
-          </button>
+          <div className="flex items-center gap-2">
+            {isActive("/admin/reservations") && (
+              <Link
+                href="/admin/reservations/quick"
+                className="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#4a4f4a] text-sm font-semibold text-[#ededed] hover:bg-[#3a3a3a] transition-colors"
+              >
+                <Plus className="h-3.5 w-3.5" />
+                Gyors foglalás
+              </Link>
+            )}
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-[#bfc3c7] text-sm font-medium text-[#4a4f4a] hover:bg-[#4a4f4a]/5 transition-colors cursor-pointer"
+            >
+              <LogOut className="h-4 w-4" />
+              <span className="hidden sm:inline">Kijelentkezés</span>
+            </button>
+          </div>
         </div>
       </header>
 
@@ -121,6 +143,7 @@ export function AdminShellNav({ years, viewYear, activeYear }: AdminShellNavProp
             <Link
               key={item.href}
               href={item.href}
+              onClick={(e) => guardedClick(e, item.href)}
               className={cn(
                 "flex min-h-14 flex-col items-center justify-center rounded-xl text-[11px] font-semibold transition",
                 isActive(item.href) ? "bg-[#4a4f4a] text-[#ededed]" : "text-[#4a4f4a]/60 hover:bg-[#4a4f4a]/8 hover:text-[#4a4f4a]",

@@ -69,11 +69,11 @@ function FAQItem({ question, answer, icon: Icon }: { question: string; answer: s
 export default function FAQPage() {
   return (
     <div className="bg-[#ededed]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-12">
-        <div className="grid lg:grid-cols-2 lg:gap-16 lg:items-center">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pt-24 pb-12">
+        <div className="grid lg:grid-cols-2 lg:gap-16 lg:items-start">
 
           {/* Left */}
-          <div className="text-center mb-10 lg:mb-0 lg:transition-all lg:duration-300 lg:ease-in-out">
+          <div className="text-center mb-10 lg:mb-0 lg:sticky lg:top-24 lg:pt-20">
             <div className="section-label justify-center mb-3">Kérdések</div>
             <h1 className="text-4xl sm:text-5xl font-bold text-[#3a3a3a] mb-4 tracking-tight leading-tight">
               GYAKRAN ISMÉTELT KÉRDÉSEK

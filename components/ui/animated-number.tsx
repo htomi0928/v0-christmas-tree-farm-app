@@ -1,5 +1,5 @@
 'use client'
-import { cn } from '@/lib/utils'
+import { cn, formatNumber } from '@/lib/utils'
 import { motion, useSpring, useTransform, useInView } from 'framer-motion'
 import { useEffect, useRef } from 'react'
 
@@ -18,7 +18,7 @@ export function AnimatedNumber({ value, from = 0, className, springOptions, suff
 
   const spring = useSpring(from, { stiffness: 60, damping: 20, mass: 1, ...springOptions })
   const display = useTransform(spring, (current) =>
-    `${prefix}${Math.round(current).toLocaleString('hu-HU')}${suffix}`
+    `${prefix}${formatNumber(Math.round(current))}${suffix}`
   )
 
   useEffect(() => {

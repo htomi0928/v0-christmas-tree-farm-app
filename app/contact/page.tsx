@@ -58,7 +58,7 @@ export default function ContactPage() {
             <AnimateOnScroll>
               <div className="rounded-lg overflow-hidden h-96 bg-[#6e7f6a]/20">
                 <iframe
-                  title="Zalaegerszeg map"
+                  title="Zalaegerszeg térkép"
                   width="100%"
                   height="100%"
                   frameBorder="0"

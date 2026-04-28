@@ -20,7 +20,7 @@ export async function POST(req: Request) {
     }
 
     if (req.headers.get("x-seed-key") !== process.env.SEED_ADMIN_KEY) {
-      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 })
+      return NextResponse.json({ success: false, error: "Nem engedélyezett" }, { status: 401 })
     }
 
     const parsedBody = await parseJsonBody(req, seedSchema)

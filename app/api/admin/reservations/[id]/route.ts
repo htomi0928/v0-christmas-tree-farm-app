@@ -6,15 +6,15 @@ import { enforceSameOrigin, logApiError, parseJsonBody, parseNumericId, requireA
 
 const updateReservationSchema = z
   .object({
-    name: z.string().trim().min(1).max(120).optional(),
-    phone: z.string().trim().min(1).max(50).optional(),
-    email: z.union([z.string().trim().email(), z.literal(""), z.null()]).optional(),
-    visitDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
-    pickupDate: z.union([z.string().regex(/^\d{4}-\d{2}-\d{2}$/), z.literal(""), z.null()]).optional(),
-    treeCount: z.number().int().min(1).max(20).optional(),
-    status: z.nativeEnum(ReservationStatus).optional(),
-    treeNumbers: z.union([z.string().trim().max(200), z.literal(""), z.null()]).optional(),
-    notes: z.union([z.string().trim().max(1000), z.literal(""), z.null()]).optional(),
+    name: z.string().trim().min(1, "Név szükséges.").max(120, "A név legfeljebb 120 karakter lehet.").optional(),
+    phone: z.string().trim().min(1, "Telefonszám szükséges.").max(50, "A telefonszám legfeljebb 50 karakter lehet.").optional(),
+    email: z.union([z.string().trim().email("Érvénytelen e-mail cím."), z.literal(""), z.null()]).optional(),
+    visitDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Érvénytelen dátumformátum.").optional(),
+    pickupDate: z.union([z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Érvénytelen dátumformátum."), z.literal(""), z.null()]).optional(),
+    treeCount: z.number({ invalid_type_error: "Érvénytelen faszám." }).int("Egész számot adj meg.").min(1, "Minimum 1 fa szükséges.").max(20, "Maximum 20 fa adható meg.").optional(),
+    status: z.nativeEnum(ReservationStatus, { errorMap: () => ({ message: "Érvénytelen státusz." }) }).optional(),
+    treeNumbers: z.union([z.string().trim().max(200, "A sorszámok legfeljebb 200 karakter lehetnek."), z.literal(""), z.null()]).optional(),
+    notes: z.union([z.string().trim().max(1000, "A megjegyzés legfeljebb 1000 karakter lehet."), z.literal(""), z.null()]).optional(),
     paidTo: z.union([z.literal("János"), z.literal("Sanyi"), z.literal(""), z.null()]).optional(),
   })
   .refine((value) => Object.keys(value).length > 0, {
