@@ -1,12 +1,13 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { AlertCircle, ArrowLeft, CheckCircle2, Save, Trash2 } from "lucide-react"
 import { type Reservation, ReservationStatus } from "@/lib/types"
 import { formatDateHu, reservationStatusMeta } from "@/lib/site"
 import AdminDatePicker from "@/components/admin-date-picker"
+import { useUnsavedChanges } from "@/contexts/unsaved-changes-context"
 
 interface Props {
   reservation: Reservation
@@ -19,6 +20,7 @@ const labelClass = "block text-xs font-bold text-[#3a3a3a] tracking-widest upper
 
 export default function ReservationDetailClient({ reservation: initialReservation, currentAdminPaidTo }: Props) {
   const router = useRouter()
+  const { setDirty, navigate } = useUnsavedChanges()
   const [formData, setFormData] = useState({
     name: initialReservation.name,
     phone: initialReservation.phone,
@@ -31,6 +33,26 @@ export default function ReservationDetailClient({ reservation: initialReservatio
     notes: initialReservation.notes || "",
     paidTo: initialReservation.paidTo || "",
   })
+  const initialSnapshot = {
+    name: initialReservation.name,
+    phone: initialReservation.phone,
+    email: initialReservation.email || "",
+    visitDate: initialReservation.visitDate,
+    pickupDate: initialReservation.pickupDate || "",
+    treeCount: initialReservation.treeCount,
+    status: initialReservation.status,
+    treeNumbers: initialReservation.treeNumbers || "",
+    notes: initialReservation.notes || "",
+    paidTo: initialReservation.paidTo || "",
+  }
+
+  useEffect(() => {
+    const isDirty = JSON.stringify(formData) !== JSON.stringify(initialSnapshot)
+    setDirty(isDirty)
+  }, [formData])
+  useEffect(() => () => setDirty(false), [setDirty])
+
+  const alertRef = useRef<HTMLDivElement>(null)
   const [isSaving, setIsSaving] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
@@ -39,6 +61,12 @@ export default function ReservationDetailClient({ reservation: initialReservatio
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({})
   const [retrievalDays, setRetrievalDays] = useState<string[]>([])
   const [availableDays, setAvailableDays] = useState<string[]>([])
+
+  useEffect(() => {
+    if (error || success) {
+      setTimeout(() => alertRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }), 50)
+    }
+  }, [error, success])
 
   useEffect(() => {
     // Load the settings for this reservation's own year, not the admin's current view year —
@@ -155,6 +183,7 @@ export default function ReservationDetailClient({ reservation: initialReservatio
       })
       const data = await response.json()
       if (data.success) {
+        setDirty(false)
         setSuccess("A foglalás mentése sikerült.")
         setTimeout(() => setSuccess(""), 2500)
       } else {
@@ -190,7 +219,11 @@ export default function ReservationDetailClient({ reservation: initialReservatio
     <div className="space-y-8 pb-10">
 
       {/* Back link */}
-      <Link href="/admin/reservations" className="inline-flex items-center gap-2 text-sm text-[#4a4f4a]/60 hover:text-[#4a4f4a] transition-colors">
+      <Link
+        href="/admin/reservations"
+        onClick={(e) => { e.preventDefault(); navigate("/admin/reservations") }}
+        className="inline-flex items-center gap-2 text-sm text-[#4a4f4a]/60 hover:text-[#4a4f4a] transition-colors"
+      >
         <ArrowLeft className="h-4 w-4" />
         Vissza a listához
       </Link>
@@ -203,16 +236,18 @@ export default function ReservationDetailClient({ reservation: initialReservatio
       </section>
 
       {/* Alerts */}
-      {error && (
-        <div className="flex gap-3 p-4 border border-destructive/30 bg-destructive/8 rounded-lg text-sm text-destructive">
-          <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />{error}
-        </div>
-      )}
-      {success && (
-        <div className="flex gap-3 p-4 border border-[#6e7f6a]/30 bg-[#6e7f6a]/8 rounded-lg text-sm text-[#6e7f6a]">
-          <CheckCircle2 className="h-5 w-5 flex-shrink-0 mt-0.5" />{success}
-        </div>
-      )}
+      <div ref={alertRef}>
+        {error && (
+          <div className="flex gap-3 p-4 border border-destructive/30 bg-destructive/8 rounded-lg text-sm text-destructive">
+            <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />{error}
+          </div>
+        )}
+        {success && (
+          <div className="flex gap-3 p-4 border border-[#6e7f6a]/30 bg-[#6e7f6a]/8 rounded-lg text-sm text-[#6e7f6a]">
+            <CheckCircle2 className="h-5 w-5 flex-shrink-0 mt-0.5" />{success}
+          </div>
+        )}
+      </div>
 
       {/* Status */}
       <div className="border border-[#bfc3c7] bg-[#f5f4f1] rounded-lg p-6">
@@ -348,7 +383,7 @@ export default function ReservationDetailClient({ reservation: initialReservatio
 
       {/* Save / Back */}
       <div className="flex gap-3">
-        <button type="button" onClick={() => router.push("/admin/reservations")} className="flex-1 inline-flex items-center justify-center h-11 rounded-lg border border-[#bfc3c7] text-[#4a4f4a] text-sm font-medium hover:bg-[#4a4f4a]/5 transition-colors">
+        <button type="button" onClick={() => navigate("/admin/reservations")} className="flex-1 inline-flex items-center justify-center h-11 rounded-lg border border-[#bfc3c7] text-[#4a4f4a] text-sm font-medium hover:bg-[#4a4f4a]/5 transition-colors">
           Vissza
         </button>
         <button type="button" onClick={handleSave} disabled={isSaving} className="flex-1 inline-flex items-center justify-center gap-2 h-11 rounded-lg bg-[#4a4f4a] text-[#ededed] text-sm font-semibold hover:bg-[#4a4f4a]/90 transition-colors disabled:opacity-60">

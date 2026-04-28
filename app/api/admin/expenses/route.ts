@@ -5,10 +5,10 @@ import { enforceSameOrigin, logApiError, parseJsonBody, requireAdminSessionRespo
 import { getViewYear } from "@/lib/years"
 
 const createExpenseSchema = z.object({
-  person: z.union([z.literal("János"), z.literal("Sanyi")]),
-  amount: z.number().positive().max(100000000),
-  description: z.string().trim().min(1).max(200),
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  person: z.union([z.literal("János"), z.literal("Sanyi")], { errorMap: () => ({ message: "Érvénytelen személy." }) }),
+  amount: z.number({ invalid_type_error: "Érvénytelen összeg." }).positive("Az összeg pozitív szám kell legyen.").max(100000000, "Túl magas összeg."),
+  description: z.string().trim().min(1, "Leírás szükséges.").max(200, "A leírás legfeljebb 200 karakter lehet."),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Érvénytelen dátumformátum."),
 })
 
 export async function GET() {
