@@ -7,6 +7,7 @@ import { CheckCircle2, AlertCircle } from "lucide-react"
 import Link from "next/link"
 import CalendarPicker from "@/components/calendar-picker"
 import { formatPrice } from "@/lib/utils"
+import { useUnsavedChanges } from "@/contexts/unsaved-changes-context"
 
 interface FormData {
   name: string
@@ -63,9 +64,27 @@ export default function BookingPage() {
       }, 50)
     }
   }, [errors])
+  const { setDirty } = useUnsavedChanges()
+
+  const isFormDirty =
+    formData.name.trim() !== "" ||
+    formData.phone.trim() !== "" ||
+    formData.email.trim() !== "" ||
+    formData.visitDate !== "" ||
+    formData.notes.trim() !== "" ||
+    formData.treeCount !== "1" ||
+    formData.acceptTerms
+
+  useEffect(() => { setDirty(isFormDirty) }, [isFormDirty, setDirty])
+  useEffect(() => () => setDirty(false), [setDirty])
+
   const [isLoading, setIsLoading] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
   const [successData, setSuccessData] = useState<any>(null)
+
+  useEffect(() => {
+    if (isSuccess) window.scrollTo({ top: 0, behavior: "smooth" })
+  }, [isSuccess])
   const [settings, setSettings] = useState<any>(null)
   const [seasonClosed, setSeasonClosed] = useState(false)
 
@@ -145,6 +164,7 @@ export default function BookingPage() {
       })
       const data = await response.json()
       if (data.success) {
+        setDirty(false)
         setSuccessData(data.data)
         setIsSuccess(true)
       } else {
@@ -160,8 +180,8 @@ export default function BookingPage() {
   /* ── Success screen ── */
   if (isSuccess && successData) {
     return (
-      <div className="min-h-[calc(100vh-4rem)] flex items-center bg-[#ededed]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-16">
+      <div className="min-h-[calc(100vh-4rem)] bg-[#ededed]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pt-24 pb-12">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-start">
 
             {/* Left — confirmation message */}
@@ -203,32 +223,40 @@ export default function BookingPage() {
             </div>
 
             {/* Right — booking summary */}
-            <div className="border border-[#bfc3c7] bg-[#f5f4f1] rounded-lg p-8">
+            <div className="lg:pt-20 flex justify-center">
+            <div className="border border-[#bfc3c7] bg-[#f5f4f1] rounded-lg p-8 w-full">
               <p className="text-xs font-bold text-[#4a4f4a]/40 tracking-widest uppercase mb-6">Foglalás összefoglalója</p>
               <div className="space-y-0">
                 {[
                   { label: "Név", value: successData.name },
                   { label: "Telefon", value: successData.phone },
                   {
-                    label: "Nap",
+                    label: "Fa választásának napja",
                     value: new Date(successData.visitDate).toLocaleDateString("hu-HU", {
                       weekday: "long", year: "numeric", month: "long", day: "numeric",
                     }),
                   },
+                  ...(successData.pickupDate ? [{
+                    label: "Átvételi nap",
+                    value: new Date(successData.pickupDate).toLocaleDateString("hu-HU", {
+                      weekday: "long", year: "numeric", month: "long", day: "numeric",
+                    }),
+                  }] : []),
                   { label: "Fák száma", value: `${successData.treeCount} db` },
                   ...(settings?.pricePerTree ? [{
                     label: "Fizetendő összeg",
-                    value: `${(successData.treeCount * settings.pricePerTree).toLocaleString("hu-HU")} Ft`,
+                    value: formatPrice(successData.treeCount * settings.pricePerTree),
                   }] : []),
                 ].map((row) => (
                   <div key={row.label} className="flex gap-6 py-4 border-b border-[#bfc3c7] last:border-b-0">
-                    <span className="text-xs font-bold text-[#6e7f6a] uppercase tracking-widest w-24 flex-shrink-0 mt-0.5">
+                    <span className="text-xs font-bold text-[#6e7f6a] uppercase tracking-widest w-40 flex-shrink-0 mt-0.5">
                       {row.label}
                     </span>
                     <span className="text-sm text-[#3a3a3a] font-light">{row.value}</span>
                   </div>
                 ))}
               </div>
+            </div>
             </div>
 
           </div>
@@ -307,7 +335,7 @@ export default function BookingPage() {
           <div className="border border-[#bfc3c7] rounded-lg px-5 py-4 mb-8 text-center bg-[#f5f4f1]" style={{ boxShadow: "0 8px 32px rgba(10, 20, 10, 0.10), 0 2px 8px rgba(10, 20, 10, 0.06)" }}>
             <p className="text-xs font-bold text-[#4a4f4a]/40 tracking-widest uppercase mb-1">Jelenlegi ár</p>
             <p className="text-2xl font-extrabold text-[#3a3a3a] tracking-tight">
-              {settings.pricePerTree.toLocaleString("hu-HU")} Ft
+              {formatPrice(settings.pricePerTree)}
             </p>
             <p className="text-xs text-[#4a4f4a] font-light mt-0.5">Mérettől függetlenül</p>
           </div>

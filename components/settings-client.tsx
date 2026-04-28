@@ -1,8 +1,9 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState, useRef, useEffect } from "react"
 import { CheckCircle2, AlertCircle, ChevronLeft, ChevronRight, Save } from "lucide-react"
 import type { Settings } from "@/lib/types"
+import { useUnsavedChanges } from "@/contexts/unsaved-changes-context"
 
 interface Props {
   initialSettings: Settings
@@ -17,10 +18,24 @@ const monthNames = ["január","február","március","április","május","június
 const dayNames = ["H","K","Sze","Cs","P","Szo","V"]
 
 export default function SettingsClient({ initialSettings, year }: Props) {
+  const alertRef = useRef<HTMLDivElement>(null)
+  const { setDirty } = useUnsavedChanges()
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
-  const [formData, setFormData] = useState({
+
+  useEffect(() => {
+    if (error || success) {
+      setTimeout(() => alertRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }), 50)
+    }
+  }, [error, success])
+  const [isFirstRender, setIsFirstRender] = useState(true)
+  const [formData, setFormData] = useState<{
+    availableDays: string[]
+    maxBookingsPerDay: number | ""
+    retrievalDays: string[]
+    pricePerTree: number | ""
+  }>({
     availableDays: initialSettings.availableDays || [],
     maxBookingsPerDay: initialSettings.maxBookingsPerDay,
     retrievalDays: initialSettings.retrievalDays || [],
@@ -28,7 +43,6 @@ export default function SettingsClient({ initialSettings, year }: Props) {
   })
 
   // Re-sync form when the parent re-renders for a different year
-  // (e.g. after the admin changes the view year in the nav).
   useEffect(() => {
     setFormData({
       availableDays: initialSettings.availableDays || [],
@@ -37,6 +51,12 @@ export default function SettingsClient({ initialSettings, year }: Props) {
       pricePerTree: initialSettings.pricePerTree,
     })
   }, [initialSettings])
+
+  useEffect(() => {
+    if (isFirstRender) { setIsFirstRender(false); return }
+    setDirty(true)
+  }, [formData])
+  useEffect(() => () => setDirty(false), [setDirty])
 
   const firstDateMonth = (dates: string[]) => {
     if (dates.length > 0) {
@@ -74,9 +94,17 @@ export default function SettingsClient({ initialSettings, year }: Props) {
   }
 
   const handleSave = async () => {
-    setIsSaving(true)
     setError("")
     setSuccess("")
+    if (formData.maxBookingsPerDay === "") {
+      setError("A maximális foglalás naponta mező nem lehet üres.")
+      return
+    }
+    if (formData.pricePerTree === "") {
+      setError("Az ár fánként mező nem lehet üres.")
+      return
+    }
+    setIsSaving(true)
     try {
       const response = await fetch("/api/admin/settings", {
         method: "PATCH",
@@ -85,6 +113,7 @@ export default function SettingsClient({ initialSettings, year }: Props) {
       })
       const data = await response.json()
       if (data.success) {
+        setDirty(false)
         setSuccess("A beállítások mentése sikerült.")
         setTimeout(() => setSuccess(""), 2500)
       } else {
@@ -169,16 +198,18 @@ export default function SettingsClient({ initialSettings, year }: Props) {
       </section>
 
       {/* Alerts */}
-      {error && (
-        <div className="flex gap-3 p-4 border border-destructive/30 bg-destructive/8 rounded-lg text-sm text-destructive">
-          <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />{error}
-        </div>
-      )}
-      {success && (
-        <div className="flex gap-3 p-4 border border-[#6e7f6a]/30 bg-[#6e7f6a]/8 rounded-lg text-sm text-[#6e7f6a]">
-          <CheckCircle2 className="h-5 w-5 flex-shrink-0 mt-0.5" />{success}
-        </div>
-      )}
+      <div ref={alertRef}>
+        {error && (
+          <div className="flex gap-3 p-4 border border-destructive/30 bg-destructive/8 rounded-lg text-sm text-destructive">
+            <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />{error}
+          </div>
+        )}
+        {success && (
+          <div className="flex gap-3 p-4 border border-[#6e7f6a]/30 bg-[#6e7f6a]/8 rounded-lg text-sm text-[#6e7f6a]">
+            <CheckCircle2 className="h-5 w-5 flex-shrink-0 mt-0.5" />{success}
+          </div>
+        )}
+      </div>
 
       <div className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
 
@@ -187,11 +218,11 @@ export default function SettingsClient({ initialSettings, year }: Props) {
           <p className="text-xs font-bold text-[#3a3a3a] tracking-widest uppercase">Általános</p>
           <div>
             <label className={labelClass}>Maximális foglalás naponta</label>
-            <input type="number" min="1" value={formData.maxBookingsPerDay} onChange={(e) => setFormData({ ...formData, maxBookingsPerDay: Number.parseInt(e.target.value) || 0 })} className={inputClass} />
+            <input type="number" min="1" value={formData.maxBookingsPerDay} onChange={(e) => setFormData({ ...formData, maxBookingsPerDay: e.target.value === "" ? "" : Number.parseInt(e.target.value) })} className={inputClass} />
           </div>
           <div>
             <label className={labelClass}>Ár fánként (Ft)</label>
-            <input type="number" min="1" value={formData.pricePerTree} onChange={(e) => setFormData({ ...formData, pricePerTree: Number.parseInt(e.target.value) || 0 })} className={inputClass} />
+            <input type="number" min="1" value={formData.pricePerTree} onChange={(e) => setFormData({ ...formData, pricePerTree: e.target.value === "" ? "" : Number.parseInt(e.target.value) })} className={inputClass} />
           </div>
           <div className="border-t border-[#bfc3c7] pt-5 space-y-0">
             {[

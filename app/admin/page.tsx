@@ -3,6 +3,7 @@ import { listReservations } from "@/lib/reservations"
 import { getSettings } from "@/lib/settings"
 import { getExpensesSummary } from "@/lib/expenses"
 import { getViewYear } from "@/lib/years"
+import { formatPrice } from "@/lib/utils"
 
 async function getStats(year: number) {
   const reservations = await listReservations({ year })
@@ -62,9 +63,7 @@ function getNextWeekend(date: Date) {
   return { start, end }
 }
 
-function money(value: number) {
-  return `${value.toLocaleString("hu-HU")} Ft`
-}
+const money = formatPrice
 
 export default async function AdminDashboard() {
   const year = await getViewYear()

@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react"
 import Link from "next/link"
-import { Search, SlidersHorizontal, X, ArrowUpDown } from "lucide-react"
+import { Search, SlidersHorizontal, X, ArrowUpDown, Plus } from "lucide-react"
 import type { Reservation } from "@/lib/types"
 import { reservationStatusMeta, formatDateHu } from "@/lib/site"
 
@@ -53,6 +53,15 @@ export default function ReservationFilters({ reservations }: Props) {
   return (
     <div className="space-y-4">
       <div className="border border-[#bfc3c7] bg-[#f5f4f1] rounded-lg p-6">
+        <div className="mb-4 md:hidden">
+          <Link
+            href="/admin/reservations/quick"
+            className="flex w-full items-center justify-center gap-2 rounded-lg border border-[#bfc3c7] bg-white px-4 py-3 text-sm font-semibold text-[#4a4f4a] shadow-sm transition-all hover:border-[#4a4f4a]/40 hover:bg-[#4a4f4a]/6 active:scale-[0.97]"
+          >
+            <Plus className="h-4 w-4" />
+            Gyors foglalás
+          </Link>
+        </div>
         <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr_0.7fr_auto_auto] lg:items-end">
           <label className="block">
             <span className="mb-2 flex items-center gap-2 text-xs font-bold text-[#3a3a3a] tracking-widest uppercase"><Search className="h-4 w-4 text-[#6e7f6a]" /> Keresés</span>
@@ -101,7 +110,10 @@ export default function ReservationFilters({ reservations }: Props) {
           <div className="px-8 py-10 text-center text-sm text-[#4a4f4a] font-light">Nincs a szűrésnek megfelelő foglalás.</div>
         ) : (
           filteredReservations.map((reservation) => {
-            const meta = reservationStatusMeta[reservation.status]
+            const meta = reservationStatusMeta[reservation.status] ?? {
+              label: reservation.status,
+              pillClassName: "border-[#bfc3c7] bg-[#f5f4f1] text-[#4a4f4a]",
+            }
             return (
               <Link key={reservation.id} href={`/admin/reservations/${reservation.id}`} className="flex flex-col gap-4 px-6 py-5 md:flex-row md:items-start md:justify-between hover:bg-[#4a4f4a]/4 transition-colors">
                 <div className="space-y-2">

@@ -208,7 +208,7 @@ export default function HomePage() {
               <AnimateOnScroll key={card.title} delay={i * 100}>
                 <SpotlightCard
                   className="bg-[#f5f4f1] border border-[#bfc3c7] rounded-lg p-6 h-full"
-                  style={{ boxShadow: "0 8px 32px rgba(10, 20, 10, 0.28), 0 2px 8px rgba(10, 20, 10, 0.14)" }}
+                  style={{ boxShadow: "0 8px 32px rgba(10, 20, 10, 0.10), 0 2px 8px rgba(10, 20, 10, 0.06)" }}
                 >
                   <div className="flex items-center mb-2">
                     <p className="text-xs font-bold text-[#6e7f6a] tracking-widest w-8 flex-shrink-0">{card.number}</p>
@@ -226,8 +226,8 @@ export default function HomePage() {
       </section>
 
       {/* Nordmann Fenyőink Section */}
-      <section id="fenyoink" className="relative min-h-screen flex items-center bg-[#ededed] scroll-mt-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-16">
+      <section id="fenyoink" className="relative lg:min-h-screen flex items-center bg-[#ededed] scroll-mt-16">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-16">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
 
             {/* Left — text */}
@@ -271,11 +271,11 @@ export default function HomePage() {
           </div>
         </div>
         {/* Transition → Tree sizes */}
-        <div aria-hidden="true" className="absolute bottom-0 left-0 right-0 h-32 pointer-events-none" style={{ background: "linear-gradient(to bottom, transparent, #f5f4f1)" }} />
+        <div aria-hidden="true" className="absolute z-0 bottom-0 left-0 right-0 h-32 pointer-events-none" style={{ background: "linear-gradient(to bottom, transparent, #f5f4f1)" }} />
       </section>
 
       {/* Tree Size Variants Section */}
-      <section className="relative min-h-screen flex items-center bg-[#f5f4f1]">
+      <section className="relative lg:min-h-screen flex items-center bg-[#f5f4f1]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-16">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
             {/* Left — image */}

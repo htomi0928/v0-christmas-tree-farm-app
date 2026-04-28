@@ -5,10 +5,10 @@ import { enforceSameOrigin, logApiError, parseJsonBody, requireAdminSessionRespo
 import { getActiveYear, getViewYear } from "@/lib/years"
 
 const settingsSchema = z.object({
-  availableDays: z.array(z.string().regex(/^\d{4}-\d{2}-\d{2}$/)).max(366).optional(),
-  maxBookingsPerDay: z.number().int().min(1).max(500).optional(),
-  retrievalDays: z.array(z.string().regex(/^\d{4}-\d{2}-\d{2}$/)).max(366).optional(),
-  pricePerTree: z.number().int().min(0).max(100000000).optional(),
+  availableDays: z.array(z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Érvénytelen dátumformátum.")).max(366, "Legfeljebb 366 nap adható meg.").optional(),
+  maxBookingsPerDay: z.number({ invalid_type_error: "Érvénytelen szám." }).int("Egész számot adj meg.").min(1, "Minimum 1 foglalás naponta.").max(500, "Maximum 500 foglalás naponta.").optional(),
+  retrievalDays: z.array(z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Érvénytelen dátumformátum.")).max(366, "Legfeljebb 366 nap adható meg.").optional(),
+  pricePerTree: z.number({ invalid_type_error: "Érvénytelen ár." }).int("Egész számot adj meg.").min(0, "Az ár nem lehet negatív.").max(100000000, "Túl magas ár.").optional(),
 })
 
 // GET semantics:
