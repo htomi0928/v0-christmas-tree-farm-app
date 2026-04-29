@@ -151,7 +151,6 @@ function allowsTreeNumbers(status: ReservationStatus) {
 
 function allowsPaidTo(status: ReservationStatus) {
   return (
-    status === ReservationStatus.TREE_TAGGED ||
     status === ReservationStatus.CUT ||
     status === ReservationStatus.PICKED_UP
   )

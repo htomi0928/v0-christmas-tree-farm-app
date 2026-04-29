@@ -8,6 +8,7 @@ import Link from "next/link"
 import CalendarPicker from "@/components/calendar-picker"
 import { formatPrice } from "@/lib/utils"
 import { useUnsavedChanges } from "@/contexts/unsaved-changes-context"
+import { Skeleton } from "@/components/ui/skeleton"
 
 interface FormData {
   name: string
@@ -86,6 +87,7 @@ export default function BookingPage() {
     if (isSuccess) window.scrollTo({ top: 0, behavior: "smooth" })
   }, [isSuccess])
   const [settings, setSettings] = useState<any>(null)
+  const [settingsLoading, setSettingsLoading] = useState(true)
   const [seasonClosed, setSeasonClosed] = useState(false)
 
   const infoRows = [
@@ -109,6 +111,7 @@ export default function BookingPage() {
         if (data?.success) setSettings(data.settings)
       })
       .catch(() => {})
+      .finally(() => setSettingsLoading(false))
   }, [])
 
   const validateForm = (): boolean => {
@@ -331,7 +334,13 @@ export default function BookingPage() {
           })}
         </div>
 
-        {settings?.pricePerTree && (
+        {settingsLoading ? (
+          <div className="border border-[#bfc3c7] rounded-lg px-5 py-4 mb-8 text-center bg-[#f5f4f1]" style={{ boxShadow: "0 8px 32px rgba(10, 20, 10, 0.10), 0 2px 8px rgba(10, 20, 10, 0.06)" }}>
+            <Skeleton className="h-3 w-24 mx-auto mb-2" />
+            <Skeleton className="h-8 w-28 mx-auto mb-1.5" />
+            <Skeleton className="h-3 w-32 mx-auto" />
+          </div>
+        ) : settings?.pricePerTree ? (
           <div className="border border-[#bfc3c7] rounded-lg px-5 py-4 mb-8 text-center bg-[#f5f4f1]" style={{ boxShadow: "0 8px 32px rgba(10, 20, 10, 0.10), 0 2px 8px rgba(10, 20, 10, 0.06)" }}>
             <p className="text-xs font-bold text-[#4a4f4a]/40 tracking-widest uppercase mb-1">Jelenlegi ár</p>
             <p className="text-2xl font-extrabold text-[#3a3a3a] tracking-tight">
@@ -339,7 +348,7 @@ export default function BookingPage() {
             </p>
             <p className="text-xs text-[#4a4f4a] font-light mt-0.5">Mérettől függetlenül</p>
           </div>
-        )}
+        ) : null}
 
         {/* Form card */}
         <div className="border border-[#bfc3c7] bg-[#f5f4f1] rounded-lg p-6 sm:p-10" style={{ boxShadow: "0 8px 32px rgba(10, 20, 10, 0.10), 0 2px 8px rgba(10, 20, 10, 0.06)" }}>

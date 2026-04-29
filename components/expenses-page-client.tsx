@@ -110,14 +110,14 @@ export default function ExpensesPageClient({ year, initialExpenses }: ExpensesPa
               </div>
             )}
             <div className="grid gap-4 sm:grid-cols-2">
-              <div>
+              <div className="min-w-0">
                 <label className={labelClass}>Kihez tartozik?</label>
                 <select value={formData.person} onChange={(e) => setFormData({ ...formData, person: e.target.value as "János" | "Sanyi" })} className={inputClass}>
                   <option value="János">János</option>
                   <option value="Sanyi">Sanyi</option>
                 </select>
               </div>
-              <div>
+              <div className="min-w-0">
                 <label className={labelClass}>Dátum</label>
                 <input type="date" value={formData.date} onChange={(e) => setFormData({ ...formData, date: e.target.value })} className={inputClass} />
               </div>
