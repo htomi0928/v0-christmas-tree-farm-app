@@ -46,6 +46,13 @@ export async function POST(request: Request) {
       )
     }
 
+    if (settings.retrievalDays.length > 0 && !data.pickupDate) {
+      return Response.json(
+        { success: false, errors: ["Az átvételi nap megadása kötelező."] },
+        { status: 400 },
+      )
+    }
+
     if (data.pickupDate && settings.retrievalDays.length > 0 && !settings.retrievalDays.includes(data.pickupDate)) {
       return Response.json(
         { success: false, errors: ["A választott átvételi nap nem elérhető."] },
