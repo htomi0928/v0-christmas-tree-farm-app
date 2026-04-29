@@ -96,7 +96,9 @@ export default function ReservationDetailClient({ reservation: initialReservatio
     }
   }, [error, success])
   useEffect(() => {
-    if (Object.keys(validationErrors).length === 0 && error) {
+    const isClientValidationError =
+      error.toLowerCase().includes("hibás mezőket")
+    if (Object.keys(validationErrors).length === 0 && isClientValidationError) {
       setError("")
     }
   }, [validationErrors, error])

@@ -424,7 +424,7 @@ export async function getReservationStats(year: number): Promise<{
 
   for (const row of revenueRows) {
     const revenue = Number(row.total_trees) * price
-    if (row.paid_to === "János" || row.paid_to === "JÃ¡nos") {
+    if (row.paid_to === "János") {
       revenueJanos = revenue
     } else if (row.paid_to === "Sanyi") {
       revenueSanyi = revenue

@@ -119,6 +119,9 @@ export default function BookingPage() {
     if (!formData.name.trim()) newErrors.name = "Név szükséges"
     if (!formData.phone.trim()) newErrors.phone = "Telefonszám szükséges"
     if (!formData.visitDate) newErrors.visitDate = "Nap szükséges"
+    if (settings?.retrievalDays?.length > 0 && !formData.pickupDate) {
+      newErrors.pickupDate = "Átvételi nap szükséges"
+    }
     if (!formData.treeCount || Number.parseInt(formData.treeCount) < 1)
       newErrors.treeCount = "Minimum 1 fa szükséges"
     if (formData.email && !formData.email.includes("@"))
