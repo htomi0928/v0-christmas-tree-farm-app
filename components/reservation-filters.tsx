@@ -63,14 +63,14 @@ export default function ReservationFilters({ reservations }: Props) {
           </Link>
         </div>
         <div className="grid gap-4 lg:grid-cols-[1.2fr_0.8fr_0.7fr_auto_auto] lg:items-end">
-          <label className="block">
+          <label className="block min-w-0">
             <span className="mb-2 flex items-center gap-2 text-xs font-bold text-[#3a3a3a] tracking-widest uppercase"><Search className="h-4 w-4 text-[#6e7f6a]" /> Keresés</span>
-            <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Név, telefonszám, megjegyzés vagy sorszám" className="w-full px-4 py-3 rounded-lg border border-[#bfc3c7] bg-white text-[#3a3a3a] placeholder:text-[#4a4f4a]/40 focus:outline-none focus:ring-2 focus:ring-[#6e7f6a] text-sm transition-all" />
+            <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Név, telefonszám, megjegyzés vagy sorszám" className="w-full min-w-0 px-4 py-3 rounded-lg border border-[#bfc3c7] bg-white text-[#3a3a3a] placeholder:text-[#4a4f4a]/40 focus:outline-none focus:ring-2 focus:ring-[#6e7f6a] text-sm transition-all" />
           </label>
 
-          <label className="block">
+          <label className="block min-w-0">
             <span className="mb-2 flex items-center gap-2 text-xs font-bold text-[#3a3a3a] tracking-widest uppercase"><SlidersHorizontal className="h-4 w-4 text-[#6e7f6a]" /> Státusz</span>
-            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="w-full px-4 py-3 rounded-lg border border-[#bfc3c7] bg-white text-[#3a3a3a] focus:outline-none focus:ring-2 focus:ring-[#6e7f6a] text-sm transition-all">
+            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="w-full min-w-0 px-4 py-3 rounded-lg border border-[#bfc3c7] bg-white text-[#3a3a3a] focus:outline-none focus:ring-2 focus:ring-[#6e7f6a] text-sm transition-all">
               <option value="ALL">Minden státusz</option>
               {Object.entries(reservationStatusMeta).map(([value, meta]) => (
                 <option key={value} value={value}>{meta.label}</option>
@@ -78,17 +78,17 @@ export default function ReservationFilters({ reservations }: Props) {
             </select>
           </label>
 
-          <label className="block">
+          <label className="block min-w-0">
             <span className="mb-2 block text-xs font-bold text-[#3a3a3a] tracking-widest uppercase">Nap szerint</span>
-            <input type="date" value={visitDateFilter} onChange={(e) => setVisitDateFilter(e.target.value)} className="w-full px-4 py-3 rounded-lg border border-[#bfc3c7] bg-white text-[#3a3a3a] focus:outline-none focus:ring-2 focus:ring-[#6e7f6a] text-sm transition-all" />
+            <input type="date" value={visitDateFilter} onChange={(e) => setVisitDateFilter(e.target.value)} className="w-full min-w-0 px-4 py-3 rounded-lg border border-[#bfc3c7] bg-white text-[#3a3a3a] focus:outline-none focus:ring-2 focus:ring-[#6e7f6a] text-sm transition-all" />
           </label>
 
           <button
             type="button"
             onClick={() => setSortAsc((v) => !v)}
-            className="flex items-center gap-1.5 px-4 py-3 rounded-lg border border-[#bfc3c7] bg-white text-sm font-semibold text-[#4a4f4a] hover:bg-[#f0efec] transition-colors whitespace-nowrap cursor-pointer"
+            className="flex w-full items-center justify-center gap-1.5 px-4 py-3 rounded-lg border border-[#bfc3c7] bg-white text-sm font-semibold text-[#4a4f4a] hover:bg-[#f0efec] transition-colors lg:w-auto lg:whitespace-nowrap cursor-pointer"
           >
-            <ArrowUpDown className="h-4 w-4" />
+            <ArrowUpDown className="h-4 w-4 shrink-0" />
             {sortAsc ? "Legrégebbi elöl" : "Legújabb elöl"}
           </button>
 
@@ -96,9 +96,9 @@ export default function ReservationFilters({ reservations }: Props) {
             <button
               type="button"
               onClick={clearFilters}
-              className="flex items-center gap-1.5 px-4 py-3 rounded-lg border border-[#bfc3c7] bg-white text-sm font-semibold text-[#4a4f4a] hover:bg-[#f0efec] transition-colors whitespace-nowrap cursor-pointer"
+              className="flex w-full items-center justify-center gap-1.5 px-4 py-3 rounded-lg border border-[#bfc3c7] bg-white text-sm font-semibold text-[#4a4f4a] hover:bg-[#f0efec] transition-colors lg:w-auto lg:whitespace-nowrap cursor-pointer"
             >
-              <X className="h-4 w-4" />
+              <X className="h-4 w-4 shrink-0" />
               Szűrők törlése
             </button>
           )}

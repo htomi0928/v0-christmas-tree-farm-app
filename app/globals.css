@@ -299,6 +299,27 @@ body {
 }
 
 
+/* ── Skeleton shimmer ─────────────────────────────────────────── */
+@keyframes skeleton-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    oklch(91% 0.005 120) 25%,
+    oklch(87% 0.007 120) 50%,
+    oklch(91% 0.005 120) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-shimmer { animation: none; background: oklch(91% 0.005 120); }
+}
+
 /* ── Reduced-motion fallbacks ─────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
   .scroll-reveal { opacity: 1; transform: none; transition: none; }
