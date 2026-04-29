@@ -119,7 +119,8 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       status: data.status,
       treeNumbers: data.treeNumbers,
       notes: data.notes,
-      paidTo: data.paidTo === "" ? undefined : data.paidTo ?? undefined,
+      // Keep empty string when explicitly sent so updateReservation can clear paid_to.
+      paidTo: data.paidTo ?? undefined,
     })
 
     if (!result.success) {

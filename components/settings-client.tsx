@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, useMemo } from "react"
 import { CheckCircle2, AlertCircle, ChevronLeft, ChevronRight, Save } from "lucide-react"
 import type { Settings } from "@/lib/types"
 import { useUnsavedChanges } from "@/contexts/unsaved-changes-context"
@@ -29,7 +29,6 @@ export default function SettingsClient({ initialSettings, year }: Props) {
       setTimeout(() => alertRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }), 50)
     }
   }, [error, success])
-  const [isFirstRender, setIsFirstRender] = useState(true)
   const [formData, setFormData] = useState<{
     availableDays: string[]
     maxBookingsPerDay: number | ""
@@ -52,10 +51,30 @@ export default function SettingsClient({ initialSettings, year }: Props) {
     })
   }, [initialSettings])
 
+  const normalizedInitial = useMemo(
+    () => ({
+      availableDays: [...(initialSettings.availableDays || [])].sort(),
+      maxBookingsPerDay: initialSettings.maxBookingsPerDay,
+      retrievalDays: [...(initialSettings.retrievalDays || [])].sort(),
+      pricePerTree: initialSettings.pricePerTree,
+    }),
+    [initialSettings],
+  )
+
+  const normalizedForm = useMemo(
+    () => ({
+      availableDays: [...formData.availableDays].sort(),
+      maxBookingsPerDay: formData.maxBookingsPerDay,
+      retrievalDays: [...formData.retrievalDays].sort(),
+      pricePerTree: formData.pricePerTree,
+    }),
+    [formData],
+  )
+
   useEffect(() => {
-    if (isFirstRender) { setIsFirstRender(false); return }
-    setDirty(true)
-  }, [formData])
+    const dirty = JSON.stringify(normalizedForm) !== JSON.stringify(normalizedInitial)
+    setDirty(dirty)
+  }, [normalizedForm, normalizedInitial, setDirty])
   useEffect(() => () => setDirty(false), [setDirty])
 
   const firstDateMonth = (dates: string[]) => {

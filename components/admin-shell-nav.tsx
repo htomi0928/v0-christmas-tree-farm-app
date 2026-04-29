@@ -35,6 +35,9 @@ export function AdminShellNav({ years, viewYear, activeYear }: AdminShellNavProp
     if (href === "/admin") return pathname === href
     return pathname.startsWith(href)
   }
+  const showQuickReservation = ["/admin", "/admin/reservations", "/admin/expenses", "/admin/settings"].some((href) =>
+    href === "/admin" ? pathname === href : pathname.startsWith(href),
+  )
 
   const handleLogout = async () => {
     await fetch("/api/admin/logout", { method: "POST" })
@@ -116,13 +119,14 @@ export function AdminShellNav({ years, viewYear, activeYear }: AdminShellNavProp
             </div>
           </div>
           <div className="flex items-center gap-2">
-            {isActive("/admin/reservations") && (
+            {showQuickReservation && (
               <Link
                 href="/admin/reservations/quick"
-                className="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#4a4f4a] text-sm font-semibold text-[#ededed] hover:bg-[#3a3a3a] transition-colors"
+                onClick={(e) => guardedClick(e, "/admin/reservations/quick")}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-[#4a4f4a] px-2.5 py-2 text-sm font-semibold text-[#ededed] transition-colors hover:bg-[#3a3a3a] sm:px-3 sm:py-1.5"
               >
                 <Plus className="h-3.5 w-3.5" />
-                Gyors foglalás
+                <span className="hidden sm:inline">Gyors foglalás</span>
               </Link>
             )}
             <button
