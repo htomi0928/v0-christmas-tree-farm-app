@@ -6,16 +6,16 @@ import { enforceSameOrigin, logApiError, parseJsonBody, requireAdminSessionRespo
 import { getActiveYear } from "@/lib/years"
 
 const quickCreateReservationSchema = z.object({
-  treeCount: z.number().int().min(1).max(20),
-  name: z.union([z.string().trim().max(120), z.literal(""), z.undefined()]).optional(),
-  phone: z.union([z.string().trim().max(50), z.literal(""), z.undefined()]).optional(),
-  email: z.union([z.string().trim().email(), z.literal(""), z.undefined()]).optional(),
-  visitDate: z.union([z.string().regex(/^\d{4}-\d{2}-\d{2}$/), z.literal(""), z.undefined()]).optional(),
-  pickupDate: z.union([z.string().regex(/^\d{4}-\d{2}-\d{2}$/), z.literal(""), z.undefined()]).optional(),
-  notes: z.union([z.string().trim().max(1000), z.literal(""), z.undefined()]).optional(),
-  status: z.nativeEnum(ReservationStatus).optional(),
-  treeNumbers: z.union([z.string().trim().max(200), z.literal(""), z.undefined()]).optional(),
-  paidTo: z.union([z.literal("János"), z.literal("Sanyi"), z.literal(""), z.undefined()]).optional(),
+  treeCount: z.number({ invalid_type_error: "A darabszám szám kell legyen" }).int({ message: "A darabszám egész szám kell legyen" }).min(1, { message: "Legalább 1 fa szükséges" }).max(20, { message: "Legfeljebb 20 fa adható meg" }),
+  name: z.union([z.string().trim().max(120, { message: "A név legfeljebb 120 karakter lehet" }), z.literal(""), z.undefined()]).optional(),
+  phone: z.union([z.string().trim().max(50, { message: "A telefonszám legfeljebb 50 karakter lehet" }), z.literal(""), z.undefined()]).optional(),
+  email: z.union([z.string().trim().email({ message: "Érvénytelen e-mail cím" }), z.literal(""), z.undefined()]).optional(),
+  visitDate: z.union([z.string().regex(/^\d{4}-\d{2}-\d{2}$/, { message: "Érvénytelen dátumformátum (ÉÉÉÉ-HH-NN)" }), z.literal(""), z.undefined()]).optional(),
+  pickupDate: z.union([z.string().regex(/^\d{4}-\d{2}-\d{2}$/, { message: "Érvénytelen dátumformátum (ÉÉÉÉ-HH-NN)" }), z.literal(""), z.undefined()]).optional(),
+  notes: z.union([z.string().trim().max(1000, { message: "A megjegyzés legfeljebb 1000 karakter lehet" }), z.literal(""), z.undefined()]).optional(),
+  status: z.nativeEnum(ReservationStatus, { message: "Érvénytelen státusz" }).optional(),
+  treeNumbers: z.union([z.string().trim().max(200, { message: "A fa sorszáma legfeljebb 200 karakter lehet" }), z.literal(""), z.undefined()]).optional(),
+  paidTo: z.union([z.literal("János"), z.literal("Sanyi"), z.literal(""), z.undefined()], { message: "Érvénytelen érték a 'kinek fizetek' mezőben" }).optional(),
 })
 
 export async function POST(request: Request) {
@@ -32,7 +32,7 @@ export async function POST(request: Request) {
 
     const activeYear = await getActiveYear()
     if (activeYear === null) {
-      return Response.json({ success: false, error: "Foglalas jelenleg nem erheto el" }, { status: 503 })
+      return Response.json({ success: false, error: "Foglalás jelenleg nem érhető el" }, { status: 503 })
     }
 
     const parsedBody = await parseJsonBody(request, quickCreateReservationSchema)

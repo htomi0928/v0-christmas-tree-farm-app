@@ -206,19 +206,21 @@ export function YearsManagerDialog({ open, onOpenChange, activeYear }: YearsMana
                 >
                   {/* Main row */}
                   <div className="flex items-center justify-between gap-4 px-5 py-3.5">
-                    <div className="flex min-w-0 items-center gap-3">
-                      <span className={[
-                        "text-base font-bold tabular-nums",
-                        isActive ? "text-[#2d5430]" : "text-[#3a3a3a]",
-                      ].join(" ")}>
-                        {y.year}
-                      </span>
-
-                      {isActive && (
-                        <span className="shrink-0 rounded-md border border-[#6e7f6a]/30 bg-[#6e7f6a]/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-[#2d5430]">
-                          aktív
+                    <div className="flex min-w-0 flex-col gap-0.5">
+                      <div className="flex items-center gap-2">
+                        <span className={[
+                          "text-base font-bold tabular-nums",
+                          isActive ? "text-[#2d5430]" : "text-[#3a3a3a]",
+                        ].join(" ")}>
+                          {y.year}
                         </span>
-                      )}
+
+                        {isActive && (
+                          <span className="shrink-0 rounded-md border border-[#6e7f6a]/30 bg-[#6e7f6a]/15 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-[#2d5430]">
+                            aktív
+                          </span>
+                        )}
+                      </div>
 
                       <div className="flex items-center gap-1.5 text-[11px] text-[#4a4f4a]/50">
                         {y.reservationCount > 0 ? (

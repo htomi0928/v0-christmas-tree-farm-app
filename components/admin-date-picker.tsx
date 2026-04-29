@@ -60,7 +60,7 @@ export default function AdminDatePicker({ selectedDate, onDateSelect, highlightD
 
   return (
     <Card className="overflow-hidden border-primary/10 bg-white/75 px-0 py-0">
-      <div className="px-5 py-5 sm:px-6">
+      <div className="px-3 py-3 sm:px-5 sm:py-5">
         <div className="flex items-center justify-between">
           <button
             type="button"
@@ -83,7 +83,7 @@ export default function AdminDatePicker({ selectedDate, onDateSelect, highlightD
           </button>
         </div>
 
-        <div className="mt-5 grid grid-cols-7 gap-2 text-center text-xs font-semibold text-foreground/48">
+        <div className="mt-5 grid grid-cols-7 gap-1 sm:gap-2 text-center text-xs font-semibold text-foreground/48">
           {dayNames.map((day) => (
             <div key={day}>{day}</div>
           ))}
@@ -91,9 +91,9 @@ export default function AdminDatePicker({ selectedDate, onDateSelect, highlightD
 
         <div className="mt-3 space-y-2">
           {weeks.map((week, weekIndex) => (
-            <div key={weekIndex} className="grid grid-cols-7 gap-2">
+            <div key={weekIndex} className="grid grid-cols-7 gap-1 sm:gap-2">
               {week.map((day, dayIndex) => {
-                if (!day) return <div key={`${weekIndex}-${dayIndex}`} className="h-10" />
+                if (!day) return <div key={`${weekIndex}-${dayIndex}`} className="h-8 sm:h-10" />
 
                 const dateStr = toDateStr(currentMonth.getFullYear(), currentMonth.getMonth(), day)
                 const isSelected = selectedDate === dateStr
@@ -105,7 +105,7 @@ export default function AdminDatePicker({ selectedDate, onDateSelect, highlightD
                     type="button"
                     disabled={!isHighlighted}
                     onClick={() => onDateSelect(isSelected ? "" : dateStr)}
-                    className={`h-10 rounded-2xl text-sm font-semibold transition ${
+                    className={`h-8 sm:h-10 rounded-2xl text-sm font-semibold transition ${
                       isSelected
                         ? "bg-primary text-primary-foreground"
                         : isHighlighted

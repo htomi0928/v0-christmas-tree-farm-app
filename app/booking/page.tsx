@@ -225,7 +225,7 @@ export default function BookingPage() {
             {/* Right — booking summary */}
             <div className="lg:pt-20 flex justify-center">
             <div className="border border-[#bfc3c7] bg-[#f5f4f1] rounded-lg p-8 w-full">
-              <p className="text-xs font-bold text-[#4a4f4a]/40 tracking-widest uppercase mb-6">Foglalás összefoglalója</p>
+              <p className="text-xs font-bold text-[#4a4f4a]/40 tracking-widest uppercase mb-6 text-center">Foglalás összefoglalója</p>
               <div className="space-y-0">
                 {[
                   { label: "Név", value: successData.name },
