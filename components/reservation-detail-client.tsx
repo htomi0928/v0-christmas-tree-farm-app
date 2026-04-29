@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { AlertCircle, ArrowLeft, CheckCircle2, Save, Trash2 } from "lucide-react"
+import { AlertCircle, ArrowLeft, CheckCircle2, Plus, Save, Trash2 } from "lucide-react"
 import { type Reservation, ReservationStatus } from "@/lib/types"
 import { formatDateHu, reservationStatusMeta } from "@/lib/site"
 import AdminDatePicker from "@/components/admin-date-picker"
@@ -12,13 +12,14 @@ import { useUnsavedChanges } from "@/contexts/unsaved-changes-context"
 interface Props {
   reservation: Reservation
   currentAdminPaidTo: "Sanyi" | "János" | null
+  justCreated?: boolean
 }
 
 const inputClass = "w-full px-4 py-3 rounded-lg border border-[#bfc3c7] bg-white text-[#3a3a3a] placeholder:text-[#4a4f4a]/40 focus:outline-none focus:ring-2 focus:ring-[#6e7f6a] text-sm transition-all duration-150"
 const disabledInputClass = "w-full px-4 py-3 rounded-lg border border-[#bfc3c7] bg-[#f0efec] text-[#4a4f4a]/60 placeholder:text-[#4a4f4a]/40 text-sm cursor-not-allowed"
 const labelClass = "block text-xs font-bold text-[#3a3a3a] tracking-widest uppercase mb-2"
 
-export default function ReservationDetailClient({ reservation: initialReservation, currentAdminPaidTo }: Props) {
+export default function ReservationDetailClient({ reservation: initialReservation, currentAdminPaidTo, justCreated }: Props) {
   const router = useRouter()
   const { setDirty, navigate } = useUnsavedChanges()
   const [formData, setFormData] = useState({
@@ -52,12 +53,35 @@ export default function ReservationDetailClient({ reservation: initialReservatio
   }, [formData])
   useEffect(() => () => setDirty(false), [setDirty])
 
+  type FormSnapshot = typeof formData
+  type ChangedField = { label: string; oldVal: string; newVal: string }
+
+  const FIELD_LABELS: Record<keyof FormSnapshot, string> = {
+    name: "Név", phone: "Telefonszám", email: "E-mail", visitDate: "Látogatás napja",
+    pickupDate: "Átvételi nap", treeCount: "Darabszám", status: "Státusz",
+    treeNumbers: "Fa sorszáma", notes: "Megjegyzés", paidTo: "Kinek fizet",
+  }
+
+  const formatFieldValue = (key: keyof FormSnapshot, val: string | number): string => {
+    if (val === "" || val === null || val === undefined) return "—"
+    if (key === "status") return reservationStatusMeta[val as ReservationStatus]?.label ?? String(val)
+    if (key === "visitDate" || key === "pickupDate") return formatDateHu(String(val))
+    return String(val)
+  }
+
+  const computeDiff = (prev: FormSnapshot, next: FormSnapshot): ChangedField[] =>
+    (Object.keys(FIELD_LABELS) as (keyof FormSnapshot)[])
+      .filter((k) => String(prev[k]) !== String(next[k]))
+      .map((k) => ({ label: FIELD_LABELS[k], oldVal: formatFieldValue(k, prev[k] as string), newVal: formatFieldValue(k, next[k] as string) }))
+
+  const prevSnapshotRef = useRef<FormSnapshot>(formData)
   const alertRef = useRef<HTMLDivElement>(null)
   const [isSaving, setIsSaving] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
+  const [savedChanges, setSavedChanges] = useState<ChangedField[]>([])
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({})
   const [retrievalDays, setRetrievalDays] = useState<string[]>([])
   const [availableDays, setAvailableDays] = useState<string[]>([])
@@ -175,6 +199,8 @@ export default function ReservationDetailClient({ reservation: initialReservatio
     setIsSaving(true)
     setError("")
     setSuccess("")
+    setSavedChanges([])
+    const diff = computeDiff(prevSnapshotRef.current, formData)
     try {
       const response = await fetch(`/api/admin/reservations/${initialReservation.id}`, {
         method: "PATCH",
@@ -184,8 +210,10 @@ export default function ReservationDetailClient({ reservation: initialReservatio
       const data = await response.json()
       if (data.success) {
         setDirty(false)
+        prevSnapshotRef.current = { ...formData }
         setSuccess("A foglalás mentése sikerült.")
-        setTimeout(() => setSuccess(""), 2500)
+        setSavedChanges(diff)
+        setTimeout(() => { setSuccess(""); setSavedChanges([]) }, 6000)
       } else {
         setError(data.error || "Hiba történt a mentés közben.")
       }
@@ -235,20 +263,81 @@ export default function ReservationDetailClient({ reservation: initialReservatio
         <p className="text-[#4a4f4a] font-light">Látogatás napja: {formatDateHu(formData.visitDate)}</p>
       </section>
 
-      {/* Alerts */}
-      <div ref={alertRef}>
+      {/* Just-created success view — replaces the edit form entirely */}
+      {justCreated ? (
+        <div className="border border-[#6e7f6a]/30 bg-[#6e7f6a]/8 rounded-lg overflow-hidden">
+          <div className="flex items-start gap-3 px-4 py-4">
+            <CheckCircle2 className="h-5 w-5 flex-shrink-0 mt-px text-[#2d5430]" />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-[#2d5430]">Gyors foglalás rögzítve</p>
+              <p className="text-xs text-[#4a4f4a]/60 mt-0.5">A foglalás sikeresen létrejött.</p>
+            </div>
+          </div>
+          <div className="border-t border-[#6e7f6a]/20 divide-y divide-[#6e7f6a]/10">
+            {[
+              { label: "Név", value: initialReservation.name },
+              { label: "Telefon", value: initialReservation.phone || "—" },
+              { label: "Státusz", value: reservationStatusMeta[initialReservation.status]?.label },
+              { label: "Látogatás", value: formatDateHu(initialReservation.visitDate) },
+              ...(initialReservation.pickupDate ? [{ label: "Átvétel", value: formatDateHu(initialReservation.pickupDate) }] : []),
+              ...(initialReservation.treeNumbers ? [{ label: "Fa sorszáma", value: initialReservation.treeNumbers }] : []),
+              ...(initialReservation.paidTo ? [{ label: "Kinek fizet", value: initialReservation.paidTo }] : []),
+            ].map(({ label, value }) => (
+              <div key={label} className="grid grid-cols-[6rem_1fr] sm:grid-cols-[8rem_1fr] items-baseline gap-x-3 px-4 py-2.5">
+                <span className="text-[10px] font-bold tracking-widest uppercase text-[#6e7f6a]/60">{label}</span>
+                <span className="text-xs font-medium text-[#2d5430]">{value}</span>
+              </div>
+            ))}
+          </div>
+          <div className="flex flex-col sm:flex-row gap-2 px-4 py-3 border-t border-[#6e7f6a]/20">
+            <Link
+              href="/admin/reservations/quick"
+              className="inline-flex items-center justify-center gap-2 h-9 px-4 rounded-lg bg-[#4a4f4a] text-xs font-medium text-[#ededed] hover:bg-[#3a3a3a] transition-colors"
+            >
+              <Plus className="h-3.5 w-3.5" />
+              Új gyors foglalás felvétele
+            </Link>
+            <Link
+              href={`/admin/reservations/${initialReservation.id}`}
+              className="inline-flex items-center justify-center gap-2 h-9 px-4 rounded-lg border border-[#6e7f6a]/40 text-xs font-medium text-[#2d5430] hover:bg-[#6e7f6a]/10 transition-colors"
+            >
+              Foglalás szerkesztése
+            </Link>
+          </div>
+        </div>
+      ) : null}
+
+      {!justCreated && <div ref={alertRef}>
         {error && (
           <div className="flex gap-3 p-4 border border-destructive/30 bg-destructive/8 rounded-lg text-sm text-destructive">
             <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />{error}
           </div>
         )}
         {success && (
-          <div className="flex gap-3 p-4 border border-[#6e7f6a]/30 bg-[#6e7f6a]/8 rounded-lg text-sm text-[#6e7f6a]">
-            <CheckCircle2 className="h-5 w-5 flex-shrink-0 mt-0.5" />{success}
+          <div className="border border-[#6e7f6a]/30 bg-[#6e7f6a]/8 rounded-lg overflow-hidden">
+            <div className="flex gap-3 px-4 py-3.5 text-sm text-[#2d5430]">
+              <CheckCircle2 className="h-4.5 w-4.5 flex-shrink-0 mt-px" />
+              <span className="font-medium">{success}</span>
+            </div>
+            {savedChanges.length > 0 && (
+              <div className="border-t border-[#6e7f6a]/20 divide-y divide-[#6e7f6a]/10">
+                {savedChanges.map((change) => (
+                  <div key={change.label} className="grid grid-cols-[6rem_1fr] sm:grid-cols-[8rem_1fr] items-baseline gap-x-3 px-4 py-2">
+                    <span className="text-[10px] font-bold tracking-widest uppercase text-[#6e7f6a]/60 truncate">{change.label}</span>
+                    <span className="text-xs text-[#4a4f4a] flex items-center gap-1.5 flex-wrap">
+                      <span className="line-through text-[#4a4f4a]/40">{change.oldVal}</span>
+                      <span className="text-[#6e7f6a]/50">→</span>
+                      <span className="font-medium text-[#2d5430]">{change.newVal}</span>
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
-      </div>
+      </div>}
 
+      {!justCreated && <>
       {/* Status */}
       <div className="border border-[#bfc3c7] bg-[#f5f4f1] rounded-lg p-6">
         <p className="text-xs font-bold text-[#3a3a3a] tracking-widest uppercase mb-4">Gyors státuszváltás</p>
@@ -294,21 +383,21 @@ export default function ReservationDetailClient({ reservation: initialReservatio
             </label>
             <input
               value={formData.treeNumbers}
-              disabled={!allowsTreeNumbers(formData.status)}
+              disabled={!allowsTreeNumbers(formData.status) && !formData.treeNumbers.trim()}
               onChange={(e) => {
                 const updated = { ...formData, treeNumbers: e.target.value }
                 setFormData(updated)
                 setValidationErrors(validate(updated))
               }}
               placeholder="Például 12, 13"
-              className={`${allowsTreeNumbers(formData.status) ? inputClass : disabledInputClass} ${validationErrors.treeNumbers ? "border-destructive ring-1 ring-destructive/40" : ""}`}
+              className={`${allowsTreeNumbers(formData.status) || formData.treeNumbers.trim() ? inputClass : disabledInputClass} ${validationErrors.treeNumbers ? "border-destructive ring-1 ring-destructive/40" : ""}`}
             />
             {validationErrors.treeNumbers ? (
               <p className="mt-1.5 text-xs text-destructive flex items-center gap-1">
                 <AlertCircle className="h-3 w-3 flex-shrink-0" />
                 {validationErrors.treeNumbers}
               </p>
-            ) : !allowsTreeNumbers(formData.status) ? (
+            ) : !allowsTreeNumbers(formData.status) && !formData.treeNumbers.trim() ? (
               <p className="mt-1.5 text-xs text-[#4a4f4a]/60 font-light">A jelenlegi státusznál nem állítható be.</p>
             ) : null}
           </div>
@@ -320,13 +409,13 @@ export default function ReservationDetailClient({ reservation: initialReservatio
             <label className={labelClass}>Kinek fizettek?</label>
             <select
               value={formData.paidTo}
-              disabled={!allowsPaidTo(formData.status)}
+              disabled={!allowsPaidTo(formData.status) && !formData.paidTo}
               onChange={(e) => {
                 const updated = { ...formData, paidTo: e.target.value as "János" | "Sanyi" | "" }
                 setFormData(updated)
                 setValidationErrors(validate(updated))
               }}
-              className={`${allowsPaidTo(formData.status) ? inputClass : disabledInputClass} ${validationErrors.paidTo ? "border-destructive ring-1 ring-destructive/40" : ""}`}
+              className={`${allowsPaidTo(formData.status) || formData.paidTo ? inputClass : disabledInputClass} ${validationErrors.paidTo ? "border-destructive ring-1 ring-destructive/40" : ""}`}
             >
               <option value="">Még nincs rögzítve</option>
               <option value="János">János</option>
@@ -337,7 +426,7 @@ export default function ReservationDetailClient({ reservation: initialReservatio
                 <AlertCircle className="h-3 w-3 flex-shrink-0" />
                 {validationErrors.paidTo}
               </p>
-            ) : !allowsPaidTo(formData.status) ? (
+            ) : !allowsPaidTo(formData.status) && !formData.paidTo ? (
               <p className="mt-1.5 text-xs text-[#4a4f4a]/60 font-light">A jelenlegi státusznál nem állítható be.</p>
             ) : null}
           </div>
@@ -346,11 +435,11 @@ export default function ReservationDetailClient({ reservation: initialReservatio
 
       {/* Date pickers */}
       <div className="grid gap-6 xl:grid-cols-2">
-        <div className="border border-[#bfc3c7] bg-[#f5f4f1] rounded-lg p-6">
+        <div className="border border-[#bfc3c7] bg-[#f5f4f1] rounded-lg p-3 sm:p-6">
           <p className="text-xs font-bold text-[#3a3a3a] tracking-widest uppercase mb-4">Látogatás napja</p>
           <AdminDatePicker selectedDate={formData.visitDate} onDateSelect={(date) => setFormData({ ...formData, visitDate: date })} highlightDays={availableDays.length > 0 ? availableDays : undefined} />
         </div>
-        <div className="border border-[#bfc3c7] bg-[#f5f4f1] rounded-lg p-6">
+        <div className="border border-[#bfc3c7] bg-[#f5f4f1] rounded-lg p-3 sm:p-6">
           <p className="text-xs font-bold text-[#3a3a3a] tracking-widest uppercase mb-4">Átvételi nap</p>
           <AdminDatePicker selectedDate={formData.pickupDate} onDateSelect={(date) => setFormData({ ...formData, pickupDate: date })} highlightDays={retrievalDays.length > 0 ? retrievalDays : undefined} />
         </div>
@@ -391,6 +480,7 @@ export default function ReservationDetailClient({ reservation: initialReservatio
           {isSaving ? "Mentés..." : "Mentés"}
         </button>
       </div>
+      </>}
 
     </div>
   )

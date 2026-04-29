@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, type FormEvent } from "react"
+import { useEffect, useRef, useState, type FormEvent } from "react"
 import { useRouter } from "next/navigation"
 import { AlertCircle, Save } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -18,12 +18,17 @@ interface QuickReservationFormProps {
 export default function QuickReservationForm({ currentAdminPaidTo }: QuickReservationFormProps) {
   const now = new Date()
   const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`
-  const adminNamePlaceholder = `Admin foglalas ${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}${String(now.getDate()).padStart(2, "0")}-${String(now.getHours()).padStart(2, "0")}${String(now.getMinutes()).padStart(2, "0")}`
+  const adminNamePlaceholder = `Admin foglalás ${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}${String(now.getDate()).padStart(2, "0")}-${String(now.getHours()).padStart(2, "0")}${String(now.getMinutes()).padStart(2, "0")}`
   const startsAsPickedUp = currentAdminPaidTo !== null
 
   const router = useRouter()
+  const alertRef = useRef<HTMLDivElement>(null)
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState("")
+
+  useEffect(() => {
+    if (error) setTimeout(() => alertRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }), 50)
+  }, [error])
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
@@ -42,7 +47,7 @@ export default function QuickReservationForm({ currentAdminPaidTo }: QuickReserv
     setError("")
 
     if (!Number.isInteger(formData.treeCount) || formData.treeCount < 1 || formData.treeCount > 20) {
-      setError("A fak szama 1 es 20 kozott lehet.")
+      setError("A fák száma 1 és 20 között lehet.")
       return
     }
 
@@ -55,13 +60,13 @@ export default function QuickReservationForm({ currentAdminPaidTo }: QuickReserv
       })
       const data = await response.json()
       if (!response.ok || !data.success) {
-        setError(data.error || data.errors?.join(", ") || "A gyors mentes nem sikerult.")
+        setError(data.error || data.errors?.join(", ") || "A gyors mentés nem sikerült.")
         return
       }
 
-      router.push(`/admin/reservations/${data.reservation.id}`)
+      router.push(`/admin/reservations/${data.reservation.id}?created=true`)
     } catch {
-      setError("Halozati hiba tortent.")
+      setError("Hálózati hiba történt.")
     } finally {
       setIsSaving(false)
     }
@@ -97,14 +102,14 @@ export default function QuickReservationForm({ currentAdminPaidTo }: QuickReserv
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {error && (
-        <div className="flex gap-3 p-4 border border-destructive/30 bg-destructive/8 rounded-lg text-sm text-destructive">
+        <div ref={alertRef} className="flex gap-3 p-4 border border-destructive/30 bg-destructive/8 rounded-lg text-sm text-destructive">
           <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
           {error}
         </div>
       )}
 
       <div className="border border-[#bfc3c7] bg-[#f5f4f1] rounded-lg p-6">
-        <label className={labelClass}>Statusz</label>
+        <label className={labelClass}>Státusz</label>
         <select
           value={formData.status}
           onChange={(e) => handleStatusChange(e.target.value as ReservationStatus)}
@@ -124,7 +129,7 @@ export default function QuickReservationForm({ currentAdminPaidTo }: QuickReserv
         <div className="border border-[#bfc3c7] bg-[#f5f4f1] rounded-lg p-6 space-y-5">
           <p className="text-xs font-bold text-[#3a3a3a] tracking-widest uppercase">Alapadatok</p>
           <div>
-            <label className={labelClass}>Nev</label>
+            <label className={labelClass}>Név</label>
             <input
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
@@ -133,7 +138,7 @@ export default function QuickReservationForm({ currentAdminPaidTo }: QuickReserv
             />
           </div>
           <div>
-            <label className={labelClass}>Telefonszam</label>
+            <label className={labelClass}>Telefonszám</label>
             <input value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} className={inputClass} />
           </div>
           <div>
@@ -141,7 +146,7 @@ export default function QuickReservationForm({ currentAdminPaidTo }: QuickReserv
             <input value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} className={inputClass} />
           </div>
           <div>
-            <label className={labelClass}>Varhato darabszam *</label>
+            <label className={labelClass}>Várható darabszám *</label>
             <input
               type="number"
               min="1"
@@ -159,23 +164,23 @@ export default function QuickReservationForm({ currentAdminPaidTo }: QuickReserv
         </div>
 
         <div className="border border-[#bfc3c7] bg-[#f5f4f1] rounded-lg p-6 space-y-5">
-          <p className="text-xs font-bold text-[#3a3a3a] tracking-widest uppercase">Datumok es tovabbi adatok</p>
+          <p className="text-xs font-bold text-[#3a3a3a] tracking-widest uppercase">Dátumok és további adatok</p>
           <div>
-            <label className={labelClass}>Latogatas napja</label>
+            <label className={labelClass}>Látogatás napja</label>
             <input type="date" value={formData.visitDate} onChange={(e) => setFormData({ ...formData, visitDate: e.target.value })} className={inputClass} />
           </div>
           <div>
-            <label className={labelClass}>Atveteli nap</label>
+            <label className={labelClass}>Átvételi nap</label>
             <input type="date" value={formData.pickupDate} onChange={(e) => setFormData({ ...formData, pickupDate: e.target.value })} className={inputClass} />
           </div>
           <div>
-            <label className={labelClass}>Fa sorszama(i)</label>
+            <label className={labelClass}>Fa sorszáma(i)</label>
             <input value={formData.treeNumbers} onChange={(e) => setFormData({ ...formData, treeNumbers: e.target.value })} placeholder="Pl. 0 vagy 12, 13" className={inputClass} />
           </div>
           <div>
             <label className={labelClass}>Kinek fizettek?</label>
             <select value={formData.paidTo} onChange={(e) => handlePaidToChange(e.target.value)} className={inputClass}>
-              <option value="">Meg nincs rogzitve</option>
+              <option value="">Még nincs rögzítve</option>
               <option value="János">János</option>
               <option value="Sanyi">Sanyi</option>
             </select>
@@ -198,7 +203,7 @@ export default function QuickReservationForm({ currentAdminPaidTo }: QuickReserv
         </Button>
         <Button type="submit" size="lg" className="flex-1" disabled={isSaving}>
           <Save className="h-4 w-4" />
-          {isSaving ? "Mentes..." : "Gyors foglalas mentese"}
+          {isSaving ? "Mentés..." : "Gyors foglalás mentése"}
         </Button>
       </div>
     </form>
