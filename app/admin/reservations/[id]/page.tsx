@@ -7,8 +7,10 @@ import ReservationDetailClient from "@/components/reservation-detail-client"
 
 export default async function ReservationDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>
+  searchParams: Promise<{ created?: string }>
 }) {
   const cookieStore = await cookies()
   const sessionId = cookieStore.get("admin_session")?.value
@@ -18,7 +20,7 @@ export default async function ReservationDetailPage({
     redirect("/admin-login")
   }
 
-  const { id } = await params
+  const [{ id }, { created }] = await Promise.all([params, searchParams])
   const reservation = await getReservationById(Number.parseInt(id))
 
   if (!reservation) {
@@ -27,5 +29,5 @@ export default async function ReservationDetailPage({
 
   const currentAdminPaidTo = paidToForUsername(await getSessionUser(sessionId))
 
-  return <ReservationDetailClient reservation={reservation} currentAdminPaidTo={currentAdminPaidTo} />
+  return <ReservationDetailClient reservation={reservation} currentAdminPaidTo={currentAdminPaidTo} justCreated={created === "true"} />
 }
