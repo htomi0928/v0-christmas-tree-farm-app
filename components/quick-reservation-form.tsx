@@ -37,7 +37,7 @@ export default function QuickReservationForm({ currentAdminPaidTo }: QuickReserv
     pickupDate: startsAsPickedUp ? today : "",
     treeCount: 1,
     notes: "",
-    status: startsAsPickedUp ? ReservationStatus.PICKED_UP : ReservationStatus.BOOKED,
+    status: ReservationStatus.BOOKED,
     treeNumbers: startsAsPickedUp ? "0" : "",
     paidTo: currentAdminPaidTo ?? "",
   })
@@ -126,7 +126,7 @@ export default function QuickReservationForm({ currentAdminPaidTo }: QuickReserv
       </div>
 
       <div className="grid gap-6 xl:grid-cols-2">
-        <div className="border border-[#bfc3c7] bg-[#f5f4f1] rounded-lg p-6 space-y-5">
+        <div className="min-w-0 border border-[#bfc3c7] bg-[#f5f4f1] rounded-lg p-6 space-y-5">
           <p className="text-xs font-bold text-[#3a3a3a] tracking-widest uppercase">Alapadatok</p>
           <div>
             <label className={labelClass}>Név</label>
@@ -163,7 +163,7 @@ export default function QuickReservationForm({ currentAdminPaidTo }: QuickReserv
           </div>
         </div>
 
-        <div className="border border-[#bfc3c7] bg-[#f5f4f1] rounded-lg p-6 space-y-5">
+        <div className="min-w-0 border border-[#bfc3c7] bg-[#f5f4f1] rounded-lg p-6 space-y-5">
           <p className="text-xs font-bold text-[#3a3a3a] tracking-widest uppercase">Dátumok és további adatok</p>
           <div>
             <label className={labelClass}>Látogatás napja</label>
