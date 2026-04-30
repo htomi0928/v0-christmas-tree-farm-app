@@ -43,7 +43,7 @@ export interface CreateAdminQuickReservationData {
   notes?: string
   status?: ReservationStatus
   treeNumbers?: string
-  paidTo?: "JÃ¡nos" | "Sanyi"
+  paidTo?: "János" | "Sanyi"
 }
 
 export interface UpdateReservationData {

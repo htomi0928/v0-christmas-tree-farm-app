@@ -6,6 +6,7 @@ import { AlertCircle, Save } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ReservationStatus } from "@/lib/types"
 import { reservationStatusMeta } from "@/lib/site"
+import { useUnsavedChanges } from "@/contexts/unsaved-changes-context"
 
 const inputClass =
   "w-full px-4 py-3 rounded-lg border border-[#bfc3c7] bg-white text-[#3a3a3a] placeholder:text-[#4a4f4a]/40 focus:outline-none focus:ring-2 focus:ring-[#6e7f6a] text-sm transition-all duration-150"
@@ -19,9 +20,8 @@ export default function QuickReservationForm({ currentAdminPaidTo }: QuickReserv
   const now = new Date()
   const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`
   const adminNamePlaceholder = `Admin foglalás ${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}${String(now.getDate()).padStart(2, "0")}-${String(now.getHours()).padStart(2, "0")}${String(now.getMinutes()).padStart(2, "0")}`
-  const startsAsPickedUp = currentAdminPaidTo !== null
-
   const router = useRouter()
+  const { setDirty, navigate } = useUnsavedChanges()
   const alertRef = useRef<HTMLDivElement>(null)
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState("")
@@ -35,14 +35,32 @@ export default function QuickReservationForm({ currentAdminPaidTo }: QuickReserv
     name: "",
     phone: "",
     email: "",
-    visitDate: today,
-    pickupDate: startsAsPickedUp ? today : "",
+    visitDate: "",
+    pickupDate: "",
     treeCount: 1,
     notes: "",
     status: ReservationStatus.BOOKED,
-    treeNumbers: startsAsPickedUp ? "0" : "",
-    paidTo: currentAdminPaidTo ?? "",
+    treeNumbers: "",
+    paidTo: "",
   })
+  const initialFormData = {
+    name: "",
+    phone: "",
+    email: "",
+    visitDate: "",
+    pickupDate: "",
+    treeCount: 1,
+    notes: "",
+    status: ReservationStatus.BOOKED,
+    treeNumbers: "",
+    paidTo: "",
+  }
+
+  useEffect(() => {
+    const isDirty = JSON.stringify(formData) !== JSON.stringify(initialFormData)
+    setDirty(isDirty)
+  }, [formData, setDirty])
+  useEffect(() => () => setDirty(false), [setDirty])
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault()
@@ -66,6 +84,7 @@ export default function QuickReservationForm({ currentAdminPaidTo }: QuickReserv
         return
       }
 
+      setDirty(false)
       router.push(`/admin/reservations/${data.reservation.id}?created=true`)
     } catch {
       setError("Hálózati hiba történt.")
@@ -75,15 +94,64 @@ export default function QuickReservationForm({ currentAdminPaidTo }: QuickReserv
   }
 
   const handleStatusChange = (nextStatus: ReservationStatus) => {
-    const shouldForceZeroTreeNumber = nextStatus === ReservationStatus.CUT || nextStatus === ReservationStatus.PICKED_UP
-    const shouldPresetPickupDate = nextStatus === ReservationStatus.PICKED_UP
+    setFormData((prev) => {
+      if (nextStatus === ReservationStatus.BOOKED) {
+        return {
+          ...prev,
+          status: nextStatus,
+          visitDate: "",
+          pickupDate: "",
+          treeNumbers: "",
+          paidTo: "",
+        }
+      }
 
-    setFormData((prev) => ({
-      ...prev,
-      status: nextStatus,
-      treeNumbers: shouldForceZeroTreeNumber ? "0" : prev.treeNumbers,
-      pickupDate: shouldPresetPickupDate ? (prev.pickupDate || today) : prev.pickupDate,
-    }))
+      if (nextStatus === ReservationStatus.TREE_TAGGED) {
+        return {
+          ...prev,
+          status: nextStatus,
+          visitDate: today,
+          pickupDate: "",
+          treeNumbers: "",
+          paidTo: "",
+        }
+      }
+
+      if (nextStatus === ReservationStatus.CUT) {
+        return {
+          ...prev,
+          status: nextStatus,
+          visitDate: today,
+          pickupDate: "",
+          treeNumbers: "0",
+          paidTo: "",
+        }
+      }
+
+      if (nextStatus === ReservationStatus.PICKED_UP) {
+        return {
+          ...prev,
+          status: nextStatus,
+          visitDate: today,
+          pickupDate: today,
+          treeNumbers: "0",
+          paidTo: currentAdminPaidTo || prev.paidTo || "",
+        }
+      }
+
+      if (nextStatus === ReservationStatus.FREE) {
+        return {
+          ...prev,
+          status: nextStatus,
+          visitDate: today,
+          pickupDate: today,
+          treeNumbers: "0",
+          paidTo: "",
+        }
+      }
+
+      return { ...prev, status: nextStatus }
+    })
   }
 
   const handlePaidToChange = (nextPaidTo: string) => {
@@ -152,7 +220,7 @@ export default function QuickReservationForm({ currentAdminPaidTo }: QuickReserv
             <input value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} autoComplete="off" autoCorrect="off" autoCapitalize="off" spellCheck={false} className={inputClass} />
           </div>
           <div>
-            <label className={labelClass}>Várható darabszám *</label>
+            <label className={labelClass}>Darabszám *</label>
             <input
               type="number"
               inputMode="numeric"
@@ -223,7 +291,7 @@ export default function QuickReservationForm({ currentAdminPaidTo }: QuickReserv
       </div>
 
       <div className="flex gap-3">
-        <Button type="button" variant="outline" size="lg" className="flex-1" onClick={() => router.push("/admin/reservations")}>
+        <Button type="button" variant="outline" size="lg" className="flex-1" onClick={() => navigate("/admin/reservations")}>
           Vissza
         </Button>
         <Button type="submit" size="lg" className="flex-1" disabled={isSaving}>

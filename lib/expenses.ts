@@ -8,7 +8,7 @@ function rowToExpense(row: any): Expense {
     year: Number(row.year),
     description: row.description,
     amount: Number(row.amount),
-    person: row.person === "JÃ¡nos" ? "János" : (row.person as "János" | "Sanyi"),
+    person: row.person as "János" | "Sanyi",
     date: row.date,
     createdAt: row.created_at,
   }
@@ -70,7 +70,7 @@ export async function getExpensesSummary(
   let sanyi = 0
 
   for (const row of rows) {
-    if (row.person === "János" || row.person === "JÃ¡nos") janos = Number(row.total_amount)
+    if (row.person === "János") janos = Number(row.total_amount)
     if (row.person === "Sanyi") sanyi = Number(row.total_amount)
   }
 

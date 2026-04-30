@@ -18,6 +18,10 @@ interface Props {
 const inputClass = "w-full px-4 py-3 rounded-lg border border-[#bfc3c7] bg-white text-[#3a3a3a] placeholder:text-[#4a4f4a]/40 focus:outline-none focus:ring-2 focus:ring-[#6e7f6a] text-sm transition-all duration-150"
 const disabledInputClass = "w-full px-4 py-3 rounded-lg border border-[#bfc3c7] bg-[#f0efec] text-[#4a4f4a]/60 placeholder:text-[#4a4f4a]/40 text-sm cursor-not-allowed"
 const labelClass = "block text-xs font-bold text-[#3a3a3a] tracking-widest uppercase mb-2"
+const normalizePaidTo = (value: string | undefined) => {
+  const trimmed = (value || "").trim()
+  return trimmed === "János" || trimmed === "Sanyi" ? trimmed : ""
+}
 
 export default function ReservationDetailClient({ reservation: initialReservation, currentAdminPaidTo, justCreated }: Props) {
   const router = useRouter()
@@ -32,7 +36,7 @@ export default function ReservationDetailClient({ reservation: initialReservatio
     status: initialReservation.status,
     treeNumbers: initialReservation.treeNumbers || "",
     notes: initialReservation.notes || "",
-    paidTo: initialReservation.paidTo || "",
+    paidTo: normalizePaidTo(initialReservation.paidTo),
   })
   const initialSnapshot = {
     name: initialReservation.name,
@@ -44,7 +48,7 @@ export default function ReservationDetailClient({ reservation: initialReservatio
     status: initialReservation.status,
     treeNumbers: initialReservation.treeNumbers || "",
     notes: initialReservation.notes || "",
-    paidTo: initialReservation.paidTo || "",
+    paidTo: normalizePaidTo(initialReservation.paidTo),
   }
 
   useEffect(() => {
@@ -91,6 +95,13 @@ export default function ReservationDetailClient({ reservation: initialReservatio
       setTimeout(() => alertRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }), 50)
     }
   }, [error, success])
+  useEffect(() => {
+    const isClientValidationError =
+      error.toLowerCase().includes("hibás mezőket")
+    if (Object.keys(validationErrors).length === 0 && isClientValidationError) {
+      setError("")
+    }
+  }, [validationErrors, error])
 
   useEffect(() => {
     // Load the settings for this reservation's own year, not the admin's current view year —
@@ -111,7 +122,6 @@ export default function ReservationDetailClient({ reservation: initialReservatio
     status !== ReservationStatus.BOOKED
 
   const allowsPaidTo = (status: ReservationStatus) =>
-    status === ReservationStatus.TREE_TAGGED ||
     status === ReservationStatus.CUT ||
     status === ReservationStatus.PICKED_UP
 
@@ -161,7 +171,7 @@ export default function ReservationDetailClient({ reservation: initialReservatio
       }
     }
 
-    if (!allowsPaidTo(data.status) && data.paidTo) {
+    if (!allowsPaidTo(data.status) && normalizePaidTo(data.paidTo) !== "") {
       errors.paidTo =
         "Ennél a státusznál nem rögzíthető fizetés. Töröld a fizetést, vagy válassz másik státuszt."
     }
@@ -378,7 +388,7 @@ export default function ReservationDetailClient({ reservation: initialReservatio
           <p className="text-xs font-bold text-[#3a3a3a] tracking-widest uppercase">Sorszám és megjegyzés</p>
           <div>
             <label className={labelClass}>
-              Fa sorszáma(i)
+              Fa sorszáma
               {requiresTreeNumber(formData.status) && <span className="ml-1 text-destructive">*</span>}
             </label>
             <input
@@ -489,3 +499,5 @@ export default function ReservationDetailClient({ reservation: initialReservatio
     </div>
   )
 }
+
+
