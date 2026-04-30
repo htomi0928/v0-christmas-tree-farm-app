@@ -358,19 +358,19 @@ export default function ReservationDetailClient({ reservation: initialReservatio
           <p className="text-xs font-bold text-[#3a3a3a] tracking-widest uppercase">Alapadatok</p>
           <div>
             <label className={labelClass}>Név</label>
-            <input value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className={inputClass} />
+            <input value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} autoComplete="off" autoCorrect="off" autoCapitalize="off" spellCheck={false} className={inputClass} />
           </div>
           <div>
             <label className={labelClass}>Telefonszám</label>
-            <input value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} className={inputClass} />
+            <input value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} autoComplete="off" autoCorrect="off" autoCapitalize="off" spellCheck={false} inputMode="tel" className={inputClass} />
           </div>
           <div>
             <label className={labelClass}>E-mail</label>
-            <input value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} className={inputClass} />
+            <input value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} autoComplete="off" autoCorrect="off" autoCapitalize="off" spellCheck={false} className={inputClass} />
           </div>
           <div>
             <label className={labelClass}>Várható darabszám</label>
-            <input type="number" min="1" value={formData.treeCount} onChange={(e) => setFormData({ ...formData, treeCount: Math.max(1, Number.parseInt(e.target.value) || 1) })} className={inputClass} />
+            <input type="number" inputMode="numeric" min="1" value={formData.treeCount} onChange={(e) => setFormData({ ...formData, treeCount: Math.max(1, Number.parseInt(e.target.value) || 1) })} autoComplete="off" className={inputClass} />
           </div>
         </div>
 
@@ -390,6 +390,10 @@ export default function ReservationDetailClient({ reservation: initialReservatio
                 setValidationErrors(validate(updated))
               }}
               placeholder="Például 12, 13"
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck={false}
               className={`${allowsTreeNumbers(formData.status) || formData.treeNumbers.trim() ? inputClass : disabledInputClass} ${validationErrors.treeNumbers ? "border-destructive ring-1 ring-destructive/40" : ""}`}
             />
             {validationErrors.treeNumbers ? (
@@ -403,7 +407,7 @@ export default function ReservationDetailClient({ reservation: initialReservatio
           </div>
           <div>
             <label className={labelClass}>Megjegyzés</label>
-            <textarea value={formData.notes} onChange={(e) => setFormData({ ...formData, notes: e.target.value })} rows={4} className={inputClass + " resize-none"} />
+            <textarea value={formData.notes} onChange={(e) => setFormData({ ...formData, notes: e.target.value })} rows={4} autoComplete="off" autoCorrect="off" spellCheck={false} className={inputClass + " resize-none"} />
           </div>
           <div>
             <label className={labelClass}>Kinek fizettek?</label>
