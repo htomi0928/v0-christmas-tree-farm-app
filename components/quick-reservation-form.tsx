@@ -264,7 +264,7 @@ export default function QuickReservationForm({ currentAdminPaidTo }: QuickReserv
             </div>
           </div>
           <div>
-            <label className={labelClass}>Fa sorszáma(i)</label>
+            <label className={labelClass}>Fa sorszáma</label>
             <input value={formData.treeNumbers} onChange={(e) => setFormData({ ...formData, treeNumbers: e.target.value })} placeholder="Pl. 0 vagy 12, 13" autoComplete="off" autoCorrect="off" autoCapitalize="off" spellCheck={false} className={inputClass} />
           </div>
           <div>
