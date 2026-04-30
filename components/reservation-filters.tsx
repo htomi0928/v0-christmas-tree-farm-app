@@ -125,7 +125,7 @@ export default function ReservationFilters({ reservations }: Props) {
                     </p>
                   </div>
                   <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm text-[#4a4f4a]">
-                    <p><span className="font-semibold text-[#3a3a3a]">Nap:</span> <span className="font-light">{formatDateHu(reservation.visitDate)}</span></p>
+                    <p><span className="font-semibold text-[#3a3a3a]">Látogatás napja:</span> <span className="font-light">{formatDateHu(reservation.visitDate)}</span></p>
                     <p><span className="font-semibold text-[#3a3a3a]">Darab:</span> <span className="font-light">{reservation.treeCount} fa</span></p>
                     <p><span className="font-semibold text-[#3a3a3a]">Sorszám:</span> <span className="font-light">{reservation.treeNumbers || "Még nincs"}</span></p>
                   </div>
