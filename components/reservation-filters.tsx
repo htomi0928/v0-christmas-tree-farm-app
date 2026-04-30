@@ -80,7 +80,7 @@ export default function ReservationFilters({ reservations }: Props) {
 
           <label className="block min-w-0">
             <span className="mb-2 block text-xs font-bold text-[#3a3a3a] tracking-widest uppercase">Nap szerint</span>
-            <input type="date" value={visitDateFilter} onChange={(e) => setVisitDateFilter(e.target.value)} className="w-full min-w-0 px-4 py-3 rounded-lg border border-[#bfc3c7] bg-white text-[#3a3a3a] focus:outline-none focus:ring-2 focus:ring-[#6e7f6a] text-sm transition-all" />
+            <input type="date" value={visitDateFilter} onChange={(e) => setVisitDateFilter(e.target.value)} className="w-full min-w-0 max-w-full px-4 py-3 rounded-lg border border-[#bfc3c7] bg-white text-[#3a3a3a] focus:outline-none focus:ring-2 focus:ring-[#6e7f6a] text-sm transition-all appearance-none [color-scheme:light]" style={{ WebkitAppearance: "none" }} />
           </label>
 
           <button
@@ -125,7 +125,7 @@ export default function ReservationFilters({ reservations }: Props) {
                     </p>
                   </div>
                   <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm text-[#4a4f4a]">
-                    <p><span className="font-semibold text-[#3a3a3a]">Nap:</span> <span className="font-light">{formatDateHu(reservation.visitDate)}</span></p>
+                    <p><span className="font-semibold text-[#3a3a3a]">Látogatás napja:</span> <span className="font-light">{formatDateHu(reservation.visitDate)}</span></p>
                     <p><span className="font-semibold text-[#3a3a3a]">Darab:</span> <span className="font-light">{reservation.treeCount} fa</span></p>
                     <p><span className="font-semibold text-[#3a3a3a]">Sorszám:</span> <span className="font-light">{reservation.treeNumbers || "Még nincs"}</span></p>
                   </div>
