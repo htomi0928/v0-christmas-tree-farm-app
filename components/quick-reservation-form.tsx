@@ -235,11 +235,11 @@ export default function QuickReservationForm({ currentAdminPaidTo }: QuickReserv
           <p className="text-xs font-bold text-[#3a3a3a] tracking-widest uppercase">Dátumok és további adatok</p>
           <div>
             <label className={labelClass}>Látogatás napja</label>
-            <input type="date" value={formData.visitDate} onChange={(e) => setFormData({ ...formData, visitDate: e.target.value })} className={inputClass} />
+            <input type="date" value={formData.visitDate} onChange={(e) => setFormData({ ...formData, visitDate: e.target.value })} className={`${inputClass} appearance-none [color-scheme:light]`} style={{ WebkitAppearance: "none" }} />
           </div>
           <div>
             <label className={labelClass}>Átvételi nap</label>
-            <input type="date" value={formData.pickupDate} onChange={(e) => setFormData({ ...formData, pickupDate: e.target.value })} className={inputClass} />
+            <input type="date" value={formData.pickupDate} onChange={(e) => setFormData({ ...formData, pickupDate: e.target.value })} className={`${inputClass} appearance-none [color-scheme:light]`} style={{ WebkitAppearance: "none" }} />
           </div>
           <div>
             <label className={labelClass}>Fa sorszáma</label>

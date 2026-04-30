@@ -510,7 +510,17 @@ export default function BookingPage() {
                     className={`mt-1 h-4 w-4 rounded border flex-shrink-0 ${errors.acceptTerms ? "border-destructive" : "border-[#bfc3c7]"}`}
                   />
                   <span className="text-sm text-[#4a4f4a] font-light leading-relaxed">
-                    Tudomásul veszem, hogy a foglalás 10:00 és 12:00 közötti érkezést jelent, nem percre pontos időpontot.{" "}
+                    Tudomásul veszem, hogy a foglalás 10:00 és 12:00 közötti érkezést jelent, nem percre pontos időpontot,
+                    és elfogadom az{" "}
+                    <Link
+                      href="/aszf"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[#6e7f6a] underline underline-offset-2 hover:text-[#4a4f4a] transition-colors"
+                    >
+                      ASZF
+                    </Link>
+                    -et.{" "}
                     <span className="text-[#6e7f6a]">*</span>
                   </span>
                 </label>

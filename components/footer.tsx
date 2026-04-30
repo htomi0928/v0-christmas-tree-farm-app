@@ -1,6 +1,12 @@
+"use client"
+
+import Link from "next/link"
 import { Facebook } from "lucide-react"
+import { useCookieConsent } from "@/contexts/cookie-consent-context"
 
 export function Footer() {
+  const { resetConsent } = useCookieConsent()
+
   return (
     <footer className="bg-neutral-900 mt-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -28,8 +34,24 @@ export function Footer() {
             </a>
           </div>
         </div>
-        <div className="border-t border-neutral-700 mt-8 pt-6 text-center text-xs text-neutral-500">
-          <p>&copy; 2026 Zalaegerszegi Nordmann Fenyők. Minden jog fenntartva.</p>
+        <div className="border-t border-neutral-700 mt-8 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <p className="text-xs text-neutral-500">
+            &copy; 2026 Zalaegerszegi Nordmann Fenyők. Minden jog fenntartva.
+          </p>
+          <div className="flex items-center gap-5">
+            <Link href="/aszf" className="text-xs text-neutral-500 hover:text-neutral-300 transition-colors">
+              ASZF
+            </Link>
+            <Link href="/adatvedelem" className="text-xs text-neutral-500 hover:text-neutral-300 transition-colors">
+              Adatvédelmi tájékoztató
+            </Link>
+            <button
+              onClick={resetConsent}
+              className="text-xs text-neutral-500 hover:text-neutral-300 transition-colors cursor-pointer"
+            >
+              Süti-beállítások
+            </button>
+          </div>
         </div>
       </div>
     </footer>

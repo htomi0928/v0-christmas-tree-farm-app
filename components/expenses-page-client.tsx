@@ -119,7 +119,7 @@ export default function ExpensesPageClient({ year, initialExpenses }: ExpensesPa
               </div>
               <div className="min-w-0">
                 <label className={labelClass}>Dátum</label>
-                <input type="date" value={formData.date} onChange={(e) => setFormData({ ...formData, date: e.target.value })} className={inputClass} />
+                <input type="date" value={formData.date} onChange={(e) => setFormData({ ...formData, date: e.target.value })} className={`${inputClass} appearance-none [color-scheme:light]`} style={{ WebkitAppearance: "none" }} />
               </div>
             </div>
             <div>
