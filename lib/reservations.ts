@@ -146,7 +146,7 @@ function requiresTreeNumber(status: ReservationStatus) {
 }
 
 function allowsTreeNumbers(status: ReservationStatus) {
-  return status !== ReservationStatus.BOOKED && status !== ReservationStatus.NO_SHOW
+  return status !== ReservationStatus.BOOKED
 }
 
 function allowsPaidTo(status: ReservationStatus) {

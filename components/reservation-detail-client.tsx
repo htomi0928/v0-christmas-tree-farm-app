@@ -108,7 +108,7 @@ export default function ReservationDetailClient({ reservation: initialReservatio
     status === ReservationStatus.FREE
 
   const allowsTreeNumbers = (status: ReservationStatus) =>
-    status !== ReservationStatus.BOOKED && status !== ReservationStatus.NO_SHOW
+    status !== ReservationStatus.BOOKED
 
   const allowsPaidTo = (status: ReservationStatus) =>
     status === ReservationStatus.TREE_TAGGED ||
