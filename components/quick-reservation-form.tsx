@@ -25,6 +25,8 @@ export default function QuickReservationForm({ currentAdminPaidTo }: QuickReserv
   const alertRef = useRef<HTMLDivElement>(null)
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState("")
+  const [visitDateFocused, setVisitDateFocused] = useState(false)
+  const [pickupDateFocused, setPickupDateFocused] = useState(false)
 
   useEffect(() => {
     if (error) setTimeout(() => alertRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }), 50)
@@ -202,21 +204,26 @@ export default function QuickReservationForm({ currentAdminPaidTo }: QuickReserv
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               placeholder={adminNamePlaceholder}
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck={false}
               className={inputClass}
             />
           </div>
           <div>
             <label className={labelClass}>Telefonszám</label>
-            <input value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} className={inputClass} />
+            <input value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} autoComplete="off" autoCorrect="off" autoCapitalize="off" spellCheck={false} inputMode="tel" className={inputClass} />
           </div>
           <div>
             <label className={labelClass}>E-mail</label>
-            <input value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} className={inputClass} />
+            <input value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} autoComplete="off" autoCorrect="off" autoCapitalize="off" spellCheck={false} className={inputClass} />
           </div>
           <div>
             <label className={labelClass}>Darabszám *</label>
             <input
               type="number"
+              inputMode="numeric"
               min="1"
               max="20"
               value={formData.treeCount}
@@ -226,6 +233,7 @@ export default function QuickReservationForm({ currentAdminPaidTo }: QuickReserv
                   treeCount: Number.parseInt(e.target.value, 10) || 1,
                 })
               }
+              autoComplete="off"
               className={inputClass}
             />
           </div>
@@ -235,15 +243,29 @@ export default function QuickReservationForm({ currentAdminPaidTo }: QuickReserv
           <p className="text-xs font-bold text-[#3a3a3a] tracking-widest uppercase">Dátumok és további adatok</p>
           <div>
             <label className={labelClass}>Látogatás napja</label>
-            <input type="date" value={formData.visitDate} onChange={(e) => setFormData({ ...formData, visitDate: e.target.value })} className={`${inputClass} appearance-none [color-scheme:light]`} style={{ WebkitAppearance: "none" }} />
+            <div className="relative">
+              <input type="date" value={formData.visitDate} onChange={(e) => setFormData({ ...formData, visitDate: e.target.value })} onFocus={() => setVisitDateFocused(true)} onBlur={() => setVisitDateFocused(false)} autoComplete="off" className={`w-full px-4 py-3 rounded-lg border border-[#bfc3c7] bg-white placeholder:text-[#4a4f4a]/40 focus:outline-none focus:ring-2 focus:ring-[#6e7f6a] text-sm transition-all duration-150 appearance-none [color-scheme:light] ${!formData.visitDate && !visitDateFocused ? "text-transparent md:text-[#3a3a3a]" : "text-[#3a3a3a]"}`} style={{ WebkitAppearance: "none" }} />
+              {!formData.visitDate && !visitDateFocused && (
+                <span className="pointer-events-none absolute inset-0 flex items-center px-4 text-sm text-[#4a4f4a]/40 md:hidden">
+                  Válassz dátumot
+                </span>
+              )}
+            </div>
           </div>
           <div>
             <label className={labelClass}>Átvételi nap</label>
-            <input type="date" value={formData.pickupDate} onChange={(e) => setFormData({ ...formData, pickupDate: e.target.value })} className={`${inputClass} appearance-none [color-scheme:light]`} style={{ WebkitAppearance: "none" }} />
+            <div className="relative">
+              <input type="date" value={formData.pickupDate} onChange={(e) => setFormData({ ...formData, pickupDate: e.target.value })} onFocus={() => setPickupDateFocused(true)} onBlur={() => setPickupDateFocused(false)} autoComplete="off" className={`w-full px-4 py-3 rounded-lg border border-[#bfc3c7] bg-white placeholder:text-[#4a4f4a]/40 focus:outline-none focus:ring-2 focus:ring-[#6e7f6a] text-sm transition-all duration-150 appearance-none [color-scheme:light] ${!formData.pickupDate && !pickupDateFocused ? "text-transparent md:text-[#3a3a3a]" : "text-[#3a3a3a]"}`} style={{ WebkitAppearance: "none" }} />
+              {!formData.pickupDate && !pickupDateFocused && (
+                <span className="pointer-events-none absolute inset-0 flex items-center px-4 text-sm text-[#4a4f4a]/40 md:hidden">
+                  Válassz dátumot
+                </span>
+              )}
+            </div>
           </div>
           <div>
             <label className={labelClass}>Fa sorszáma</label>
-            <input value={formData.treeNumbers} onChange={(e) => setFormData({ ...formData, treeNumbers: e.target.value })} placeholder="Pl. 0 vagy 12, 13" className={inputClass} />
+            <input value={formData.treeNumbers} onChange={(e) => setFormData({ ...formData, treeNumbers: e.target.value })} placeholder="Pl. 0 vagy 12, 13" autoComplete="off" autoCorrect="off" autoCapitalize="off" spellCheck={false} className={inputClass} />
           </div>
           <div>
             <label className={labelClass}>Kinek fizettek?</label>
@@ -259,6 +281,9 @@ export default function QuickReservationForm({ currentAdminPaidTo }: QuickReserv
               rows={4}
               value={formData.notes}
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+              autoComplete="off"
+              autoCorrect="off"
+              spellCheck={false}
               className={inputClass + " resize-none"}
             />
           </div>
