@@ -103,14 +103,14 @@ export default function AdminDatePicker({ selectedDate, onDateSelect, highlightD
                   <button
                     key={dateStr}
                     type="button"
-                    disabled={!isHighlighted}
                     onClick={() => onDateSelect(isSelected ? "" : dateStr)}
+                    title={!isHighlighted && !isSelected ? "Nem elérhető nap (admin felülírás)" : undefined}
                     className={`h-8 sm:h-10 rounded-2xl text-sm font-semibold transition ${
                       isSelected
-                        ? "bg-primary text-primary-foreground"
+                        ? "bg-primary text-primary-foreground cursor-pointer"
                         : isHighlighted
-                          ? "text-foreground/80 hover:bg-secondary/60"
-                          : "text-foreground/30 cursor-not-allowed"
+                          ? "bg-[color:var(--mint-soft)] text-[color:var(--mint-strong)] hover:brightness-95 cursor-pointer"
+                          : "text-foreground/30 hover:bg-foreground/8 hover:text-foreground/50 cursor-pointer"
                     }`}
                   >
                     {day}

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { ReservationStatus } from "@/lib/types"
 import { reservationStatusMeta } from "@/lib/site"
 import { useUnsavedChanges } from "@/contexts/unsaved-changes-context"
+import AdminDatePicker from "@/components/admin-date-picker"
 
 const inputClass =
   "w-full px-4 py-3 rounded-lg border border-[#bfc3c7] bg-white text-[#3a3a3a] placeholder:text-[#4a4f4a]/40 focus:outline-none focus:ring-2 focus:ring-[#6e7f6a] text-sm transition-all duration-150"
@@ -25,12 +26,19 @@ export default function QuickReservationForm({ currentAdminPaidTo }: QuickReserv
   const alertRef = useRef<HTMLDivElement>(null)
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState("")
-  const [visitDateFocused, setVisitDateFocused] = useState(false)
-  const [pickupDateFocused, setPickupDateFocused] = useState(false)
+  const [availableDays, setAvailableDays] = useState<string[]>([])
+  const [retrievalDays, setRetrievalDays] = useState<string[]>([])
 
   useEffect(() => {
     if (error) setTimeout(() => alertRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }), 50)
   }, [error])
+
+  useEffect(() => {
+    fetch("/api/admin/settings").then((r) => r.json()).then((data) => {
+      if (data.settings?.availableDays) setAvailableDays(data.settings.availableDays.sort())
+      if (data.settings?.retrievalDays) setRetrievalDays(data.settings.retrievalDays.sort())
+    }).catch(() => {})
+  }, [])
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
@@ -240,29 +248,7 @@ export default function QuickReservationForm({ currentAdminPaidTo }: QuickReserv
         </div>
 
         <div className="min-w-0 border border-[#bfc3c7] bg-[#f5f4f1] rounded-lg p-6 space-y-5">
-          <p className="text-xs font-bold text-[#3a3a3a] tracking-widest uppercase">Dátumok és további adatok</p>
-          <div>
-            <label className={labelClass}>Látogatás napja</label>
-            <div className="relative">
-              <input type="date" value={formData.visitDate} onChange={(e) => setFormData({ ...formData, visitDate: e.target.value })} onFocus={() => setVisitDateFocused(true)} onBlur={() => setVisitDateFocused(false)} autoComplete="off" className={`w-full px-4 py-3 rounded-lg border border-[#bfc3c7] bg-white placeholder:text-[#4a4f4a]/40 focus:outline-none focus:ring-2 focus:ring-[#6e7f6a] text-sm transition-all duration-150 appearance-none [color-scheme:light] ${!formData.visitDate && !visitDateFocused ? "text-transparent md:text-[#3a3a3a]" : "text-[#3a3a3a]"}`} style={{ WebkitAppearance: "none" }} />
-              {!formData.visitDate && !visitDateFocused && (
-                <span className="pointer-events-none absolute inset-0 flex items-center px-4 text-sm text-[#4a4f4a]/40 md:hidden">
-                  Válassz dátumot
-                </span>
-              )}
-            </div>
-          </div>
-          <div>
-            <label className={labelClass}>Átvételi nap</label>
-            <div className="relative">
-              <input type="date" value={formData.pickupDate} onChange={(e) => setFormData({ ...formData, pickupDate: e.target.value })} onFocus={() => setPickupDateFocused(true)} onBlur={() => setPickupDateFocused(false)} autoComplete="off" className={`w-full px-4 py-3 rounded-lg border border-[#bfc3c7] bg-white placeholder:text-[#4a4f4a]/40 focus:outline-none focus:ring-2 focus:ring-[#6e7f6a] text-sm transition-all duration-150 appearance-none [color-scheme:light] ${!formData.pickupDate && !pickupDateFocused ? "text-transparent md:text-[#3a3a3a]" : "text-[#3a3a3a]"}`} style={{ WebkitAppearance: "none" }} />
-              {!formData.pickupDate && !pickupDateFocused && (
-                <span className="pointer-events-none absolute inset-0 flex items-center px-4 text-sm text-[#4a4f4a]/40 md:hidden">
-                  Válassz dátumot
-                </span>
-              )}
-            </div>
-          </div>
+          <p className="text-xs font-bold text-[#3a3a3a] tracking-widest uppercase">További adatok</p>
           <div>
             <label className={labelClass}>Fa sorszáma</label>
             <input value={formData.treeNumbers} onChange={(e) => setFormData({ ...formData, treeNumbers: e.target.value })} placeholder="Pl. 0 vagy 12, 13" autoComplete="off" autoCorrect="off" autoCapitalize="off" spellCheck={false} className={inputClass} />
@@ -287,6 +273,18 @@ export default function QuickReservationForm({ currentAdminPaidTo }: QuickReserv
               className={inputClass + " resize-none"}
             />
           </div>
+        </div>
+      </div>
+
+      {/* Date pickers */}
+      <div className="grid gap-6 xl:grid-cols-2">
+        <div className="border border-[#bfc3c7] bg-[#f5f4f1] rounded-lg p-3 sm:p-6">
+          <p className="text-xs font-bold text-[#3a3a3a] tracking-widest uppercase mb-4">Látogatás napja</p>
+          <AdminDatePicker selectedDate={formData.visitDate} onDateSelect={(date) => setFormData({ ...formData, visitDate: date })} highlightDays={availableDays.length > 0 ? availableDays : undefined} />
+        </div>
+        <div className="border border-[#bfc3c7] bg-[#f5f4f1] rounded-lg p-3 sm:p-6">
+          <p className="text-xs font-bold text-[#3a3a3a] tracking-widest uppercase mb-4">Átvételi nap</p>
+          <AdminDatePicker selectedDate={formData.pickupDate} onDateSelect={(date) => setFormData({ ...formData, pickupDate: date })} highlightDays={retrievalDays.length > 0 ? retrievalDays : undefined} />
         </div>
       </div>
 

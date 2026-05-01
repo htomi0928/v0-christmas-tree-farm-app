@@ -210,7 +210,7 @@ export default function ReservationFilters({ reservations }: Props) {
                       <span className="text-sm text-[#4a4f4a] font-light">{pickupShort}</span>
                       <span className="text-sm text-[#4a4f4a] font-light">{reservation.treeCount} fa</span>
                       <span className="text-sm text-[#4a4f4a] font-light">{reservation.treeNumbers || <span className="text-[#bfc3c7]">—</span>}</span>
-                      <span className={`inline-block rounded-full px-3 py-1 text-xs font-medium border whitespace-nowrap ${meta.pillClassName}`}>{meta.label}</span>
+                      <span className={`w-fit rounded-full px-3 py-1 text-xs font-medium border whitespace-nowrap ${meta.pillClassName}`}>{meta.label}</span>
                       <span className="text-xs font-semibold text-[#6e7f6a] tracking-widest uppercase whitespace-nowrap">→</span>
                     </div>
                   </Link>

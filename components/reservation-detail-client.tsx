@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { AlertCircle, ArrowLeft, CheckCircle2, Plus, Save, Trash2 } from "lucide-react"
+import { AlertCircle, ArrowLeft, CheckCircle2, Plus, Save, Trash2, X } from "lucide-react"
 import { type Reservation, ReservationStatus } from "@/lib/types"
 import { formatDateHu, reservationStatusMeta } from "@/lib/site"
 import AdminDatePicker from "@/components/admin-date-picker"
@@ -223,7 +223,6 @@ export default function ReservationDetailClient({ reservation: initialReservatio
         prevSnapshotRef.current = { ...formData }
         setSuccess("A foglalás mentése sikerült.")
         setSavedChanges(diff)
-        setTimeout(() => { setSuccess(""); setSavedChanges([]) }, 6000)
       } else {
         setError(data.error || "Hiba történt a mentés közben.")
       }
@@ -324,25 +323,26 @@ export default function ReservationDetailClient({ reservation: initialReservatio
           </div>
         )}
         {success && (
-          <div className="border border-[#6e7f6a]/30 bg-[#6e7f6a]/8 rounded-lg overflow-hidden">
-            <div className="flex gap-3 px-4 py-3.5 text-sm text-[#2d5430]">
-              <CheckCircle2 className="h-4.5 w-4.5 flex-shrink-0 mt-px" />
-              <span className="font-medium">{success}</span>
+          <div className="flex gap-3 p-4 border border-[#6e7f6a]/30 bg-[#6e7f6a]/8 rounded-lg text-sm text-[#6e7f6a]">
+            <CheckCircle2 className="h-5 w-5 flex-shrink-0 mt-0.5" />
+            <div className="flex-1 min-w-0">
+              <p className="font-semibold">{success}</p>
+              {savedChanges.length > 0 && (
+                <ul className="mt-2 space-y-0.5">
+                  {savedChanges.map((change) => (
+                    <li key={change.label} className="text-[#6e7f6a]/80 font-light">— {change.label}: {change.oldVal} → {change.newVal}</li>
+                  ))}
+                </ul>
+              )}
             </div>
-            {savedChanges.length > 0 && (
-              <div className="border-t border-[#6e7f6a]/20 divide-y divide-[#6e7f6a]/10">
-                {savedChanges.map((change) => (
-                  <div key={change.label} className="grid grid-cols-[6rem_1fr] sm:grid-cols-[8rem_1fr] items-baseline gap-x-3 px-4 py-2">
-                    <span className="text-[10px] font-bold tracking-widest uppercase text-[#6e7f6a]/60 truncate">{change.label}</span>
-                    <span className="text-xs text-[#4a4f4a] flex items-center gap-1.5 flex-wrap">
-                      <span className="line-through text-[#4a4f4a]/40">{change.oldVal}</span>
-                      <span className="text-[#6e7f6a]/50">→</span>
-                      <span className="font-medium text-[#2d5430]">{change.newVal}</span>
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
+            <button
+              type="button"
+              onClick={() => { setSuccess(""); setSavedChanges([]) }}
+              className="flex-shrink-0 text-[#6e7f6a]/50 hover:text-[#6e7f6a] transition-colors cursor-pointer"
+              aria-label="Bezárás"
+            >
+              <X className="h-4 w-4" />
+            </button>
           </div>
         )}
       </div>}
