@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect, useMemo } from "react"
-import { CheckCircle2, AlertCircle, ChevronLeft, ChevronRight, Save } from "lucide-react"
+import { CheckCircle2, AlertCircle, ChevronLeft, ChevronRight, Save, X } from "lucide-react"
 import type { Settings } from "@/lib/types"
 import { useUnsavedChanges } from "@/contexts/unsaved-changes-context"
 
@@ -23,6 +23,13 @@ export default function SettingsClient({ initialSettings, year }: Props) {
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
+  const [savedSummary, setSavedSummary] = useState<string[]>([])
+  const lastSavedRef = useRef({
+    availableDays: [...(initialSettings.availableDays || [])].sort(),
+    maxBookingsPerDay: initialSettings.maxBookingsPerDay,
+    retrievalDays: [...(initialSettings.retrievalDays || [])].sort(),
+    pricePerTree: initialSettings.pricePerTree,
+  })
 
   useEffect(() => {
     if (error || success) {
@@ -112,9 +119,32 @@ export default function SettingsClient({ initialSettings, year }: Props) {
     }))
   }
 
+  const computeChangeSummary = (
+    before: typeof lastSavedRef.current,
+    after: { availableDays: string[]; maxBookingsPerDay: number | ""; retrievalDays: string[]; pricePerTree: number | "" },
+  ): string[] => {
+    const changes: string[] = []
+    if (before.maxBookingsPerDay !== after.maxBookingsPerDay) {
+      changes.push(`Max. foglalás/nap: ${before.maxBookingsPerDay} → ${after.maxBookingsPerDay}`)
+    }
+    if (before.pricePerTree !== after.pricePerTree) {
+      changes.push(`Ár fánként: ${Number(before.pricePerTree).toLocaleString("hu-HU")} Ft → ${Number(after.pricePerTree).toLocaleString("hu-HU")} Ft`)
+    }
+    const afterAvailSorted = [...after.availableDays].sort()
+    const afterRetrSorted = [...after.retrievalDays].sort()
+    if (JSON.stringify(before.availableDays) !== JSON.stringify(afterAvailSorted)) {
+      changes.push(`Foglalható napok: ${before.availableDays.length} nap → ${afterAvailSorted.length} nap`)
+    }
+    if (JSON.stringify(before.retrievalDays) !== JSON.stringify(afterRetrSorted)) {
+      changes.push(`Átvételi napok: ${before.retrievalDays.length} nap → ${afterRetrSorted.length} nap`)
+    }
+    return changes
+  }
+
   const handleSave = async () => {
     setError("")
     setSuccess("")
+    setSavedSummary([])
     if (formData.maxBookingsPerDay === "") {
       setError("A maximális foglalás naponta mező nem lehet üres.")
       return
@@ -125,6 +155,7 @@ export default function SettingsClient({ initialSettings, year }: Props) {
     }
     setIsSaving(true)
     try {
+      const summary = computeChangeSummary(lastSavedRef.current, formData)
       const response = await fetch("/api/admin/settings", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -134,7 +165,13 @@ export default function SettingsClient({ initialSettings, year }: Props) {
       if (data.success) {
         setDirty(false)
         setSuccess("A beállítások mentése sikerült.")
-        setTimeout(() => setSuccess(""), 2500)
+        setSavedSummary(summary)
+        lastSavedRef.current = {
+          availableDays: [...formData.availableDays].sort(),
+          maxBookingsPerDay: formData.maxBookingsPerDay,
+          retrievalDays: [...formData.retrievalDays].sort(),
+          pricePerTree: formData.pricePerTree,
+        }
       } else {
         setError(data.error || "A mentés nem sikerült.")
       }
@@ -225,7 +262,28 @@ export default function SettingsClient({ initialSettings, year }: Props) {
         )}
         {success && (
           <div className="flex gap-3 p-4 border border-[#6e7f6a]/30 bg-[#6e7f6a]/8 rounded-lg text-sm text-[#6e7f6a]">
-            <CheckCircle2 className="h-5 w-5 flex-shrink-0 mt-0.5" />{success}
+            <CheckCircle2 className="h-5 w-5 flex-shrink-0 mt-0.5" />
+            <div className="flex-1 min-w-0">
+              <p className="font-semibold">{success}</p>
+              {savedSummary.length > 0 && (
+                <ul className="mt-2 space-y-0.5">
+                  {savedSummary.map((line) => (
+                    <li key={line} className="text-[#6e7f6a]/80 font-light">— {line}</li>
+                  ))}
+                </ul>
+              )}
+              {savedSummary.length === 0 && (
+                <p className="mt-0.5 text-[#6e7f6a]/70 font-light">Nem változott egyetlen beállítás sem.</p>
+              )}
+            </div>
+            <button
+              type="button"
+              onClick={() => { setSuccess(""); setSavedSummary([]) }}
+              className="flex-shrink-0 text-[#6e7f6a]/50 hover:text-[#6e7f6a] transition-colors cursor-pointer"
+              aria-label="Bezárás"
+            >
+              <X className="h-4 w-4" />
+            </button>
           </div>
         )}
       </div>

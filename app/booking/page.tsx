@@ -448,42 +448,55 @@ export default function BookingPage() {
 
               {/* Tree count */}
               <div>
-                <label htmlFor="treeCount" className="block text-xs font-bold text-[#3a3a3a] tracking-widest uppercase mb-2">
+                <p className="block text-xs font-bold text-[#3a3a3a] tracking-widest uppercase mb-2">
                   Hány fát szeretnél? <span className="text-[#6e7f6a]">*</span>
-                </label>
-                <select
-                  id="treeCount" name="treeCount"
-                  value={customTreeCount ? "custom" : formData.treeCount}
-                  onChange={(e) => {
-                    if (e.target.value === "custom") {
-                      setCustomTreeCount(true)
-                      setFormData((prev) => ({ ...prev, treeCount: "" }))
-                    } else {
-                      setCustomTreeCount(false)
-                      setFormData((prev) => ({ ...prev, treeCount: e.target.value }))
-                    }
-                  }}
-                  className={inputClass(!!errors.treeCount)}
-                >
-                  <option value="1">1 fa</option>
-                  <option value="2">2 fa</option>
-                  <option value="3">3 fa</option>
-                  <option value="custom">Egyéni mennyiség megadása</option>
-                </select>
-                {customTreeCount && (
-                  <input
-                    type="number"
-                    min="1"
-                    inputMode="numeric"
-                    placeholder="Hány fát szeretnél?"
-                    value={formData.treeCount}
-                    onChange={(e) => {
-                      const v = e.target.value.replace(/[^0-9]/g, "")
-                      setFormData((prev) => ({ ...prev, treeCount: v }))
-                    }}
-                    className={`${inputClass(!!errors.treeCount)} mt-2`}
-                  />
-                )}
+                </p>
+                <div className="grid grid-cols-2 gap-2">
+                  {(["1", "2", "3"] as const).map((n) => {
+                    const selected = !customTreeCount && formData.treeCount === n
+                    return (
+                      <button
+                        key={n}
+                        type="button"
+                        onClick={() => {
+                          setCustomTreeCount(false)
+                          setFormData((prev) => ({ ...prev, treeCount: n }))
+                        }}
+                        className={`py-3 rounded-lg border text-sm font-semibold transition-all duration-150 cursor-pointer ${
+                          selected
+                            ? "border-[#6e7f6a] bg-[#6e7f6a]/10 text-[#3a3a3a] ring-2 ring-[#6e7f6a]/20"
+                            : "border-[#bfc3c7] bg-[#f5f4f1] text-[#4a4f4a] hover:border-[#6e7f6a]/60 hover:bg-[#6e7f6a]/5"
+                        }`}
+                      >
+                        {n} fa
+                      </button>
+                    )
+                  })}
+                  {(["pl.: 5", "Adja meg hány fát szeretne, pl.: 5"] as const).map((placeholder, i) => (
+                    <input
+                      key={i}
+                      type="number"
+                      min="1"
+                      inputMode="numeric"
+                      placeholder={placeholder}
+                      value={customTreeCount ? formData.treeCount : ""}
+                      onFocus={() => {
+                        setCustomTreeCount(true)
+                        setFormData((prev) => ({ ...prev, treeCount: "" }))
+                      }}
+                      onChange={(e) => {
+                        setCustomTreeCount(true)
+                        const v = e.target.value.replace(/[^0-9]/g, "")
+                        setFormData((prev) => ({ ...prev, treeCount: v }))
+                      }}
+                      className={`py-3 px-4 rounded-lg border text-sm transition-all duration-150 ${i === 0 ? "md:hidden" : "hidden md:block"} ${
+                        customTreeCount
+                          ? "border-[#6e7f6a] bg-[#6e7f6a]/10 text-[#3a3a3a] ring-2 ring-[#6e7f6a]/20 outline-none"
+                          : `bg-[#f5f4f1] text-[#3a3a3a] placeholder:text-[#4a4f4a]/40 focus:outline-none focus:ring-2 focus:ring-[#6e7f6a] ${errors.treeCount ? "border-destructive" : "border-[#bfc3c7]"}`
+                      }`}
+                    />
+                  ))}
+                </div>
                 {errors.treeCount && <p data-error className="text-destructive text-xs mt-1">{errors.treeCount}</p>}
               </div>
 
