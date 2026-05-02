@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useTransition } from "react"
+import { useState, useTransition, useEffect } from "react"
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { LogOut, Settings, Plus } from "lucide-react"
@@ -23,6 +23,15 @@ export function AdminShellNav({ years, viewYear, activeYear }: AdminShellNavProp
   const [isPending, startTransition] = useTransition()
   const [managerOpen, setManagerOpen] = useState(false)
   const { isDirty, navigate } = useUnsavedChanges()
+  const [keyboardOpen, setKeyboardOpen] = useState(false)
+
+  useEffect(() => {
+    const vv = window.visualViewport
+    if (!vv) return
+    const handleResize = () => setKeyboardOpen(vv.height < window.innerHeight * 0.75)
+    vv.addEventListener("resize", handleResize)
+    return () => vv.removeEventListener("resize", handleResize)
+  }, [])
 
   const guardedClick = (e: React.MouseEvent, href: string) => {
     if (isDirty) {
@@ -72,7 +81,7 @@ export function AdminShellNav({ years, viewYear, activeYear }: AdminShellNavProp
         onChange={handleYearChange}
         disabled={isPending}
         aria-label="Megjelenített év"
-        className="h-8 rounded-lg border border-border bg-white px-2 pr-7 text-sm font-medium text-primary cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 disabled:opacity-50"
+        className="h-8 rounded-lg border border-border bg-white px-2 pr-11 text-sm font-medium text-primary cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 disabled:opacity-50"
       >
         {yearOptions.map((y) => (
           <option key={y.year} value={y.year}>
@@ -141,7 +150,7 @@ export function AdminShellNav({ years, viewYear, activeYear }: AdminShellNavProp
         </div>
       </header>
 
-      <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-background/98 px-3 py-2 backdrop-blur-md md:hidden">
+      <nav className={cn("fixed inset-x-0 bottom-0 z-50 border-t border-border bg-background/98 px-3 py-2 backdrop-blur-md md:hidden", keyboardOpen && "hidden")}>
         <div className="grid grid-cols-4 gap-2">
           {adminNavigation.map((item) => (
             <Link
