@@ -12,7 +12,7 @@ import { useUnsavedChanges } from "@/contexts/unsaved-changes-context"
 const navigationItems = [
   { label: "Fenyőink",        href: "/#fenyoink" },
   { label: "Hogyan működik?", href: "/#hogyan-mukodik" },
-  { label: "GY.I.K",          href: "/faq" },
+  { label: "GY.I.K.",         href: "/faq" },
   { label: "Elérhetőség",     href: "/contact" },
 ]
 
@@ -231,9 +231,7 @@ export function Navigation() {
                 })}
                 <Link
                   href="/booking"
-                  className={`block px-4 py-2.5 text-base font-bold transition-colors ${
-                    pathname === "/booking" ? "text-foreground" : "text-primary/70 hover:text-foreground"
-                  }`}
+                  className={`block px-4 py-2.5 text-base font-bold transition-colors text-foreground`}
                   onClick={(e) => guardedClick(e, "/booking", () => setIsOpen(false))}
                 >
                   <span className={`relative inline-block ${pathname === "/booking" ? "after:absolute after:bottom-0 after:left-0 after:right-0 after:h-px after:bg-current" : ""}`}>

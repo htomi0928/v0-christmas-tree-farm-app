@@ -145,7 +145,7 @@ export function YearsManagerDialog({ open, onOpenChange, activeYear }: YearsMana
               <button
                 type="submit"
                 disabled={creating}
-                className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-[#4a4f4a] px-3.5 text-sm font-medium text-[#ededed] shadow-sm transition-all duration-150 hover:bg-[#3a3a3a] active:scale-[0.97] disabled:opacity-50 cursor-pointer"
+                className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg bg-[#4a4f4a] px-3.5 text-sm font-medium text-[#ededed] shadow-sm transition-all duration-150 hover:bg-[#3a3a3a] active:scale-[0.97] disabled:opacity-50 cursor-pointer whitespace-nowrap"
               >
                 <Plus className="h-3.5 w-3.5" />
                 Új év

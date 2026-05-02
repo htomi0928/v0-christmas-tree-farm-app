@@ -200,7 +200,7 @@ export default function HomePage() {
       <section className="relative min-h-screen flex items-center overflow-hidden bg-section-alt">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-16">
           <AnimateOnScroll>
-            <div className="section-label justify-center">Miért minket?</div>
+            <div className="section-label justify-center">Miért válassz minket</div>
             <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-8 tracking-tight text-center">A mi különlegességünk</h2>
           </AnimateOnScroll>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -232,19 +232,18 @@ export default function HomePage() {
             {/* Left — text */}
             <AnimateOnScroll>
               <div className="flex flex-col text-center lg:text-left items-center lg:items-start">
-                <div className="section-label">Kínálatunk</div>
+                <div className="section-label justify-center w-full">Kínálatunk</div>
                 <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-6 tracking-tight leading-tight">
                   Nordmann fenyőink
                 </h2>
-                <div className="section-label mb-2">A fajta</div>
                 <h3 className="text-xl font-semibold text-foreground mb-3 tracking-tight">Miért Nordmann?</h3>
-                <p className="text-primary font-light mb-3">
+                <p className="text-primary font-light mb-3 text-pretty">
                   Nem hullik a tűje. Ez az egyetlen komoly különbség, ami számít, ha otthon szeretnéd tartani az ünnep után is.
                 </p>
-                <p className="text-primary font-light mb-3">
+                <p className="text-primary font-light mb-3 text-pretty">
                   Dús forma, erős ágak — a nehezebb díszeket is elbírja. Gyerekbarát, nincs szúrós tűlevele.
                 </p>
-                <p className="text-primary font-light mb-8">
+                <p className="text-primary font-light mb-8 text-pretty">
                   Frissen vágva adjuk át. Nem hetekkel korábban vágott, ponyva alatt tárolt fa.
                 </p>
                 <div className="border border-border rounded-lg px-6 py-5 w-full text-center [box-shadow:var(--shadow-card)]">

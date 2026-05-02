@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react"
 import Link from "next/link"
-import { Search, SlidersHorizontal, X, ArrowUp, ArrowDown, ArrowUpDown, Plus } from "lucide-react"
+import { Search, SlidersHorizontal, X, ArrowUp, ArrowDown, ArrowUpDown, Plus, CalendarDays } from "lucide-react"
 import type { Reservation } from "@/lib/types"
 import { reservationStatusMeta, formatDateHu } from "@/lib/site"
 
@@ -94,7 +94,7 @@ export default function ReservationFilters({ reservations }: Props) {
 
           <label className="block min-w-0">
             <span className="mb-2 flex items-center gap-2 text-xs font-bold text-foreground tracking-widest uppercase"><SlidersHorizontal className="h-4 w-4 text-accent" /> Státusz</span>
-            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="w-full min-w-0 px-4 py-3 rounded-lg border border-border bg-white text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent text-sm transition-all">
+            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="w-full min-w-0 px-4 py-3 pr-10 rounded-lg border border-border bg-white text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent text-sm transition-all">
               <option value="ALL">Minden státusz</option>
               {Object.entries(reservationStatusMeta).map(([value, meta]) => (
                 <option key={value} value={value}>{meta.label}</option>
@@ -103,7 +103,7 @@ export default function ReservationFilters({ reservations }: Props) {
           </label>
 
           <label className="block min-w-0">
-            <span className="mb-2 block text-xs font-bold text-foreground tracking-widest uppercase">Nap szerint</span>
+            <span className="mb-2 flex items-center gap-2 text-xs font-bold text-foreground tracking-widest uppercase"><CalendarDays className="h-4 w-4 text-accent" /> Nap szerint</span>
             <div className="relative">
               <input type="date" value={visitDateFilter} onChange={(e) => setVisitDateFilter(e.target.value)} onFocus={() => setDateFocused(true)} onBlur={() => setDateFocused(false)} autoComplete="off" className={`w-full min-w-0 max-w-full px-4 py-3 rounded-lg border border-border bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent text-sm transition-all appearance-none [color-scheme:light] ${!visitDateFilter && !dateFocused ? "text-transparent md:text-foreground" : "text-foreground"}`} style={{ WebkitAppearance: "none" }} />
               {!visitDateFilter && !dateFocused && (
@@ -122,7 +122,7 @@ export default function ReservationFilters({ reservations }: Props) {
               <select
                 value={sortField}
                 onChange={(e) => setSortField(e.target.value as SortField)}
-                className="flex-1 min-w-0 px-4 py-3 rounded-lg border border-border bg-white text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent text-sm transition-all"
+                className="flex-1 min-w-0 px-4 py-3 pr-10 rounded-lg border border-border bg-white text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent text-sm transition-all"
               >
                 {(Object.entries(sortFieldLabels) as [SortField, string][]).map(([value, label]) => (
                   <option key={value} value={value}>{label}</option>
