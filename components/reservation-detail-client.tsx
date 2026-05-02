@@ -1,9 +1,9 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState, type ChangeEvent } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { AlertCircle, ArrowLeft, CheckCircle2, Plus, Save, Trash2, X } from "lucide-react"
+import { AlertCircle, ArrowLeft, Camera, CheckCircle2, Image as ImageIcon, Plus, Save, Trash2, Upload, X } from "lucide-react"
 import { type Reservation, ReservationStatus } from "@/lib/types"
 import { formatDateHu, reservationStatusMeta } from "@/lib/site"
 import AdminDatePicker from "@/components/admin-date-picker"
@@ -37,6 +37,9 @@ export default function ReservationDetailClient({ reservation: initialReservatio
     treeNumbers: initialReservation.treeNumbers || "",
     notes: initialReservation.notes || "",
     paidTo: normalizePaidTo(initialReservation.paidTo),
+    photoUrl: initialReservation.photoUrl || "",
+    photoPublicId: initialReservation.photoPublicId || "",
+    clearPhoto: false,
   })
   const initialSnapshot = {
     name: initialReservation.name,
@@ -49,6 +52,9 @@ export default function ReservationDetailClient({ reservation: initialReservatio
     treeNumbers: initialReservation.treeNumbers || "",
     notes: initialReservation.notes || "",
     paidTo: normalizePaidTo(initialReservation.paidTo),
+    photoUrl: initialReservation.photoUrl || "",
+    photoPublicId: initialReservation.photoPublicId || "",
+    clearPhoto: false,
   }
 
   useEffect(() => {
@@ -63,7 +69,8 @@ export default function ReservationDetailClient({ reservation: initialReservatio
   const FIELD_LABELS: Record<keyof FormSnapshot, string> = {
     name: "Név", phone: "Telefonszám", email: "E-mail", visitDate: "Látogatás napja",
     pickupDate: "Átvételi nap", treeCount: "Darabszám", status: "Státusz",
-    treeNumbers: "Fa sorszáma", notes: "Megjegyzés", paidTo: "Kinek fizet",
+    treeNumbers: "Fa sorszáma", notes: "Megjegyzés", paidTo: "Kinek fizet", photoUrl: "Fotó",
+    photoPublicId: "Fotó azonosító", clearPhoto: "Fotó törlés",
   }
 
   const formatFieldValue = (key: keyof FormSnapshot, val: string | number): string => {
@@ -89,6 +96,10 @@ export default function ReservationDetailClient({ reservation: initialReservatio
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({})
   const [retrievalDays, setRetrievalDays] = useState<string[]>([])
   const [availableDays, setAvailableDays] = useState<string[]>([])
+  const [photoUploading, setPhotoUploading] = useState(false)
+  const [photoVisible, setPhotoVisible] = useState(false)
+  const uploadInputRef = useRef<HTMLInputElement>(null)
+  const cameraInputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (error || success) {
@@ -199,11 +210,50 @@ export default function ReservationDetailClient({ reservation: initialReservatio
     setValidationErrors(validate(updated))
   }
 
+  const uploadPhoto = async (file: File) => {
+    setPhotoUploading(true)
+    setError("")
+    try {
+      const body = new FormData()
+      body.set("photo", file)
+      const response = await fetch("/api/admin/uploads/reservation-photo", { method: "POST", body })
+      const data = await response.json()
+      if (!response.ok || !data.success) {
+        setError(data.error || "A fotó feltöltése nem sikerült.")
+        return
+      }
+      const updated = {
+        ...formData,
+        photoUrl: data.photoUrl as string,
+        photoPublicId: data.photoPublicId as string,
+        clearPhoto: false,
+      }
+      setFormData(updated)
+      setValidationErrors(validate(updated))
+      setPhotoVisible(false)
+    } catch {
+      setError("Hálózati hiba történt a fotó feltöltésekor.")
+    } finally {
+      setPhotoUploading(false)
+    }
+  }
+
+  const onFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+    await uploadPhoto(file)
+    event.target.value = ""
+  }
+
   const handleSave = async () => {
     const errors = validate(formData)
     setValidationErrors(errors)
     if (Object.keys(errors).length > 0) {
       setError("Kérlek javítsd a hibás mezőket a mentés előtt.")
+      return
+    }
+    if (photoUploading) {
+      setError("Várd meg, amíg befejeződik a fotó feltöltése.")
       return
     }
     setIsSaving(true)
@@ -447,6 +497,56 @@ export default function ReservationDetailClient({ reservation: initialReservatio
         </div>
       </div>
 
+      <div className="border border-border bg-surface rounded-lg p-6 space-y-4">
+        <p className="text-xs font-bold text-foreground tracking-widest uppercase">Fotó (opcionális)</p>
+        <input ref={uploadInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" className="hidden" onChange={onFileChange} />
+        <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={onFileChange} />
+        <div className="flex flex-wrap gap-2">
+          <button type="button" onClick={() => uploadInputRef.current?.click()} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-border text-sm font-medium hover:bg-primary/5 transition-colors" disabled={photoUploading}>
+            <Upload className="h-4 w-4" />
+            Feltöltés
+          </button>
+          <button type="button" onClick={() => cameraInputRef.current?.click()} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-border text-sm font-medium hover:bg-primary/5 transition-colors" disabled={photoUploading}>
+            <Camera className="h-4 w-4" />
+            Gyors fotó
+          </button>
+          {formData.photoUrl ? (
+            <button
+              type="button"
+              onClick={() => {
+                const updated = { ...formData, photoUrl: "", photoPublicId: "", clearPhoto: true }
+                setFormData(updated)
+                setValidationErrors(validate(updated))
+                setPhotoVisible(false)
+              }}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-border text-sm font-medium hover:bg-primary/5 transition-colors"
+              disabled={photoUploading}
+            >
+              <Trash2 className="h-4 w-4" />
+              Fotó törlése
+            </button>
+          ) : null}
+        </div>
+        {formData.photoUrl ? (
+          <div className="space-y-3">
+            <button type="button" onClick={() => setPhotoVisible((v) => !v)} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-border text-sm font-medium hover:bg-primary/5 transition-colors">
+              <ImageIcon className="h-4 w-4" />
+              {photoVisible ? "Fotó elrejtése" : "Fotó megjelenítése"}
+            </button>
+            {photoVisible ? (
+              <div className="border border-border rounded-lg p-2 bg-white w-fit">
+                <img src={formData.photoUrl} alt="Foglalás fotó" className="max-h-96 max-w-full rounded object-contain" loading="lazy" />
+              </div>
+            ) : null}
+          </div>
+        ) : (
+          <div className="text-xs text-primary/60 inline-flex items-center gap-2">
+            <ImageIcon className="h-4 w-4" />
+            Nincs fotó csatolva.
+          </div>
+        )}
+      </div>
+
       {/* Date pickers */}
       <div className="grid gap-6 xl:grid-cols-2">
         <div className="border border-border bg-surface rounded-lg p-3 sm:p-6">
@@ -489,7 +589,7 @@ export default function ReservationDetailClient({ reservation: initialReservatio
         <button type="button" onClick={() => navigate("/admin/reservations")} className="flex-1 inline-flex items-center justify-center h-11 rounded-lg border border-border text-primary text-sm font-medium hover:bg-primary/5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30">
           Vissza
         </button>
-        <button type="button" onClick={handleSave} disabled={isSaving} className="flex-1 inline-flex items-center justify-center gap-2 h-11 rounded-lg bg-primary text-background text-sm font-semibold hover:bg-primary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30">
+        <button type="button" onClick={handleSave} disabled={isSaving || photoUploading} className="flex-1 inline-flex items-center justify-center gap-2 h-11 rounded-lg bg-primary text-background text-sm font-semibold hover:bg-primary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30">
           <Save className="h-4 w-4" />
           {isSaving ? "Mentés..." : "Mentés"}
         </button>

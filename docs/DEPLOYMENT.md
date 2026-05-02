@@ -88,6 +88,15 @@ RESERVATION_EMAIL_FROM=Foglalás <noreply@yourdomain.tld>
 3. Paste the verified sender identity
 4. Apply to: Production, Preview, Development
 
+#### `CLOUDINARY_CLOUD_NAME`
+Cloudinary cloud name for admin reservation photo uploads.
+
+#### `CLOUDINARY_API_KEY`
+Cloudinary API key for signed upload and destroy calls.
+
+#### `CLOUDINARY_API_SECRET`
+Cloudinary API secret for request signing.## Database Setup
+
 ## Database Setup
 
 ### Initial Setup
@@ -374,3 +383,10 @@ For issues or questions:
 2. Check Neon documentation: [neon.tech/docs](https://neon.tech/docs)
 3. Review GitHub repository issues
 4. Contact Vercel support if needed
+
+
+### Cloudinary Reservation Photo Variables
+- CLOUDINARY_CLOUD_NAME - Cloudinary cloud name.
+- CLOUDINARY_API_KEY - Cloudinary API key.
+- CLOUDINARY_API_SECRET - Cloudinary API secret.
+

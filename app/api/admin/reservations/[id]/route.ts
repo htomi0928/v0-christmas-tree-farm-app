@@ -1,7 +1,8 @@
-import "server-only"
+﻿import "server-only"
 import { z } from "zod"
 import { deleteReservation, findConflictingTreeNumbers, getReservationById, updateReservation } from "@/lib/reservations"
 import { ReservationStatus } from "@/lib/types"
+import { destroyReservationPhoto } from "@/lib/cloudinary"
 import { enforceSameOrigin, logApiError, parseJsonBody, parseNumericId, requireAdminSessionResponse } from "@/lib/api"
 
 const updateReservationSchema = z
@@ -16,9 +17,12 @@ const updateReservationSchema = z
     treeNumbers: z.union([z.string().trim().max(200, "A sorszámok legfeljebb 200 karakter lehetnek."), z.literal(""), z.null()]).optional(),
     notes: z.union([z.string().trim().max(1000, "A megjegyzés legfeljebb 1000 karakter lehet."), z.literal(""), z.null()]).optional(),
     paidTo: z.union([z.literal("János"), z.literal("Sanyi"), z.literal(""), z.null()]).optional(),
+    photoUrl: z.union([z.string().url("Érvénytelen fotó URL."), z.literal(""), z.null()]).optional(),
+    photoPublicId: z.union([z.string().trim().max(255, "Érvénytelen fotó azonosító."), z.literal(""), z.null()]).optional(),
+    clearPhoto: z.boolean().optional(),
   })
   .refine((value) => Object.keys(value).length > 0, {
-    message: "Legalább egy mezőt meg kell adni.",
+    message: "Legalább egy mezot meg kell adni.",
   })
 
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -78,9 +82,11 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     if (!parsedBody.success) return parsedBody.response
 
     const data = parsedBody.data
+    const existing = await getReservationById(reservationId)
+    if (!existing) {
+      return Response.json({ success: false, error: "Foglalás nem található" }, { status: 404 })
+    }
 
-    // Check for conflicting tree numbers if treeNumbers is being updated.
-    // Conflicts are scoped to the reservation's own year — same tree number is fine across years.
     if (data.treeNumbers && data.treeNumbers.trim()) {
       const treeNumbers = data.treeNumbers
         .split(",")
@@ -88,10 +94,6 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         .filter((n) => !Number.isNaN(n) && n > 0)
 
       if (treeNumbers.length > 0) {
-        const existing = await getReservationById(reservationId)
-        if (!existing) {
-          return Response.json({ success: false, error: "Foglalás nem található" }, { status: 404 })
-        }
         const { conflictingNumbers, reservationNames } = await findConflictingTreeNumbers(
           treeNumbers,
           existing.year,
@@ -109,6 +111,18 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       }
     }
 
+    const clearPhoto = data.clearPhoto === true
+    const nextPhotoPublicId = data.photoPublicId === "" ? undefined : data.photoPublicId ?? undefined
+    const hasPhotoChange = clearPhoto || data.photoUrl !== undefined || data.photoPublicId !== undefined
+
+    if (hasPhotoChange && existing.photoPublicId && (clearPhoto || nextPhotoPublicId !== existing.photoPublicId)) {
+      try {
+        await destroyReservationPhoto(existing.photoPublicId)
+      } catch (cleanupError) {
+        logApiError("reservation photo cleanup failed", cleanupError)
+      }
+    }
+
     const result = await updateReservation(reservationId, {
       name: data.name,
       phone: data.phone,
@@ -119,8 +133,10 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       status: data.status,
       treeNumbers: data.treeNumbers,
       notes: data.notes,
-      // Keep empty string when explicitly sent so updateReservation can clear paid_to.
       paidTo: data.paidTo ?? undefined,
+      photoUrl: data.photoUrl === "" ? undefined : data.photoUrl ?? undefined,
+      photoPublicId: nextPhotoPublicId,
+      clearPhoto,
     })
 
     if (!result.success) {
@@ -163,11 +179,17 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
       return Response.json({ success: false, error: "Érvénytelen foglalás azonosító" }, { status: 400 })
     }
 
-    // Check if reservation exists and has tree numbers before deletion
     const reservation = await getReservationById(reservationId)
     if (reservation && reservation.treeNumbers && reservation.treeNumbers.trim()) {
-      // Log warning about deleting reservation with assigned tree numbers
       console.warn(`WARNING: Deleting reservation ${reservationId} (${reservation.name}) with assigned tree numbers: ${reservation.treeNumbers}. These tree numbers will be permanently lost and cannot be reused.`)
+    }
+
+    if (reservation?.photoPublicId) {
+      try {
+        await destroyReservationPhoto(reservation.photoPublicId)
+      } catch (cleanupError) {
+        logApiError("reservation photo cleanup on delete failed", cleanupError)
+      }
     }
 
     const result = await deleteReservation(reservationId)

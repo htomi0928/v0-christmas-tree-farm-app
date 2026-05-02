@@ -1,8 +1,8 @@
-﻿"use client"
+"use client"
 
 import { useMemo, useState } from "react"
 import Link from "next/link"
-import { Search, SlidersHorizontal, X, ArrowUp, ArrowDown, ArrowUpDown, Plus, CalendarDays } from "lucide-react"
+import { Search, SlidersHorizontal, X, ArrowUp, ArrowDown, ArrowUpDown, Plus, CalendarDays, Image as ImageIcon } from "lucide-react"
 import type { Reservation } from "@/lib/types"
 import { reservationStatusMeta, formatDateHu } from "@/lib/site"
 
@@ -161,8 +161,8 @@ export default function ReservationFilters({ reservations }: Props) {
         ) : (
           <>
             {/* Desktop table header */}
-            <div className="hidden md:grid md:grid-cols-[2fr_1fr_1fr_1fr_56px_1fr_152px_28px] items-center gap-4 px-6 py-2.5 bg-sidebar-accent border-b border-border">
-              {["Név", "Beérkezett", "Látogatás", "Átvétel", "Db", "Sorszám", "Státusz", ""].map((h) => (
+            <div className="hidden md:grid md:grid-cols-[2fr_1fr_1fr_1fr_56px_1fr_72px_152px_28px] items-center gap-4 px-6 py-2.5 bg-sidebar-accent border-b border-border">
+              {["Név", "Beérkezett", "Látogatás", "Átvétel", "Db", "Sorszám", "Fotó", "Státusz", ""].map((h) => (
                 <span key={h} className="text-[9px] font-bold tracking-widest uppercase text-accent">{h}</span>
               ))}
             </div>
@@ -200,10 +200,12 @@ export default function ReservationFilters({ reservations }: Props) {
                         <span className="text-sm text-foreground font-light">{reservation.treeCount} fa</span>
                         <span className="text-[10px] font-bold tracking-widest uppercase text-accent whitespace-nowrap pt-px">Sorszám</span>
                         <span className="text-sm text-foreground font-light">{reservation.treeNumbers || "Még nincs"}</span>
+                        <span className="text-[10px] font-bold tracking-widest uppercase text-accent whitespace-nowrap pt-px">Fotó</span>
+                        <span className="text-sm text-foreground font-light">{reservation.photoUrl ? "Van" : "Nincs"}</span>
                       </div>
                     </div>
                     {/* Desktop — Option C: table row */}
-                    <div className="hidden md:grid md:grid-cols-[2fr_1fr_1fr_1fr_56px_1fr_152px_28px] items-center gap-4 px-6 py-3.5">
+                    <div className="hidden md:grid md:grid-cols-[2fr_1fr_1fr_1fr_56px_1fr_72px_152px_28px] items-center gap-4 px-6 py-3.5">
                       <div>
                         <p className="text-sm font-semibold text-foreground">{reservation.name}</p>
                         <p className="text-xs text-primary font-light mt-0.5">{reservation.phone}{reservation.email ? <><br />{reservation.email}</> : ""}</p>
@@ -213,6 +215,7 @@ export default function ReservationFilters({ reservations }: Props) {
                       <span className="text-sm text-primary font-light">{pickupShort}</span>
                       <span className="text-sm text-primary font-light">{reservation.treeCount} fa</span>
                       <span className="text-sm text-primary font-light">{reservation.treeNumbers || <span className="text-border">—</span>}</span>
+                      <span className="text-sm text-primary font-light">{reservation.photoUrl ? <span className="inline-flex items-center gap-1"><ImageIcon className="h-3.5 w-3.5" />Van</span> : "—"}</span>
                       <span className={`w-fit rounded-full px-3 py-1 text-xs font-medium border whitespace-nowrap ${meta.pillClassName}`}>{meta.label}</span>
                       <span className="text-xs font-semibold text-accent tracking-widest uppercase whitespace-nowrap">→</span>
                     </div>

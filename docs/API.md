@@ -1,4 +1,4 @@
-# API Documentation
+﻿# API Documentation
 
 All responses are JSON. Success responses include `"success": true`; failures include `"success": false` plus either `error` (string) or `errors` (string array, used by Zod validation failures).
 
@@ -274,3 +274,17 @@ Mutating routes (POST/PATCH/DELETE) call `enforceSameOrigin`, which compares the
 ## Rate limiting
 
 Not implemented.
+
+## Reservation Photo Upload (admin)
+
+- `POST /api/admin/uploads/reservation-photo` (multipart/form-data, field: `photo`)
+- Requires admin auth and same-origin checks on production.
+- Accepted MIME: `image/jpeg`, `image/png`, `image/webp`, `image/heic`, `image/heif`.
+- Max upload size: 10 MB.
+- Success: `{ success: true, photoUrl, photoPublicId }`
+
+photoUrl and photoPublicId can be sent to:
+- `POST /api/admin/reservations/quick`
+- `PATCH /api/admin/reservations/[id]` (with `clearPhoto=true` to remove existing photo)
+
+

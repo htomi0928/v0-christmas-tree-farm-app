@@ -1,4 +1,4 @@
-import "server-only"
+﻿import "server-only"
 import { z } from "zod"
 import { createAdminQuickReservation } from "@/lib/reservations"
 import { ReservationStatus } from "@/lib/types"
@@ -15,7 +15,9 @@ const quickCreateReservationSchema = z.object({
   notes: z.union([z.string().trim().max(1000, { message: "A megjegyzés legfeljebb 1000 karakter lehet" }), z.literal(""), z.undefined()]).optional(),
   status: z.nativeEnum(ReservationStatus, { message: "Érvénytelen státusz" }).optional(),
   treeNumbers: z.union([z.string().trim().max(200, { message: "A fa sorszáma legfeljebb 200 karakter lehet" }), z.literal(""), z.undefined()]).optional(),
-  paidTo: z.union([z.literal("János"), z.literal("Sanyi"), z.literal(""), z.undefined()], { message: "Érvénytelen érték a 'kinek fizetek' mezőben" }).optional(),
+  paidTo: z.union([z.literal("János"), z.literal("Sanyi"), z.literal(""), z.undefined()], { message: "Érvénytelen érték a 'kinek fizetek' mezoben" }).optional(),
+  photoUrl: z.union([z.string().url({ message: "Érvénytelen fotó URL." }), z.literal(""), z.undefined()]).optional(),
+  photoPublicId: z.union([z.string().trim().max(255, { message: "Érvénytelen fotó azonosító." }), z.literal(""), z.undefined()]).optional(),
 })
 
 export async function POST(request: Request) {
@@ -55,6 +57,8 @@ export async function POST(request: Request) {
         status: data.status,
         treeNumbers: data.treeNumbers || undefined,
         paidTo: data.paidTo || undefined,
+        photoUrl: data.photoUrl || undefined,
+        photoPublicId: data.photoPublicId || undefined,
       },
       activeYear,
     )

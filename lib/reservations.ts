@@ -1,4 +1,4 @@
-import "server-only"
+﻿import "server-only"
 import { sql } from "./db"
 import {
   type Reservation,
@@ -37,6 +37,9 @@ function rowToReservation(row: any): Reservation {
     treeNumbers: row.tree_numbers || undefined,
     status: row.status as ReservationStatus,
     paidTo: row.paid_to || undefined,
+    photoUrl: row.photo_url || undefined,
+    photoPublicId: row.photo_public_id || undefined,
+    photoUploadedAt: row.photo_uploaded_at || undefined,
     createdAt: row.created_at,
   }
 }
@@ -205,7 +208,7 @@ export async function createAdminQuickReservation(
   const visitDate = data.visitDate?.trim() || formatTodayLocal()
 
   const rows = await sql`
-    INSERT INTO reservations (year, name, phone, email, visit_date, pickup_date, tree_count, notes, status, tree_numbers, paid_to)
+    INSERT INTO reservations (year, name, phone, email, visit_date, pickup_date, tree_count, notes, status, tree_numbers, paid_to, photo_url, photo_public_id, photo_uploaded_at)
     VALUES (
       ${year},
       ${name},
@@ -217,7 +220,10 @@ export async function createAdminQuickReservation(
       ${data.notes?.trim() || null},
       ${status},
       ${treeNumbers || null},
-      ${paidTo || null}
+      ${paidTo || null},
+      ${data.photoUrl || null},
+      ${data.photoPublicId || null},
+      ${data.photoUrl ? new Date().toISOString() : null}
     )
     RETURNING *
   `
@@ -315,6 +321,25 @@ export async function updateReservation(
   if (data.paidTo !== undefined) {
     updates.push(`paid_to = $${paramIndex++}`)
     values.push(data.paidTo || null)
+  }
+  if (data.clearPhoto) {
+    updates.push(`photo_url = $${paramIndex++}`)
+    values.push(null)
+    updates.push(`photo_public_id = $${paramIndex++}`)
+    values.push(null)
+    updates.push(`photo_uploaded_at = $${paramIndex++}`)
+    values.push(null)
+  } else {
+    if (data.photoUrl !== undefined) {
+      updates.push(`photo_url = $${paramIndex++}`)
+      values.push(data.photoUrl || null)
+      updates.push(`photo_uploaded_at = $${paramIndex++}`)
+      values.push(data.photoUrl ? new Date().toISOString() : null)
+    }
+    if (data.photoPublicId !== undefined) {
+      updates.push(`photo_public_id = $${paramIndex++}`)
+      values.push(data.photoPublicId || null)
+    }
   }
 
   if (updates.length === 0) {
