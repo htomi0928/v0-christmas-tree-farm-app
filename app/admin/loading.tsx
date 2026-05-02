@@ -13,7 +13,7 @@ export default function AdminOverviewLoading() {
       {/* Overview stat cards */}
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="border border-[#bfc3c7] bg-[#f5f4f1] rounded-lg p-6">
+          <div key={i} className="border border-border bg-surface rounded-lg p-6">
             <div className="flex items-center justify-between mb-4">
               <Skeleton className="h-3 w-24" />
               <Skeleton className="h-4 w-4 rounded-sm" />
@@ -30,13 +30,13 @@ export default function AdminOverviewLoading() {
         <Skeleton className="h-7 w-48 mx-auto mb-6" />
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="border border-[#bfc3c7] bg-[#f5f4f1] rounded-lg p-6">
+            <div key={i} className="border border-border bg-surface rounded-lg p-6">
               <div className="flex items-center justify-between mb-4">
                 <Skeleton className="h-3 w-24" />
                 <Skeleton className="h-4 w-4 rounded-sm" />
               </div>
               <Skeleton className="h-8 w-24 mb-3" />
-              <div className="space-y-1.5 border-t border-[#bfc3c7] pt-3">
+              <div className="space-y-1.5 border-t border-border pt-3">
                 <Skeleton className="h-3 w-28" />
                 <Skeleton className="h-3 w-20" />
               </div>

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { AlertCircle, ArrowLeft, CheckCircle2, Plus, Save, Trash2 } from "lucide-react"
+import { AlertCircle, ArrowLeft, CheckCircle2, Plus, Save, Trash2, X } from "lucide-react"
 import { type Reservation, ReservationStatus } from "@/lib/types"
 import { formatDateHu, reservationStatusMeta } from "@/lib/site"
 import AdminDatePicker from "@/components/admin-date-picker"
@@ -15,9 +15,9 @@ interface Props {
   justCreated?: boolean
 }
 
-const inputClass = "w-full px-4 py-3 rounded-lg border border-[#bfc3c7] bg-white text-[#3a3a3a] placeholder:text-[#4a4f4a]/40 focus:outline-none focus:ring-2 focus:ring-[#6e7f6a] text-sm transition-all duration-150"
-const disabledInputClass = "w-full px-4 py-3 rounded-lg border border-[#bfc3c7] bg-[#f0efec] text-[#4a4f4a]/60 placeholder:text-[#4a4f4a]/40 text-sm cursor-not-allowed"
-const labelClass = "block text-xs font-bold text-[#3a3a3a] tracking-widest uppercase mb-2"
+const inputClass = "w-full px-4 py-3 rounded-lg border border-border bg-white text-foreground placeholder:text-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent text-sm transition-all duration-150"
+const disabledInputClass = "w-full px-4 py-3 rounded-lg border border-border bg-muted text-primary/60 placeholder:text-primary/40 text-sm cursor-not-allowed"
+const labelClass = "block text-xs font-bold text-foreground tracking-widest uppercase mb-2"
 const normalizePaidTo = (value: string | undefined) => {
   const trimmed = (value || "").trim()
   return trimmed === "János" || trimmed === "Sanyi" ? trimmed : ""
@@ -223,7 +223,6 @@ export default function ReservationDetailClient({ reservation: initialReservatio
         prevSnapshotRef.current = { ...formData }
         setSuccess("A foglalás mentése sikerült.")
         setSavedChanges(diff)
-        setTimeout(() => { setSuccess(""); setSavedChanges([]) }, 6000)
       } else {
         setError(data.error || "Hiba történt a mentés közben.")
       }
@@ -260,7 +259,7 @@ export default function ReservationDetailClient({ reservation: initialReservatio
       <Link
         href="/admin/reservations"
         onClick={(e) => { e.preventDefault(); navigate("/admin/reservations") }}
-        className="inline-flex items-center gap-2 text-sm text-[#4a4f4a]/60 hover:text-[#4a4f4a] transition-colors"
+        className="inline-flex items-center gap-2 text-sm text-primary/60 hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30 rounded px-1"
       >
         <ArrowLeft className="h-4 w-4" />
         Vissza a listához
@@ -269,21 +268,21 @@ export default function ReservationDetailClient({ reservation: initialReservatio
       {/* Header */}
       <section className="text-center">
         <div className="section-label justify-center">Foglalás részletei</div>
-        <h1 className="text-4xl font-bold text-[#3a3a3a] tracking-tight mb-2">{formData.name}</h1>
-        <p className="text-[#4a4f4a] font-light">Látogatás napja: {formatDateHu(formData.visitDate)}</p>
+        <h1 className="text-4xl font-bold text-foreground tracking-tight mb-2">{formData.name}</h1>
+        <p className="text-primary font-light">Látogatás napja: {formatDateHu(formData.visitDate)}</p>
       </section>
 
       {/* Just-created success view — replaces the edit form entirely */}
       {justCreated ? (
-        <div className="border border-[#6e7f6a]/30 bg-[#6e7f6a]/8 rounded-lg overflow-hidden">
+        <div className="border border-accent/30 bg-accent/8 rounded-lg overflow-hidden">
           <div className="flex items-start gap-3 px-4 py-4">
-            <CheckCircle2 className="h-5 w-5 flex-shrink-0 mt-px text-[#2d5430]" />
+            <CheckCircle2 className="h-5 w-5 flex-shrink-0 mt-px text-accent" />
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-[#2d5430]">Gyors foglalás rögzítve</p>
-              <p className="text-xs text-[#4a4f4a]/60 mt-0.5">A foglalás sikeresen létrejött.</p>
+              <p className="text-sm font-semibold text-accent">Gyors foglalás rögzítve</p>
+              <p className="text-xs text-primary/60 mt-0.5">A foglalás sikeresen létrejött.</p>
             </div>
           </div>
-          <div className="border-t border-[#6e7f6a]/20 divide-y divide-[#6e7f6a]/10">
+          <div className="border-t border-accent/20 divide-y divide-accent/10">
             {[
               { label: "Név", value: initialReservation.name },
               { label: "Telefon", value: initialReservation.phone || "—" },
@@ -294,22 +293,22 @@ export default function ReservationDetailClient({ reservation: initialReservatio
               ...(initialReservation.paidTo ? [{ label: "Kinek fizet", value: initialReservation.paidTo }] : []),
             ].map(({ label, value }) => (
               <div key={label} className="grid grid-cols-[6rem_1fr] sm:grid-cols-[8rem_1fr] items-baseline gap-x-3 px-4 py-2.5">
-                <span className="text-[10px] font-bold tracking-widest uppercase text-[#6e7f6a]/60">{label}</span>
-                <span className="text-xs font-medium text-[#2d5430]">{value}</span>
+                <span className="text-[10px] font-bold tracking-widest uppercase text-accent/60">{label}</span>
+                <span className="text-xs font-medium text-accent">{value}</span>
               </div>
             ))}
           </div>
-          <div className="flex flex-col sm:flex-row gap-2 px-4 py-3 border-t border-[#6e7f6a]/20">
+          <div className="flex flex-col sm:flex-row gap-2 px-4 py-3 border-t border-accent/20">
             <Link
               href="/admin/reservations/quick"
-              className="inline-flex items-center justify-center gap-2 h-9 px-4 rounded-lg bg-[#4a4f4a] text-xs font-medium text-[#ededed] hover:bg-[#3a3a3a] transition-colors"
+              className="inline-flex items-center justify-center gap-2 h-9 px-4 rounded-lg bg-primary text-xs font-medium text-background hover:bg-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30"
             >
               <Plus className="h-3.5 w-3.5" />
               Új gyors foglalás felvétele
             </Link>
             <Link
               href={`/admin/reservations/${initialReservation.id}`}
-              className="inline-flex items-center justify-center gap-2 h-9 px-4 rounded-lg border border-[#6e7f6a]/40 text-xs font-medium text-[#2d5430] hover:bg-[#6e7f6a]/10 transition-colors"
+              className="inline-flex items-center justify-center gap-2 h-9 px-4 rounded-lg border border-accent/40 text-xs font-medium text-accent hover:bg-accent/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30"
             >
               Foglalás szerkesztése
             </Link>
@@ -324,37 +323,38 @@ export default function ReservationDetailClient({ reservation: initialReservatio
           </div>
         )}
         {success && (
-          <div className="border border-[#6e7f6a]/30 bg-[#6e7f6a]/8 rounded-lg overflow-hidden">
-            <div className="flex gap-3 px-4 py-3.5 text-sm text-[#2d5430]">
-              <CheckCircle2 className="h-4.5 w-4.5 flex-shrink-0 mt-px" />
-              <span className="font-medium">{success}</span>
+          <div className="flex gap-3 p-4 border border-accent/30 bg-accent/8 rounded-lg text-sm text-accent">
+            <CheckCircle2 className="h-5 w-5 flex-shrink-0 mt-0.5" />
+            <div className="flex-1 min-w-0">
+              <p className="font-semibold">{success}</p>
+              {savedChanges.length > 0 && (
+                <ul className="mt-2 space-y-0.5">
+                  {savedChanges.map((change) => (
+                    <li key={change.label} className="text-accent/80 font-light">— {change.label}: {change.oldVal} → {change.newVal}</li>
+                  ))}
+                </ul>
+              )}
             </div>
-            {savedChanges.length > 0 && (
-              <div className="border-t border-[#6e7f6a]/20 divide-y divide-[#6e7f6a]/10">
-                {savedChanges.map((change) => (
-                  <div key={change.label} className="grid grid-cols-[6rem_1fr] sm:grid-cols-[8rem_1fr] items-baseline gap-x-3 px-4 py-2">
-                    <span className="text-[10px] font-bold tracking-widest uppercase text-[#6e7f6a]/60 truncate">{change.label}</span>
-                    <span className="text-xs text-[#4a4f4a] flex items-center gap-1.5 flex-wrap">
-                      <span className="line-through text-[#4a4f4a]/40">{change.oldVal}</span>
-                      <span className="text-[#6e7f6a]/50">→</span>
-                      <span className="font-medium text-[#2d5430]">{change.newVal}</span>
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
+            <button
+              type="button"
+              onClick={() => { setSuccess(""); setSavedChanges([]) }}
+              className="flex-shrink-0 text-accent/50 hover:text-accent transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30"
+              aria-label="Bezárás"
+            >
+              <X className="h-4 w-4" />
+            </button>
           </div>
         )}
       </div>}
 
       {!justCreated && <>
       {/* Status */}
-      <div className="border border-[#bfc3c7] bg-[#f5f4f1] rounded-lg p-6">
-        <p className="text-xs font-bold text-[#3a3a3a] tracking-widest uppercase mb-4">Gyors státuszváltás</p>
+      <div className="border border-border bg-surface rounded-lg p-6">
+        <p className="text-xs font-bold text-foreground tracking-widest uppercase mb-4">Gyors státuszváltás</p>
         <select
           value={formData.status}
           onChange={(e) => handleStatusChange(e.target.value as ReservationStatus)}
-          className="w-full px-4 py-3 rounded-lg border border-[#bfc3c7] bg-white text-[#3a3a3a] text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#6e7f6a] transition-all duration-150 cursor-pointer"
+          className="w-full px-4 py-3 rounded-lg border border-border bg-white text-foreground text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent transition-all duration-150 cursor-pointer"
         >
           {Object.entries(reservationStatusMeta).map(([value, meta]) => (
             <option key={value} value={value}>{meta.label}</option>
@@ -364,8 +364,8 @@ export default function ReservationDetailClient({ reservation: initialReservatio
 
       {/* Basic data + Notes */}
       <div className="grid gap-6 xl:grid-cols-2">
-        <div className="border border-[#bfc3c7] bg-[#f5f4f1] rounded-lg p-6 space-y-5">
-          <p className="text-xs font-bold text-[#3a3a3a] tracking-widest uppercase">Alapadatok</p>
+        <div className="border border-border bg-surface rounded-lg p-6 space-y-5">
+          <p className="text-xs font-bold text-foreground tracking-widest uppercase">Alapadatok</p>
           <div>
             <label className={labelClass}>Név</label>
             <input value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} autoComplete="off" autoCorrect="off" autoCapitalize="off" spellCheck={false} className={inputClass} />
@@ -384,8 +384,8 @@ export default function ReservationDetailClient({ reservation: initialReservatio
           </div>
         </div>
 
-        <div className="border border-[#bfc3c7] bg-[#f5f4f1] rounded-lg p-6 space-y-5">
-          <p className="text-xs font-bold text-[#3a3a3a] tracking-widest uppercase">Sorszám és megjegyzés</p>
+        <div className="border border-border bg-surface rounded-lg p-6 space-y-5">
+          <p className="text-xs font-bold text-foreground tracking-widest uppercase">Sorszám és megjegyzés</p>
           <div>
             <label className={labelClass}>
               Fa sorszáma
@@ -412,7 +412,7 @@ export default function ReservationDetailClient({ reservation: initialReservatio
                 {validationErrors.treeNumbers}
               </p>
             ) : !allowsTreeNumbers(formData.status) && !formData.treeNumbers.trim() ? (
-              <p className="mt-1.5 text-xs text-[#4a4f4a]/60 font-light">A jelenlegi státusznál nem állítható be.</p>
+              <p className="mt-1.5 text-xs text-primary/60 font-light">A jelenlegi státusznál nem állítható be.</p>
             ) : null}
           </div>
           <div>
@@ -441,7 +441,7 @@ export default function ReservationDetailClient({ reservation: initialReservatio
                 {validationErrors.paidTo}
               </p>
             ) : !allowsPaidTo(formData.status) && !formData.paidTo ? (
-              <p className="mt-1.5 text-xs text-[#4a4f4a]/60 font-light">A jelenlegi státusznál nem állítható be.</p>
+              <p className="mt-1.5 text-xs text-primary/60 font-light">A jelenlegi státusznál nem állítható be.</p>
             ) : null}
           </div>
         </div>
@@ -449,12 +449,12 @@ export default function ReservationDetailClient({ reservation: initialReservatio
 
       {/* Date pickers */}
       <div className="grid gap-6 xl:grid-cols-2">
-        <div className="border border-[#bfc3c7] bg-[#f5f4f1] rounded-lg p-3 sm:p-6">
-          <p className="text-xs font-bold text-[#3a3a3a] tracking-widest uppercase mb-4">Látogatás napja</p>
+        <div className="border border-border bg-surface rounded-lg p-3 sm:p-6">
+          <p className="text-xs font-bold text-foreground tracking-widest uppercase mb-4">Látogatás napja</p>
           <AdminDatePicker selectedDate={formData.visitDate} onDateSelect={(date) => setFormData({ ...formData, visitDate: date })} highlightDays={availableDays.length > 0 ? availableDays : undefined} />
         </div>
-        <div className="border border-[#bfc3c7] bg-[#f5f4f1] rounded-lg p-3 sm:p-6">
-          <p className="text-xs font-bold text-[#3a3a3a] tracking-widest uppercase mb-4">Átvételi nap</p>
+        <div className="border border-border bg-surface rounded-lg p-3 sm:p-6">
+          <p className="text-xs font-bold text-foreground tracking-widest uppercase mb-4">Átvételi nap</p>
           <AdminDatePicker selectedDate={formData.pickupDate} onDateSelect={(date) => setFormData({ ...formData, pickupDate: date })} highlightDays={retrievalDays.length > 0 ? retrievalDays : undefined} />
         </div>
       </div>
@@ -464,19 +464,19 @@ export default function ReservationDetailClient({ reservation: initialReservatio
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-xs font-bold text-destructive/70 tracking-widest uppercase mb-1">Veszélyes művelet</p>
-            <p className="text-sm text-[#4a4f4a] font-light">Csak akkor töröld, ha biztosan nincs már szükség erre a foglalásra.</p>
+            <p className="text-sm text-primary font-light">Csak akkor töröld, ha biztosan nincs már szükség erre a foglalásra.</p>
           </div>
           {!showDeleteConfirm ? (
-            <button type="button" onClick={() => setShowDeleteConfirm(true)} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg border border-destructive/30 text-destructive text-sm font-medium hover:bg-destructive/8 transition-colors flex-shrink-0">
+            <button type="button" onClick={() => setShowDeleteConfirm(true)} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg border border-destructive/30 text-destructive text-sm font-medium hover:bg-destructive/8 transition-colors flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive/30">
               <Trash2 className="h-4 w-4" />
               Foglalás törlése
             </button>
           ) : (
             <div className="flex flex-wrap gap-2">
-              <button type="button" onClick={() => setShowDeleteConfirm(false)} className="inline-flex items-center px-5 py-2.5 rounded-lg border border-[#bfc3c7] text-[#4a4f4a] text-sm font-medium hover:bg-[#4a4f4a]/5 transition-colors">
+              <button type="button" onClick={() => setShowDeleteConfirm(false)} className="inline-flex items-center px-5 py-2.5 rounded-lg border border-border text-primary text-sm font-medium hover:bg-primary/5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30">
                 Mégse
               </button>
-              <button type="button" onClick={handleDelete} disabled={isDeleting} className="inline-flex items-center px-5 py-2.5 rounded-lg bg-destructive text-white text-sm font-semibold hover:bg-destructive/90 transition-colors disabled:opacity-60">
+              <button type="button" onClick={handleDelete} disabled={isDeleting} className="inline-flex items-center px-5 py-2.5 rounded-lg bg-destructive text-white text-sm font-semibold hover:bg-destructive/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-destructive/30">
                 {isDeleting ? "Törlés..." : "Végleges törlés"}
               </button>
             </div>
@@ -486,10 +486,10 @@ export default function ReservationDetailClient({ reservation: initialReservatio
 
       {/* Save / Back */}
       <div className="flex gap-3">
-        <button type="button" onClick={() => navigate("/admin/reservations")} className="flex-1 inline-flex items-center justify-center h-11 rounded-lg border border-[#bfc3c7] text-[#4a4f4a] text-sm font-medium hover:bg-[#4a4f4a]/5 transition-colors">
+        <button type="button" onClick={() => navigate("/admin/reservations")} className="flex-1 inline-flex items-center justify-center h-11 rounded-lg border border-border text-primary text-sm font-medium hover:bg-primary/5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30">
           Vissza
         </button>
-        <button type="button" onClick={handleSave} disabled={isSaving} className="flex-1 inline-flex items-center justify-center gap-2 h-11 rounded-lg bg-[#4a4f4a] text-[#ededed] text-sm font-semibold hover:bg-[#4a4f4a]/90 transition-colors disabled:opacity-60">
+        <button type="button" onClick={handleSave} disabled={isSaving} className="flex-1 inline-flex items-center justify-center gap-2 h-11 rounded-lg bg-primary text-background text-sm font-semibold hover:bg-primary/90 transition-colors disabled:opacity-60 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30">
           <Save className="h-4 w-4" />
           {isSaving ? "Mentés..." : "Mentés"}
         </button>

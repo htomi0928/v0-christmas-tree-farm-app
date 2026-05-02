@@ -11,13 +11,13 @@ export function CookieBanner() {
   if (pathname.startsWith("/admin") || consent !== null) return null
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 bg-neutral-900 border-t border-neutral-700">
+    <div className="fixed bottom-0 left-0 right-0 z-50 bg-foreground border-t border-primary/30">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <p className="text-sm text-neutral-400 leading-relaxed">
-          <strong className="text-neutral-100 font-semibold">Sütik és adatvédelem</strong>
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          <strong className="text-background font-semibold">Sütik és adatvédelem</strong>
           {" – "}
           Az oldal analitikai sütiket használ a látogatások mérésére. Részletek az{" "}
-          <Link href="/adatvedelem" className="text-[#8fa88b] underline underline-offset-2 hover:text-[#a0bfa0] transition-colors">
+          <Link href="/adatvedelem" className="text-secondary underline underline-offset-2 hover:text-secondary/80 transition-colors">
             adatvédelmi tájékoztatóban
           </Link>
           .
@@ -25,13 +25,13 @@ export function CookieBanner() {
         <div className="flex gap-3 flex-shrink-0">
           <button
             onClick={rejectConsent}
-            className="px-4 py-2 text-sm font-medium text-neutral-400 border border-neutral-700 rounded-lg hover:border-neutral-500 hover:text-neutral-200 transition-colors"
+            className="px-4 py-2 text-sm font-medium text-muted-foreground border border-primary/30 rounded-lg hover:border-primary/60 hover:text-background transition-colors"
           >
             Elutasítom
           </button>
           <button
             onClick={acceptConsent}
-            className="px-4 py-2 text-sm font-semibold bg-neutral-100 text-neutral-900 rounded-lg hover:bg-white transition-colors"
+            className="px-4 py-2 text-sm font-semibold bg-background text-foreground rounded-lg hover:bg-card transition-colors"
           >
             Elfogadom
           </button>
