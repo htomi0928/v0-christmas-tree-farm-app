@@ -1,5 +1,6 @@
 import { Phone, MapPin, Facebook } from "lucide-react"
 import { AnimateOnScroll } from "@/components/ui/animate-on-scroll"
+import { phoneNumber } from "@/lib/site"
 
 export default function ContactPage() {
   return (
@@ -20,8 +21,8 @@ export default function ContactPage() {
               <div className="border border-border bg-surface rounded-lg p-8 h-full">
                 <Phone className="h-6 w-6 text-secondary mb-4" />
                 <h3 className="font-semibold text-foreground mb-2 tracking-tight">Telefonszám</h3>
-                <p className="text-2xl font-bold text-foreground mb-2 tracking-tight">+36 (30) 123 4567</p>
-                <p className="text-sm text-primary font-light">Szombat–vasárnap, 10:00–12:00</p>
+                <p className="text-2xl font-bold text-foreground mb-2 tracking-tight">{phoneNumber}</p>
+                <p className="text-sm text-primary font-light">A megadott napokon 10:00-12:00 magasságában</p>
               </div>
             </AnimateOnScroll>
 

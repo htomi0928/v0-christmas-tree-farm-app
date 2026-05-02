@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { Facebook } from "lucide-react"
 import { useCookieConsent } from "@/contexts/cookie-consent-context"
+import { phoneNumber } from "@/lib/site"
 
 export function Footer() {
   const { resetConsent } = useCookieConsent()
@@ -13,13 +14,13 @@ export function Footer() {
         <div className="flex flex-col md:flex-row justify-between gap-8">
           <div>
             <h3 className="text-sm font-semibold text-background mb-3">Elérhetőség</h3>
-            <p className="text-sm text-background/65">+36 (30) 123 4567</p>
-            <p className="text-sm text-background/65">Szombat–vasárnap, 10:00–12:00</p>
+            <p className="text-sm text-background/65">{phoneNumber}</p>
+            <p className="text-sm text-background/65">A megadott napokon 10:00-12:00 magasságában</p>
           </div>
           <div>
             <h3 className="text-sm font-semibold text-background mb-3">Helyszín</h3>
-            <p className="text-sm text-background/65">Zalaegerszeg határa</p>
-            <p className="text-sm text-background/65">GPS koordináták alapján</p>
+            <Link href="/contact" className="block text-sm text-background/65 hover:text-background transition-colors">Zalaegerszeg határa</Link>
+            <Link href="/contact" className="block text-sm text-background/65 hover:text-background transition-colors">GPS koordináták alapján</Link>
           </div>
           <div>
             <h3 className="text-sm font-semibold text-background mb-3">Kövess minket</h3>

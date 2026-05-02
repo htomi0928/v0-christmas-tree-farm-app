@@ -196,16 +196,13 @@ export default function BookingPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-start">
 
             {/* Left — confirmation message */}
-            <div>
-              <div className="inline-flex items-center gap-2 mb-6">
-                <CheckCircle2 className="h-5 w-5 text-secondary" />
-                <span className="text-xs font-bold text-secondary tracking-widest uppercase">Foglalás rögzítve</span>
-              </div>
+            <div className="flex flex-col items-center text-center">
+              <div className="section-label justify-center w-full mb-6">Foglalás rögzítve</div>
               <h1 className="text-4xl sm:text-5xl font-bold text-foreground mb-4 tracking-tight leading-tight">
                 Hamarosan<br />jelentkezünk.
               </h1>
               <p className="text-primary font-light mb-10 max-w-xs">
-                A foglalásod megkaptuk. Felvesszük veled a kapcsolatot a megadott telefonszámon.
+                A foglalásod megkaptuk. Köszönjük, hogy hozzánk fordultál — várunk az általad választott napon.
               </p>
 
               <div className="space-y-0 mb-10">
@@ -224,7 +221,7 @@ export default function BookingPage() {
                 ))}
               </div>
 
-              <div className="flex flex-col sm:flex-row gap-3">
+              <div className="flex justify-center">
                 <Link href="/">
                   <Button className="h-12 px-7 text-base rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(74,79,74,0.25)] active:translate-y-0 active:shadow-none font-semibold">
                     Vissza a főoldalra
@@ -420,7 +417,7 @@ export default function BookingPage() {
                   onDateSelect={handleDateSelect}
                   availableDates={settings?.availableDays}
                 />
-                <p className="text-primary text-xs mt-1">Válassz egy elérhető napot — szombat vagy vasárnap, 10–12 között</p>
+                <p className="text-primary text-xs mt-1">Válassz egy elérhető napot — a megadott napokon 10:00-12:00 magasságában</p>
                 {errors.visitDate && <p data-error className="text-destructive text-xs mt-1">{errors.visitDate}</p>}
               </div>
 
