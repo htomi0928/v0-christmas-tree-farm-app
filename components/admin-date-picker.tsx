@@ -59,12 +59,13 @@ export default function AdminDatePicker({ selectedDate, onDateSelect, highlightD
   for (let i = 0; i < days.length; i += 7) weeks.push(days.slice(i, i + 7))
 
   return (
-    <Card className="overflow-hidden border-primary/10 bg-white/75 px-0 py-0">
+    <Card className="overflow-hidden border-primary/10 bg-surface/80 px-0 py-0">
       <div className="px-3 py-3 sm:px-5 sm:py-5">
         <div className="flex items-center justify-between">
           <button
             type="button"
-            className="rounded-full border border-primary/10 p-2"
+            aria-label="Előző hónap"
+            className="rounded-full border border-primary/10 p-2 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-1"
             onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1))}
           >
             <ChevronLeft className="h-4 w-4" />
@@ -76,7 +77,8 @@ export default function AdminDatePicker({ selectedDate, onDateSelect, highlightD
 
           <button
             type="button"
-            className="rounded-full border border-primary/10 p-2"
+            aria-label="Következő hónap"
+            className="rounded-full border border-primary/10 p-2 focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-1"
             onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1))}
           >
             <ChevronRight className="h-4 w-4" />
@@ -105,7 +107,7 @@ export default function AdminDatePicker({ selectedDate, onDateSelect, highlightD
                     type="button"
                     onClick={() => onDateSelect(isSelected ? "" : dateStr)}
                     title={!isHighlighted && !isSelected ? "Nem elérhető nap (admin felülírás)" : undefined}
-                    className={`h-8 sm:h-10 rounded-2xl text-sm font-semibold transition ${
+                    className={`h-8 sm:h-10 rounded-2xl text-sm font-semibold transition focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-1 ${
                       isSelected
                         ? "bg-primary text-primary-foreground cursor-pointer"
                         : isHighlighted

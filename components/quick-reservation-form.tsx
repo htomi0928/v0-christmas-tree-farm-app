@@ -10,8 +10,8 @@ import { useUnsavedChanges } from "@/contexts/unsaved-changes-context"
 import AdminDatePicker from "@/components/admin-date-picker"
 
 const inputClass =
-  "w-full px-4 py-3 rounded-lg border border-[#bfc3c7] bg-white text-[#3a3a3a] placeholder:text-[#4a4f4a]/40 focus:outline-none focus:ring-2 focus:ring-[#6e7f6a] text-sm transition-all duration-150"
-const labelClass = "block text-xs font-bold text-[#3a3a3a] tracking-widest uppercase mb-2"
+  "w-full px-4 py-3 rounded-lg border border-border bg-white text-foreground placeholder:text-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent text-sm transition-all duration-150"
+const labelClass = "block text-xs font-bold text-foreground tracking-widest uppercase mb-2"
 
 interface QuickReservationFormProps {
   currentAdminPaidTo: "Sanyi" | "János" | null
@@ -186,7 +186,7 @@ export default function QuickReservationForm({ currentAdminPaidTo }: QuickReserv
         </div>
       )}
 
-      <div className="border border-[#bfc3c7] bg-[#f5f4f1] rounded-lg p-6">
+      <div className="border border-border bg-surface rounded-lg p-6">
         <label className={labelClass}>Státusz</label>
         <select
           value={formData.status}
@@ -204,8 +204,8 @@ export default function QuickReservationForm({ currentAdminPaidTo }: QuickReserv
       </div>
 
       <div className="grid gap-6 xl:grid-cols-2">
-        <div className="min-w-0 border border-[#bfc3c7] bg-[#f5f4f1] rounded-lg p-6 space-y-5">
-          <p className="text-xs font-bold text-[#3a3a3a] tracking-widest uppercase">Alapadatok</p>
+        <div className="min-w-0 border border-border bg-surface rounded-lg p-6 space-y-5">
+          <p className="text-xs font-bold text-foreground tracking-widest uppercase">Alapadatok</p>
           <div>
             <label className={labelClass}>Név</label>
             <input
@@ -247,8 +247,8 @@ export default function QuickReservationForm({ currentAdminPaidTo }: QuickReserv
           </div>
         </div>
 
-        <div className="min-w-0 border border-[#bfc3c7] bg-[#f5f4f1] rounded-lg p-6 space-y-5">
-          <p className="text-xs font-bold text-[#3a3a3a] tracking-widest uppercase">További adatok</p>
+        <div className="min-w-0 border border-border bg-surface rounded-lg p-6 space-y-5">
+          <p className="text-xs font-bold text-foreground tracking-widest uppercase">További adatok</p>
           <div>
             <label className={labelClass}>Fa sorszáma</label>
             <input value={formData.treeNumbers} onChange={(e) => setFormData({ ...formData, treeNumbers: e.target.value })} placeholder="Pl. 0 vagy 12, 13" autoComplete="off" autoCorrect="off" autoCapitalize="off" spellCheck={false} className={inputClass} />
@@ -262,7 +262,7 @@ export default function QuickReservationForm({ currentAdminPaidTo }: QuickReserv
             </select>
           </div>
           <div>
-            <label className={labelClass}>Megjegyzes</label>
+            <label className={labelClass}>Megjegyzés</label>
             <textarea
               rows={4}
               value={formData.notes}
@@ -278,12 +278,12 @@ export default function QuickReservationForm({ currentAdminPaidTo }: QuickReserv
 
       {/* Date pickers */}
       <div className="grid gap-6 xl:grid-cols-2">
-        <div className="border border-[#bfc3c7] bg-[#f5f4f1] rounded-lg p-3 sm:p-6">
-          <p className="text-xs font-bold text-[#3a3a3a] tracking-widest uppercase mb-4">Látogatás napja</p>
+        <div className="border border-border bg-surface rounded-lg p-3 sm:p-6">
+          <p className="text-xs font-bold text-foreground tracking-widest uppercase mb-4">Látogatás napja</p>
           <AdminDatePicker selectedDate={formData.visitDate} onDateSelect={(date) => setFormData({ ...formData, visitDate: date })} highlightDays={availableDays.length > 0 ? availableDays : undefined} />
         </div>
-        <div className="border border-[#bfc3c7] bg-[#f5f4f1] rounded-lg p-3 sm:p-6">
-          <p className="text-xs font-bold text-[#3a3a3a] tracking-widest uppercase mb-4">Átvételi nap</p>
+        <div className="border border-border bg-surface rounded-lg p-3 sm:p-6">
+          <p className="text-xs font-bold text-foreground tracking-widest uppercase mb-4">Átvételi nap</p>
           <AdminDatePicker selectedDate={formData.pickupDate} onDateSelect={(date) => setFormData({ ...formData, pickupDate: date })} highlightDays={retrievalDays.length > 0 ? retrievalDays : undefined} />
         </div>
       </div>

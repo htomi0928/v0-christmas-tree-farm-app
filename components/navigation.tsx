@@ -98,14 +98,14 @@ export function Navigation() {
   const isSolid = !isHome || scrolled
 
   const navLinkClass = isSolid
-    ? "nav-link px-3 py-2 text-sm font-normal text-[#4a4f4a] hover:text-[#3a3a3a] transition-colors"
+    ? "nav-link px-3 py-2 text-sm font-normal text-primary hover:text-foreground transition-colors"
     : "nav-link px-3 py-2 text-sm font-normal text-white/70 hover:text-white transition-colors"
 
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 w-full transition-all duration-300 ${
         isSolid
-          ? "bg-[#ededed]/95 backdrop-blur-md shadow-sm border-b border-[#bfc3c7]"
+          ? "bg-background/95 backdrop-blur-md shadow-sm border-b border-border"
           : "bg-transparent border-b border-transparent"
       }`}
     >
@@ -121,7 +121,7 @@ export function Navigation() {
             {navigationItems.map((item) => {
               const isActive = !item.href.startsWith("/#") && pathname === item.href
               const activeClass = isSolid
-                ? "text-[#6e7f6a]"
+                ? "text-secondary"
                 : "text-white"
               return (
                 <Link
@@ -189,7 +189,7 @@ export function Navigation() {
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: -20, opacity: 0 }}
               transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
-              className="relative bg-[#ededed]/98 backdrop-blur-md shadow-md"
+              className="relative bg-background/98 backdrop-blur-md shadow-md"
             >
               {/* Header row */}
               <div className="flex justify-between items-center h-16 px-4 sm:px-6">
@@ -216,7 +216,7 @@ export function Navigation() {
                       key={item.href}
                       href={item.href}
                       className={`block px-4 py-2.5 text-base font-medium transition-colors ${
-                        isActive ? "text-[#3a3a3a]" : "text-[#4a4f4a]/70 hover:text-[#3a3a3a]"
+                        isActive ? "text-foreground" : "text-primary/70 hover:text-foreground"
                       }`}
                       onClick={(e) => guardedClick(e, item.href, () => {
                         if (item.href.startsWith("/#")) setActiveHash(item.href.slice(1))
@@ -232,7 +232,7 @@ export function Navigation() {
                 <Link
                   href="/booking"
                   className={`block px-4 py-2.5 text-base font-bold transition-colors ${
-                    pathname === "/booking" ? "text-[#3a3a3a]" : "text-[#4a4f4a]/70 hover:text-[#3a3a3a]"
+                    pathname === "/booking" ? "text-foreground" : "text-primary/70 hover:text-foreground"
                   }`}
                   onClick={(e) => guardedClick(e, "/booking", () => setIsOpen(false))}
                 >
@@ -242,7 +242,7 @@ export function Navigation() {
                 </Link>
                 <Link
                   href="/admin"
-                  className="block px-4 py-2.5 text-sm text-[#4a4f4a]/40 hover:text-[#4a4f4a]/70 transition-colors"
+                  className="block px-4 py-2.5 text-sm text-primary/40 hover:text-primary/70 transition-colors"
                   onClick={(e) => guardedClick(e, "/admin", () => setIsOpen(false))}
                 >
                   Admin
