@@ -72,7 +72,7 @@ export function AdminShellNav({ years, viewYear, activeYear }: AdminShellNavProp
         onChange={handleYearChange}
         disabled={isPending}
         aria-label="Megjelenített év"
-        className="h-8 rounded-lg border border-[#bfc3c7] bg-white px-2 pr-7 text-sm font-medium text-[#4a4f4a] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#4a4f4a]/30 disabled:opacity-50"
+        className="h-8 rounded-lg border border-border bg-white px-2 pr-7 text-sm font-medium text-primary cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 disabled:opacity-50"
       >
         {yearOptions.map((y) => (
           <option key={y.year} value={y.year}>
@@ -85,7 +85,7 @@ export function AdminShellNav({ years, viewYear, activeYear }: AdminShellNavProp
         onClick={() => setManagerOpen(true)}
         aria-label="Évek kezelése"
         title="Évek kezelése"
-        className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[#bfc3c7] bg-white text-[#4a4f4a] hover:bg-[#4a4f4a]/5 transition-colors cursor-pointer"
+        className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-border bg-white text-primary hover:bg-primary/5 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
       >
         <Settings className="h-4 w-4" />
       </button>
@@ -94,10 +94,10 @@ export function AdminShellNav({ years, viewYear, activeYear }: AdminShellNavProp
 
   return (
     <>
-      <header className="sticky top-16 z-40 border-b border-[#bfc3c7] bg-[#ededed]/95 backdrop-blur-md">
+      <header className="sticky top-16 z-40 border-b border-border bg-background/95 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4 py-3">
           <div className="flex items-center gap-3">
-            <span className="text-xs font-bold tracking-widest uppercase text-[#6e7f6a]">Admin</span>
+            <span className="text-xs font-bold tracking-widest uppercase text-accent">Admin</span>
             {yearControls}
             <div className="hidden md:flex items-center gap-1 ml-4">
               {adminNavigation.map((item) => (
@@ -106,10 +106,10 @@ export function AdminShellNav({ years, viewYear, activeYear }: AdminShellNavProp
                   href={item.href}
                   onClick={(e) => guardedClick(e, item.href)}
                   className={cn(
-                    "inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors",
+                    "inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
                     isActive(item.href)
-                      ? "bg-[#4a4f4a] text-[#ededed]"
-                      : "text-[#4a4f4a]/60 hover:text-[#4a4f4a] hover:bg-[#4a4f4a]/8",
+                      ? "bg-primary text-background"
+                      : "text-primary/60 hover:text-primary hover:bg-primary/8",
                   )}
                 >
                   <item.icon className="h-4 w-4" />
@@ -123,7 +123,7 @@ export function AdminShellNav({ years, viewYear, activeYear }: AdminShellNavProp
               <Link
                 href="/admin/reservations/quick"
                 onClick={(e) => guardedClick(e, "/admin/reservations/quick")}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-[#4a4f4a] px-2.5 py-2 text-sm font-semibold text-[#ededed] transition-colors hover:bg-[#3a3a3a] sm:px-3 sm:py-1.5"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-2.5 py-2 text-sm font-semibold text-background transition-colors hover:bg-foreground sm:px-3 sm:py-1.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
               >
                 <Plus className="h-3.5 w-3.5" />
                 <span className="hidden sm:inline">Gyors foglalás</span>
@@ -132,7 +132,7 @@ export function AdminShellNav({ years, viewYear, activeYear }: AdminShellNavProp
             <button
               type="button"
               onClick={handleLogout}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-[#bfc3c7] text-sm font-medium text-[#4a4f4a] hover:bg-[#4a4f4a]/5 transition-colors cursor-pointer"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-border text-sm font-medium text-primary hover:bg-primary/5 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
             >
               <LogOut className="h-4 w-4" />
               <span className="hidden sm:inline">Kijelentkezés</span>
@@ -141,7 +141,7 @@ export function AdminShellNav({ years, viewYear, activeYear }: AdminShellNavProp
         </div>
       </header>
 
-      <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-[#bfc3c7] bg-[#ededed]/98 px-3 py-2 backdrop-blur-md md:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-background/98 px-3 py-2 backdrop-blur-md md:hidden">
         <div className="grid grid-cols-4 gap-2">
           {adminNavigation.map((item) => (
             <Link
@@ -149,8 +149,8 @@ export function AdminShellNav({ years, viewYear, activeYear }: AdminShellNavProp
               href={item.href}
               onClick={(e) => guardedClick(e, item.href)}
               className={cn(
-                "flex min-h-14 flex-col items-center justify-center rounded-xl text-[11px] font-semibold transition",
-                isActive(item.href) ? "bg-[#4a4f4a] text-[#ededed]" : "text-[#4a4f4a]/60 hover:bg-[#4a4f4a]/8 hover:text-[#4a4f4a]",
+                "flex min-h-14 flex-col items-center justify-center rounded-xl text-[11px] font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30",
+                isActive(item.href) ? "bg-primary text-background" : "text-primary/60 hover:bg-primary/8 hover:text-primary",
               )}
             >
               <item.icon className="mb-1 h-4 w-4" />

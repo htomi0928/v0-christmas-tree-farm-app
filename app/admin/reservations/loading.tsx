@@ -20,7 +20,7 @@ export default function ReservationsLoading() {
       {/* Reservation rows */}
       <div className="space-y-3">
         {Array.from({ length: 8 }).map((_, i) => (
-          <div key={i} className="border border-[#bfc3c7] bg-[#f5f4f1] rounded-lg px-5 py-4 flex items-center gap-4">
+          <div key={i} className="border border-border bg-surface rounded-lg px-5 py-4 flex items-center gap-4">
             <Skeleton className="h-9 w-9 rounded-full flex-shrink-0" />
             <div className="flex-1 min-w-0 space-y-2">
               <Skeleton className="h-4 w-40" />

@@ -115,20 +115,20 @@ export default async function AdminDashboard() {
       {/* Header */}
       <section className="text-center">
         <div className="section-label justify-center">Áttekintés · {year}</div>
-        <h1 className="text-4xl sm:text-5xl font-bold text-[#3a3a3a] mb-3 tracking-tight">Dashboard</h1>
-        <p className="text-[#4a4f4a] font-light max-w-md mx-auto">A legfontosabb számok és gyors műveletek egy helyen.</p>
+        <h1 className="text-4xl sm:text-5xl font-bold text-foreground mb-3 tracking-tight">Dashboard</h1>
+        <p className="text-primary font-light max-w-md mx-auto">A legfontosabb számok és gyors műveletek egy helyen.</p>
       </section>
 
       {/* Overview stats */}
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {overviewCards.map((item) => (
-          <div key={item.label} className="border border-[#bfc3c7] bg-[#f5f4f1] rounded-lg p-6">
+          <div key={item.label} className="border border-border bg-surface rounded-lg p-6">
             <div className="flex items-center justify-between mb-4">
-              <p className="text-xs font-bold text-[#4a4f4a]/50 tracking-widest uppercase">{item.label}</p>
-              <item.icon className="h-4 w-4 text-[#6e7f6a]" />
+              <p className="text-xs font-bold text-primary/50 tracking-widest uppercase">{item.label}</p>
+              <item.icon className="h-4 w-4 text-secondary" />
             </div>
-            <p className="text-2xl font-bold text-[#3a3a3a] tracking-tight mb-1">{item.value}</p>
-            <p className="text-sm text-[#4a4f4a] font-light">{item.help}</p>
+            <p className="text-2xl font-bold text-foreground tracking-tight mb-1">{item.value}</p>
+            <p className="text-sm text-primary font-light">{item.help}</p>
           </div>
         ))}
       </section>
@@ -136,18 +136,18 @@ export default async function AdminDashboard() {
       {/* Revenue breakdown */}
       <section>
         <div className="section-label justify-center mb-3">Pénzügyek</div>
-        <h2 className="text-2xl font-bold text-[#3a3a3a] tracking-tight mb-6 text-center">Bevétel és kiadás</h2>
+        <h2 className="text-2xl font-bold text-foreground tracking-tight mb-6 text-center">Bevétel és kiadás</h2>
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {revenueCards.map((item) => (
-            <div key={item.label} className={`border rounded-lg p-6 ${'accent' in item && item.accent === 'green' ? 'border-emerald-200 bg-emerald-50/60' : 'accent' in item && item.accent === 'red' ? 'border-red-200 bg-red-50/60' : 'border-[#bfc3c7] bg-[#f5f4f1]'}`}>
+            <div key={item.label} className={`border rounded-lg p-6 ${'accent' in item && item.accent === 'green' ? 'border-emerald-200 bg-emerald-50/60' : 'accent' in item && item.accent === 'red' ? 'border-red-200 bg-red-50/60' : 'border-border bg-surface'}`}>
               <div className="flex items-center justify-between mb-4">
-                <p className="text-xs font-bold text-[#4a4f4a]/50 tracking-widest uppercase">{item.label}</p>
-                <item.icon className={`h-4 w-4 ${'accent' in item && item.accent === 'green' ? 'text-emerald-600' : 'accent' in item && item.accent === 'red' ? 'text-red-500' : 'text-[#6e7f6a]'}`} />
+                <p className="text-xs font-bold text-primary/50 tracking-widest uppercase">{item.label}</p>
+                <item.icon className={`h-4 w-4 ${'accent' in item && item.accent === 'green' ? 'text-emerald-600' : 'accent' in item && item.accent === 'red' ? 'text-red-500' : 'text-secondary'}`} />
               </div>
-              <p className={`text-2xl font-bold tracking-tight mb-3 ${'accent' in item && item.accent === 'green' ? 'text-emerald-700' : 'accent' in item && item.accent === 'red' ? 'text-red-600' : 'text-[#3a3a3a]'}`}>{item.value}</p>
-              <div className="space-y-1 border-t border-[#bfc3c7] pt-3">
-                <p className="text-xs text-[#4a4f4a] font-light">{item.expense}</p>
-                <p className="text-xs font-semibold text-[#3a3a3a]">{item.net}</p>
+              <p className={`text-2xl font-bold tracking-tight mb-3 ${'accent' in item && item.accent === 'green' ? 'text-emerald-700' : 'accent' in item && item.accent === 'red' ? 'text-red-600' : 'text-foreground'}`}>{item.value}</p>
+              <div className="space-y-1 border-t border-border pt-3">
+                <p className="text-xs text-primary font-light">{item.expense}</p>
+                <p className="text-xs font-semibold text-foreground">{item.net}</p>
               </div>
             </div>
           ))}

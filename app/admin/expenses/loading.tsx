@@ -13,7 +13,7 @@ export default function ExpensesLoading() {
       {/* Summary cards */}
       <div className="grid gap-4 sm:grid-cols-3">
         {Array.from({ length: 3 }).map((_, i) => (
-          <div key={i} className="border border-[#bfc3c7] bg-[#f5f4f1] rounded-lg p-6">
+          <div key={i} className="border border-border bg-surface rounded-lg p-6">
             <Skeleton className="h-3 w-20 mb-3" />
             <Skeleton className="h-8 w-24 mb-1" />
             <Skeleton className="h-3 w-16" />
@@ -27,7 +27,7 @@ export default function ExpensesLoading() {
       {/* Expense rows */}
       <div className="space-y-3">
         {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="border border-[#bfc3c7] bg-[#f5f4f1] rounded-lg px-5 py-4 flex items-center gap-4">
+          <div key={i} className="border border-border bg-surface rounded-lg px-5 py-4 flex items-center gap-4">
             <div className="flex-1 min-w-0 space-y-2">
               <Skeleton className="h-4 w-48" />
               <Skeleton className="h-3 w-32" />

@@ -74,6 +74,20 @@ The cookie value is independently validated against `years` on every read — a 
 - **`[v0]`-prefixed `console.log`** is the project's debug-print convention (see `scripts/test-db-connection.ts`). Grep for them before shipping.
 - **v0.app sync**: this repo is auto-synced from v0.app deployments. Manual edits and v0-driven edits both land on `main`; expect occasional churn from the v0 side.
 
+## Design skills (non-negotiable)
+
+For any UI, layout, visual, or frontend design work — including "small" changes — invoke these skills **before doing anything else**:
+
+1. `impeccable` — primary design system; owns shape, craft, and all refine/enhance commands
+2. `taste-skill` — aesthetic judgment and quality bar
+3. `emil-design-eng` — design engineering perspective
+
+This applies even if the change feels trivial. Skipping these because the task is "just a tweak" is not allowed.
+
+### Polish before the last step
+
+Before the final implementation step of any frontend feature or UI change, run `/impeccable polish` on the target. This is the last quality gate before code lands — do not skip it.
+
 ## Documentation
 
 `docs/API.md` (endpoint shapes), `docs/DEPLOYMENT.md` (Vercel + table schemas), and `docs/DEVELOPMENT.md` (local setup, route pipeline) are intended to be code-accurate. If you spot a drift while working, fix the doc rather than working around it.
