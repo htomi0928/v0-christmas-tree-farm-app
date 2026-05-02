@@ -1,4 +1,4 @@
-export enum ReservationStatus {
+﻿export enum ReservationStatus {
   BOOKED = "BOOKED",
   TREE_TAGGED = "TREE_TAGGED",
   CUT = "CUT",
@@ -21,6 +21,9 @@ export interface Reservation {
   status: ReservationStatus
   createdAt: string
   paidTo?: "János" | "Sanyi"
+  photoUrl?: string
+  photoPublicId?: string
+  photoUploadedAt?: string
 }
 
 export interface CreateReservationData {
@@ -44,6 +47,8 @@ export interface CreateAdminQuickReservationData {
   status?: ReservationStatus
   treeNumbers?: string
   paidTo?: "János" | "Sanyi"
+  photoUrl?: string
+  photoPublicId?: string
 }
 
 export interface UpdateReservationData {
@@ -57,6 +62,9 @@ export interface UpdateReservationData {
   pickupDate?: string
   treeCount?: number
   paidTo?: "János" | "Sanyi"
+  photoUrl?: string
+  photoPublicId?: string
+  clearPhoto?: boolean
 }
 
 export interface Expense {

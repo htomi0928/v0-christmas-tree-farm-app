@@ -1,4 +1,4 @@
-# 🎄 Christmas Tree Farm App
+﻿# 🎄 Christmas Tree Farm App
 
 A full-stack web application for managing Christmas tree farm operations, including customer reservations, tree inventory, expenses tracking, and admin authentication.
 
@@ -81,6 +81,9 @@ DATABASE_URL            # Neon PostgreSQL connection string
 RESEND_API_KEY          # API key from Resend
 RESERVATION_NOTIFY_TO   # Comma-separated internal recipients
 RESERVATION_EMAIL_FROM  # Verified sender, e.g. Foglalás <noreply@yourdomain.tld>
+CLOUDINARY_CLOUD_NAME   # Cloudinary cloud name for admin reservation photos
+CLOUDINARY_API_KEY      # Cloudinary API key
+CLOUDINARY_API_SECRET   # Cloudinary API secret
 ```
 
 ## Development

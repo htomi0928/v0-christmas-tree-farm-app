@@ -1,8 +1,8 @@
 "use client"
 
-import { useEffect, useRef, useState, type FormEvent } from "react"
+import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react"
 import { useRouter } from "next/navigation"
-import { AlertCircle, Save } from "lucide-react"
+import { AlertCircle, Camera, Image as ImageIcon, Save, Trash2, Upload } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ReservationStatus } from "@/lib/types"
 import { reservationStatusMeta } from "@/lib/site"
@@ -24,8 +24,11 @@ export default function QuickReservationForm({ currentAdminPaidTo }: QuickReserv
   const router = useRouter()
   const { setDirty, navigate } = useUnsavedChanges()
   const alertRef = useRef<HTMLDivElement>(null)
+  const uploadInputRef = useRef<HTMLInputElement>(null)
+  const cameraInputRef = useRef<HTMLInputElement>(null)
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState("")
+  const [photoUploading, setPhotoUploading] = useState(false)
   const [availableDays, setAvailableDays] = useState<string[]>([])
   const [retrievalDays, setRetrievalDays] = useState<string[]>([])
 
@@ -50,6 +53,8 @@ export default function QuickReservationForm({ currentAdminPaidTo }: QuickReserv
     status: ReservationStatus.BOOKED,
     treeNumbers: "",
     paidTo: "",
+    photoUrl: "",
+    photoPublicId: "",
   })
   const initialFormData = {
     name: "",
@@ -62,6 +67,8 @@ export default function QuickReservationForm({ currentAdminPaidTo }: QuickReserv
     status: ReservationStatus.BOOKED,
     treeNumbers: "",
     paidTo: "",
+    photoUrl: "",
+    photoPublicId: "",
   }
 
   useEffect(() => {
@@ -70,12 +77,46 @@ export default function QuickReservationForm({ currentAdminPaidTo }: QuickReserv
   }, [formData, setDirty])
   useEffect(() => () => setDirty(false), [setDirty])
 
+  const uploadPhoto = async (file: File) => {
+    setPhotoUploading(true)
+    try {
+      const body = new FormData()
+      body.set("photo", file)
+      const response = await fetch("/api/admin/uploads/reservation-photo", {
+        method: "POST",
+        body,
+      })
+      const data = await response.json()
+      if (!response.ok || !data.success) {
+        setError(data.error || "A fotó feltöltése nem sikerült.")
+        return
+      }
+      setFormData((prev) => ({ ...prev, photoUrl: data.photoUrl, photoPublicId: data.photoPublicId }))
+    } catch {
+      setError("Hálózati hiba történt a fotó feltöltésekor.")
+    } finally {
+      setPhotoUploading(false)
+    }
+  }
+
+  const onFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+    await uploadPhoto(file)
+    event.target.value = ""
+  }
+
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault()
     setError("")
 
     if (!Number.isInteger(formData.treeCount) || formData.treeCount < 1 || formData.treeCount > 20) {
       setError("A fák száma 1 és 20 között lehet.")
+      return
+    }
+
+    if (photoUploading) {
+      setError("Várd meg, amíg befejeződik a fotó feltöltése.")
       return
     }
 
@@ -276,6 +317,38 @@ export default function QuickReservationForm({ currentAdminPaidTo }: QuickReserv
         </div>
       </div>
 
+      <div className="border border-border bg-surface rounded-lg p-6 space-y-4">
+        <p className="text-xs font-bold text-foreground tracking-widest uppercase">Fotó (opcionális)</p>
+        <input ref={uploadInputRef} type="file" accept="image/jpeg,image/png,image/webp,image/heic,image/heif" className="hidden" onChange={onFileChange} />
+        <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={onFileChange} />
+        <div className="flex flex-wrap gap-2">
+          <Button type="button" variant="outline" onClick={() => uploadInputRef.current?.click()} disabled={photoUploading}>
+            <Upload className="h-4 w-4" />
+            Feltöltés
+          </Button>
+          <Button type="button" variant="outline" onClick={() => cameraInputRef.current?.click()} disabled={photoUploading}>
+            <Camera className="h-4 w-4" />
+            Gyors fotó
+          </Button>
+          {formData.photoUrl ? (
+            <Button type="button" variant="outline" onClick={() => setFormData((prev) => ({ ...prev, photoUrl: "", photoPublicId: "" }))} disabled={photoUploading}>
+              <Trash2 className="h-4 w-4" />
+              Eltávolítás
+            </Button>
+          ) : null}
+        </div>
+        {formData.photoUrl ? (
+          <div className="border border-border rounded-lg p-2 bg-white w-fit">
+            <img src={formData.photoUrl} alt="Foglalás fotó előnézet" className="h-36 w-auto rounded object-cover" loading="lazy" />
+          </div>
+        ) : (
+          <div className="text-xs text-primary/60 inline-flex items-center gap-2">
+            <ImageIcon className="h-4 w-4" />
+            Nincs fotó csatolva.
+          </div>
+        )}
+      </div>
+
       {/* Date pickers */}
       <div className="grid gap-6 xl:grid-cols-2">
         <div className="border border-border bg-surface rounded-lg p-3 sm:p-6">
@@ -292,7 +365,7 @@ export default function QuickReservationForm({ currentAdminPaidTo }: QuickReserv
         <Button type="button" variant="outline" size="lg" className="flex-1" onClick={() => navigate("/admin/reservations")}>
           Vissza
         </Button>
-        <Button type="submit" size="lg" className="flex-1" disabled={isSaving}>
+        <Button type="submit" size="lg" className="flex-1" disabled={isSaving || photoUploading}>
           <Save className="h-4 w-4" />
           {isSaving ? "Mentés..." : "Gyors foglalás mentése"}
         </Button>
