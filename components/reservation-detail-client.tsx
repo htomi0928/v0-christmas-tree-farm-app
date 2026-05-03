@@ -274,7 +274,7 @@ export default function ReservationDetailClient({ reservation: initialReservatio
         setSuccess("A foglalás mentése sikerült.")
         setSavedChanges(diff)
       } else {
-        setError(data.error || "Hiba történt a mentés közben.")
+        setError(data.error || (Array.isArray(data.errors) ? data.errors.join(", ") : "") || "Hiba történt a mentés közben.")
       }
     } catch {
       setError("Hálózati hiba történt.")
