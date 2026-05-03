@@ -53,8 +53,7 @@ export default function QuickReservationForm({ currentAdminPaidTo }: QuickReserv
     status: ReservationStatus.BOOKED,
     treeNumbers: "",
     paidTo: "",
-    photoUrl: "",
-    photoPublicId: "",
+    photos: [] as Array<{ photoUrl: string; photoPublicId: string }>,
   })
   const initialFormData = {
     name: "",
@@ -67,8 +66,7 @@ export default function QuickReservationForm({ currentAdminPaidTo }: QuickReserv
     status: ReservationStatus.BOOKED,
     treeNumbers: "",
     paidTo: "",
-    photoUrl: "",
-    photoPublicId: "",
+    photos: [] as Array<{ photoUrl: string; photoPublicId: string }>,
   }
 
   useEffect(() => {
@@ -91,7 +89,10 @@ export default function QuickReservationForm({ currentAdminPaidTo }: QuickReserv
         setError(data.error || "A fotó feltöltése nem sikerült.")
         return
       }
-      setFormData((prev) => ({ ...prev, photoUrl: data.photoUrl, photoPublicId: data.photoPublicId }))
+      setFormData((prev) => ({
+        ...prev,
+        photos: [...prev.photos, { photoUrl: data.photoUrl, photoPublicId: data.photoPublicId }],
+      }))
     } catch {
       setError("Hálózati hiba történt a fotó feltöltésekor.")
     } finally {
@@ -330,16 +331,36 @@ export default function QuickReservationForm({ currentAdminPaidTo }: QuickReserv
             <Camera className="h-4 w-4" />
             Gyors fotó
           </Button>
-          {formData.photoUrl ? (
-            <Button type="button" variant="outline" onClick={() => setFormData((prev) => ({ ...prev, photoUrl: "", photoPublicId: "" }))} disabled={photoUploading}>
-              <Trash2 className="h-4 w-4" />
-              Eltávolítás
-            </Button>
-          ) : null}
         </div>
-        {formData.photoUrl ? (
-          <div className="border border-border rounded-lg p-2 bg-white w-fit">
-            <img src={formData.photoUrl} alt="Foglalás fotó előnézet" className="h-36 w-auto rounded object-cover" loading="lazy" />
+        {formData.photos.length > 0 ? (
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {formData.photos.map((photo, index) => (
+              <div key={photo.photoPublicId} className="border border-border rounded-lg p-2 bg-white">
+                <img src={photo.photoUrl} alt={`Foglalás fotó ${index + 1}`} className="h-36 w-full rounded object-cover" loading="lazy" />
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full mt-2"
+                  onClick={async () => {
+                    try {
+                      await fetch("/api/admin/uploads/reservation-photo", {
+                        method: "DELETE",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ photoPublicId: photo.photoPublicId }),
+                      })
+                    } catch {}
+                    setFormData((prev) => ({
+                      ...prev,
+                      photos: prev.photos.filter((p) => p.photoPublicId !== photo.photoPublicId),
+                    }))
+                  }}
+                  disabled={photoUploading}
+                >
+                  <Trash2 className="h-4 w-4" />
+                  Kép törlése
+                </Button>
+              </div>
+            ))}
           </div>
         ) : (
           <div className="text-xs text-primary/60 inline-flex items-center gap-2">

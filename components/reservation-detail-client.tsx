@@ -37,9 +37,7 @@ export default function ReservationDetailClient({ reservation: initialReservatio
     treeNumbers: initialReservation.treeNumbers || "",
     notes: initialReservation.notes || "",
     paidTo: normalizePaidTo(initialReservation.paidTo),
-    photoUrl: initialReservation.photoUrl || "",
-    photoPublicId: initialReservation.photoPublicId || "",
-    clearPhoto: false,
+    photos: initialReservation.photos || [],
   })
   const initialSnapshot = {
     name: initialReservation.name,
@@ -52,9 +50,7 @@ export default function ReservationDetailClient({ reservation: initialReservatio
     treeNumbers: initialReservation.treeNumbers || "",
     notes: initialReservation.notes || "",
     paidTo: normalizePaidTo(initialReservation.paidTo),
-    photoUrl: initialReservation.photoUrl || "",
-    photoPublicId: initialReservation.photoPublicId || "",
-    clearPhoto: false,
+    photos: initialReservation.photos || [],
   }
 
   useEffect(() => {
@@ -69,12 +65,15 @@ export default function ReservationDetailClient({ reservation: initialReservatio
   const FIELD_LABELS: Record<keyof FormSnapshot, string> = {
     name: "Név", phone: "Telefonszám", email: "E-mail", visitDate: "Látogatás napja",
     pickupDate: "Átvételi nap", treeCount: "Darabszám", status: "Státusz",
-    treeNumbers: "Fa sorszáma", notes: "Megjegyzés", paidTo: "Kinek fizet", photoUrl: "Fotó",
-    photoPublicId: "Fotó azonosító", clearPhoto: "Fotó törlés",
+    treeNumbers: "Fa sorszáma", notes: "Megjegyzés", paidTo: "Kinek fizet", photos: "Fotók",
   }
 
-  const formatFieldValue = (key: keyof FormSnapshot, val: string | number): string => {
+  const formatFieldValue = (key: keyof FormSnapshot, val: unknown): string => {
     if (val === "" || val === null || val === undefined) return "—"
+    if (key === "photos") {
+      const count = Array.isArray(val) ? val.length : 0
+      return `${count} db kép`
+    }
     if (key === "status") return reservationStatusMeta[val as ReservationStatus]?.label ?? String(val)
     if (key === "visitDate" || key === "pickupDate") return formatDateHu(String(val))
     return String(val)
@@ -83,7 +82,7 @@ export default function ReservationDetailClient({ reservation: initialReservatio
   const computeDiff = (prev: FormSnapshot, next: FormSnapshot): ChangedField[] =>
     (Object.keys(FIELD_LABELS) as (keyof FormSnapshot)[])
       .filter((k) => String(prev[k]) !== String(next[k]))
-      .map((k) => ({ label: FIELD_LABELS[k], oldVal: formatFieldValue(k, prev[k] as string), newVal: formatFieldValue(k, next[k] as string) }))
+      .map((k) => ({ label: FIELD_LABELS[k], oldVal: formatFieldValue(k, prev[k]), newVal: formatFieldValue(k, next[k]) }))
 
   const prevSnapshotRef = useRef<FormSnapshot>(formData)
   const alertRef = useRef<HTMLDivElement>(null)
@@ -97,7 +96,7 @@ export default function ReservationDetailClient({ reservation: initialReservatio
   const [retrievalDays, setRetrievalDays] = useState<string[]>([])
   const [availableDays, setAvailableDays] = useState<string[]>([])
   const [photoUploading, setPhotoUploading] = useState(false)
-  const [photoVisible, setPhotoVisible] = useState(false)
+  const [visiblePhotoIds, setVisiblePhotoIds] = useState<number[]>([])
   const uploadInputRef = useRef<HTMLInputElement>(null)
   const cameraInputRef = useRef<HTMLInputElement>(null)
 
@@ -222,15 +221,26 @@ export default function ReservationDetailClient({ reservation: initialReservatio
         setError(data.error || "A fotó feltöltése nem sikerült.")
         return
       }
+      const attachResponse = await fetch(`/api/admin/reservations/${initialReservation.id}/photos`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          photoUrl: data.photoUrl,
+          photoPublicId: data.photoPublicId,
+        }),
+      })
+      const attachData = await attachResponse.json()
+      if (!attachResponse.ok || !attachData.success) {
+        setError(attachData.error || "A fotó hozzárendelése nem sikerült.")
+        return
+      }
       const updated = {
         ...formData,
-        photoUrl: data.photoUrl as string,
-        photoPublicId: data.photoPublicId as string,
-        clearPhoto: false,
+        photos: attachData.reservation?.photos ?? formData.photos,
       }
       setFormData(updated)
       setValidationErrors(validate(updated))
-      setPhotoVisible(false)
+      setVisiblePhotoIds([])
     } catch {
       setError("Hálózati hiba történt a fotó feltöltésekor.")
     } finally {
@@ -274,7 +284,7 @@ export default function ReservationDetailClient({ reservation: initialReservatio
         setSuccess("A foglalás mentése sikerült.")
         setSavedChanges(diff)
       } else {
-        setError(data.error || "Hiba történt a mentés közben.")
+        setError(data.error || (Array.isArray(data.errors) ? data.errors.join(", ") : "") || "Hiba történt a mentés közben.")
       }
     } catch {
       setError("Hálózati hiba történt.")
@@ -510,34 +520,51 @@ export default function ReservationDetailClient({ reservation: initialReservatio
             <Camera className="h-4 w-4" />
             Gyors fotó
           </button>
-          {formData.photoUrl ? (
-            <button
-              type="button"
-              onClick={() => {
-                const updated = { ...formData, photoUrl: "", photoPublicId: "", clearPhoto: true }
-                setFormData(updated)
-                setValidationErrors(validate(updated))
-                setPhotoVisible(false)
-              }}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-border text-sm font-medium hover:bg-primary/5 transition-colors"
-              disabled={photoUploading}
-            >
-              <Trash2 className="h-4 w-4" />
-              Fotó törlése
-            </button>
-          ) : null}
         </div>
-        {formData.photoUrl ? (
-          <div className="space-y-3">
-            <button type="button" onClick={() => setPhotoVisible((v) => !v)} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-border text-sm font-medium hover:bg-primary/5 transition-colors">
-              <ImageIcon className="h-4 w-4" />
-              {photoVisible ? "Fotó elrejtése" : "Fotó megjelenítése"}
-            </button>
-            {photoVisible ? (
-              <div className="border border-border rounded-lg p-2 bg-white w-fit">
-                <img src={formData.photoUrl} alt="Foglalás fotó" className="max-h-96 max-w-full rounded object-contain" loading="lazy" />
+        {formData.photos.length > 0 ? (
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {formData.photos.map((photo) => (
+              <div key={photo.id} className="border border-border rounded-lg p-2 bg-white">
+                <div className="flex gap-2 mb-2">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setVisiblePhotoIds((prev) =>
+                        prev.includes(photo.id) ? prev.filter((id) => id !== photo.id) : [...prev, photo.id],
+                      )
+                    }
+                    className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border text-xs font-medium hover:bg-primary/5 transition-colors"
+                  >
+                    <ImageIcon className="h-3.5 w-3.5" />
+                    {visiblePhotoIds.includes(photo.id) ? "Elrejtés" : "Megjelenítés"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      const response = await fetch(`/api/admin/reservations/${initialReservation.id}/photos/${photo.id}`, { method: "DELETE" })
+                      const data = await response.json()
+                      if (!response.ok || !data.success) {
+                        setError(data.error || "A kép törlése nem sikerült.")
+                        return
+                      }
+                      const updatedPhotos = formData.photos.filter((p) => p.id !== photo.id)
+                      setFormData((prev) => ({ ...prev, photos: updatedPhotos }))
+                      setVisiblePhotoIds((prev) => prev.filter((id) => id !== photo.id))
+                    }}
+                    className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border text-xs font-medium hover:bg-primary/5 transition-colors"
+                    disabled={photoUploading}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                    Törlés
+                  </button>
+                </div>
+                {visiblePhotoIds.includes(photo.id) ? (
+                  <img src={photo.photoUrl} alt={`Foglalás fotó ${photo.id}`} className="h-40 w-full rounded object-cover" loading="lazy" />
+                ) : (
+                  <div className="h-40 w-full rounded bg-muted flex items-center justify-center text-xs text-primary/60">Kép rejtve</div>
+                )}
               </div>
-            ) : null}
+            ))}
           </div>
         ) : (
           <div className="text-xs text-primary/60 inline-flex items-center gap-2">

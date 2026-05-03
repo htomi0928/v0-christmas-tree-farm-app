@@ -2,6 +2,7 @@
 import { sql } from "./db"
 import {
   type Reservation,
+  type ReservationPhoto,
   ReservationStatus,
   type CreateReservationData,
   type CreateAdminQuickReservationData,
@@ -37,11 +38,42 @@ function rowToReservation(row: any): Reservation {
     treeNumbers: row.tree_numbers || undefined,
     status: row.status as ReservationStatus,
     paidTo: row.paid_to || undefined,
-    photoUrl: row.photo_url || undefined,
-    photoPublicId: row.photo_public_id || undefined,
-    photoUploadedAt: row.photo_uploaded_at || undefined,
+    photos: [],
+    hasPhotos: Boolean(row.has_photos),
     createdAt: row.created_at,
   }
+}
+
+function rowToReservationPhoto(row: any): ReservationPhoto {
+  return {
+    id: Number(row.id),
+    reservationId: Number(row.reservation_id),
+    photoUrl: row.photo_url,
+    photoPublicId: row.photo_public_id,
+    createdAt: row.created_at,
+  }
+}
+
+async function attachPhotos(reservations: Reservation[]): Promise<Reservation[]> {
+  if (reservations.length === 0) return reservations
+  const ids = reservations.map((r) => r.id)
+  const photoRows = await sql.query(
+    "SELECT id, reservation_id, photo_url, photo_public_id, created_at FROM reservation_photos WHERE reservation_id = ANY($1) ORDER BY created_at ASC",
+    [ids],
+  )
+  const grouped = new Map<number, ReservationPhoto[]>()
+  for (const row of photoRows) {
+    const photo = rowToReservationPhoto(row)
+    const arr = grouped.get(photo.reservationId) ?? []
+    arr.push(photo)
+    grouped.set(photo.reservationId, arr)
+  }
+
+  return reservations.map((reservation) => ({
+    ...reservation,
+    photos: grouped.get(reservation.id) ?? [],
+    hasPhotos: (grouped.get(reservation.id)?.length ?? 0) > 0 || reservation.hasPhotos === true,
+  }))
 }
 
 // Validation
@@ -83,30 +115,36 @@ export async function listReservations(filters: {
   visitDate?: string
   status?: ReservationStatus
 }): Promise<Reservation[]> {
-  let query = "SELECT * FROM reservations WHERE year = $1"
+  let query =
+    "SELECT r.*, EXISTS(SELECT 1 FROM reservation_photos rp WHERE rp.reservation_id = r.id) AS has_photos FROM reservations r WHERE r.year = $1"
   const params: any[] = [filters.year]
 
   if (filters.visitDate) {
     params.push(filters.visitDate)
-    query += ` AND visit_date = $${params.length}`
+    query += ` AND r.visit_date = $${params.length}`
   }
 
   if (filters.status) {
     params.push(filters.status)
-    query += ` AND status = $${params.length}`
+    query += ` AND r.status = $${params.length}`
   }
 
-  query += " ORDER BY visit_date DESC, created_at DESC"
+  query += " ORDER BY r.visit_date DESC, r.created_at DESC"
 
   const rows = await sql.query(query, params)
-  return rows.map(rowToReservation)
+  return attachPhotos(rows.map(rowToReservation))
 }
 
 // Get single reservation
 export async function getReservationById(id: number): Promise<Reservation | null> {
-  const rows = await sql`SELECT * FROM reservations WHERE id = ${id}`
+  const rows = await sql`
+    SELECT r.*, EXISTS(SELECT 1 FROM reservation_photos rp WHERE rp.reservation_id = r.id) AS has_photos
+    FROM reservations r
+    WHERE r.id = ${id}
+  `
   if (rows.length === 0) return null
-  return rowToReservation(rows[0])
+  const [reservation] = await attachPhotos([rowToReservation(rows[0])])
+  return reservation
 }
 
 // Create reservation. Year is decided server-side (active year for public, view year is unused
@@ -208,7 +246,7 @@ export async function createAdminQuickReservation(
   const visitDate = data.visitDate?.trim() || formatTodayLocal()
 
   const rows = await sql`
-    INSERT INTO reservations (year, name, phone, email, visit_date, pickup_date, tree_count, notes, status, tree_numbers, paid_to, photo_url, photo_public_id, photo_uploaded_at)
+    INSERT INTO reservations (year, name, phone, email, visit_date, pickup_date, tree_count, notes, status, tree_numbers, paid_to)
     VALUES (
       ${year},
       ${name},
@@ -220,15 +258,21 @@ export async function createAdminQuickReservation(
       ${data.notes?.trim() || null},
       ${status},
       ${treeNumbers || null},
-      ${paidTo || null},
-      ${data.photoUrl || null},
-      ${data.photoPublicId || null},
-      ${data.photoUrl ? new Date().toISOString() : null}
+      ${paidTo || null}
     )
     RETURNING *
   `
-
-  return { success: true, data: rowToReservation(rows[0]) }
+  const created = rowToReservation(rows[0])
+  if (data.photos && data.photos.length > 0) {
+    for (const photo of data.photos) {
+      await sql`
+        INSERT INTO reservation_photos (reservation_id, photo_url, photo_public_id)
+        VALUES (${created.id}, ${photo.photoUrl}, ${photo.photoPublicId})
+      `
+    }
+  }
+  const reloaded = await getReservationById(created.id)
+  return { success: true, data: reloaded ?? created }
 }
 
 // Update reservation
@@ -322,25 +366,6 @@ export async function updateReservation(
     updates.push(`paid_to = $${paramIndex++}`)
     values.push(data.paidTo || null)
   }
-  if (data.clearPhoto) {
-    updates.push(`photo_url = $${paramIndex++}`)
-    values.push(null)
-    updates.push(`photo_public_id = $${paramIndex++}`)
-    values.push(null)
-    updates.push(`photo_uploaded_at = $${paramIndex++}`)
-    values.push(null)
-  } else {
-    if (data.photoUrl !== undefined) {
-      updates.push(`photo_url = $${paramIndex++}`)
-      values.push(data.photoUrl || null)
-      updates.push(`photo_uploaded_at = $${paramIndex++}`)
-      values.push(data.photoUrl ? new Date().toISOString() : null)
-    }
-    if (data.photoPublicId !== undefined) {
-      updates.push(`photo_public_id = $${paramIndex++}`)
-      values.push(data.photoPublicId || null)
-    }
-  }
 
   if (updates.length === 0) {
     return { success: true, data: existing }
@@ -350,7 +375,45 @@ export async function updateReservation(
   const query = `UPDATE reservations SET ${updates.join(", ")} WHERE id = $${paramIndex} RETURNING *`
 
   const rows = await sql.query(query, values)
-  return { success: true, data: rowToReservation(rows[0]) }
+  const reloaded = await getReservationById(id)
+  return { success: true, data: reloaded ?? rowToReservation(rows[0]) }
+}
+
+export async function addReservationPhoto(
+  reservationId: number,
+  photo: { photoUrl: string; photoPublicId: string },
+): Promise<{ success: boolean; data?: ReservationPhoto; error?: string }> {
+  const existing = await getReservationById(reservationId)
+  if (!existing) return { success: false, error: "Foglalás nem található" }
+  const rows = await sql`
+    INSERT INTO reservation_photos (reservation_id, photo_url, photo_public_id)
+    VALUES (${reservationId}, ${photo.photoUrl}, ${photo.photoPublicId})
+    RETURNING id, reservation_id, photo_url, photo_public_id, created_at
+  `
+  return { success: true, data: rowToReservationPhoto(rows[0]) }
+}
+
+export async function getReservationPhotoById(
+  reservationId: number,
+  photoId: number,
+): Promise<ReservationPhoto | null> {
+  const rows = await sql`
+    SELECT id, reservation_id, photo_url, photo_public_id, created_at
+    FROM reservation_photos
+    WHERE id = ${photoId} AND reservation_id = ${reservationId}
+  `
+  if (rows.length === 0) return null
+  return rowToReservationPhoto(rows[0])
+}
+
+export async function deleteReservationPhoto(
+  reservationId: number,
+  photoId: number,
+): Promise<{ success: boolean; error?: string }> {
+  const existing = await getReservationPhotoById(reservationId, photoId)
+  if (!existing) return { success: false, error: "Fotó nem található" }
+  await sql`DELETE FROM reservation_photos WHERE id = ${photoId} AND reservation_id = ${reservationId}`
+  return { success: true }
 }
 
 // Delete reservation

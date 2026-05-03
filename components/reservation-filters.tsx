@@ -201,7 +201,7 @@ export default function ReservationFilters({ reservations }: Props) {
                         <span className="text-[10px] font-bold tracking-widest uppercase text-accent whitespace-nowrap pt-px">Sorszám</span>
                         <span className="text-sm text-foreground font-light">{reservation.treeNumbers || "Még nincs"}</span>
                         <span className="text-[10px] font-bold tracking-widest uppercase text-accent whitespace-nowrap pt-px">Fotó</span>
-                        <span className="text-sm text-foreground font-light">{reservation.photoUrl ? "Van" : "Nincs"}</span>
+                        <span className="text-sm text-foreground font-light">{reservation.hasPhotos ? "Van" : "Nincs"}</span>
                       </div>
                     </div>
                     {/* Desktop — Option C: table row */}
@@ -215,7 +215,7 @@ export default function ReservationFilters({ reservations }: Props) {
                       <span className="text-sm text-primary font-light">{pickupShort}</span>
                       <span className="text-sm text-primary font-light">{reservation.treeCount} fa</span>
                       <span className="text-sm text-primary font-light">{reservation.treeNumbers || <span className="text-border">—</span>}</span>
-                      <span className="text-sm text-primary font-light">{reservation.photoUrl ? <span className="inline-flex items-center gap-1"><ImageIcon className="h-3.5 w-3.5" />Van</span> : "—"}</span>
+                      <span className="text-sm text-primary font-light">{reservation.hasPhotos ? <span className="inline-flex items-center gap-1"><ImageIcon className="h-3.5 w-3.5" />Van</span> : "—"}</span>
                       <span className={`w-fit rounded-full px-3 py-1 text-xs font-medium border whitespace-nowrap ${meta.pillClassName}`}>{meta.label}</span>
                       <span className="text-xs font-semibold text-accent tracking-widest uppercase whitespace-nowrap">→</span>
                     </div>

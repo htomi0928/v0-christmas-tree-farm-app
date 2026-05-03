@@ -16,8 +16,15 @@ const quickCreateReservationSchema = z.object({
   status: z.nativeEnum(ReservationStatus, { message: "Érvénytelen státusz" }).optional(),
   treeNumbers: z.union([z.string().trim().max(200, { message: "A fa sorszáma legfeljebb 200 karakter lehet" }), z.literal(""), z.undefined()]).optional(),
   paidTo: z.union([z.literal("János"), z.literal("Sanyi"), z.literal(""), z.undefined()], { message: "Érvénytelen érték a 'kinek fizetek' mezoben" }).optional(),
-  photoUrl: z.union([z.string().url({ message: "Érvénytelen fotó URL." }), z.literal(""), z.undefined()]).optional(),
-  photoPublicId: z.union([z.string().trim().max(255, { message: "Érvénytelen fotó azonosító." }), z.literal(""), z.undefined()]).optional(),
+  photos: z
+    .array(
+      z.object({
+        photoUrl: z.string().url({ message: "Érvénytelen fotó URL." }),
+        photoPublicId: z.string().trim().min(1, { message: "Érvénytelen fotó azonosító." }).max(255, { message: "Érvénytelen fotó azonosító." }),
+      }),
+    )
+    .max(20, { message: "Maximum 20 fotó adható meg." })
+    .optional(),
 })
 
 export async function POST(request: Request) {
@@ -57,8 +64,7 @@ export async function POST(request: Request) {
         status: data.status,
         treeNumbers: data.treeNumbers || undefined,
         paidTo: data.paidTo || undefined,
-        photoUrl: data.photoUrl || undefined,
-        photoPublicId: data.photoPublicId || undefined,
+        photos: data.photos,
       },
       activeYear,
     )
@@ -73,5 +79,4 @@ export async function POST(request: Request) {
     return Response.json({ success: false, error: "Szerver hiba" }, { status: 500 })
   }
 }
-
 
