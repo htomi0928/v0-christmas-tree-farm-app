@@ -17,12 +17,9 @@ const updateReservationSchema = z
     treeNumbers: z.union([z.string().trim().max(200, "A sorszámok legfeljebb 200 karakter lehetnek."), z.literal(""), z.null()]).optional(),
     notes: z.union([z.string().trim().max(1000, "A megjegyzés legfeljebb 1000 karakter lehet."), z.literal(""), z.null()]).optional(),
     paidTo: z.union([z.literal("János"), z.literal("Sanyi"), z.literal(""), z.null()]).optional(),
-    photoUrl: z.union([z.string().url("Érvénytelen fotó URL."), z.literal(""), z.null()]).optional(),
-    photoPublicId: z.union([z.string().trim().max(255, "Érvénytelen fotó azonosító."), z.literal(""), z.null()]).optional(),
-    clearPhoto: z.boolean().optional(),
   })
   .refine((value) => Object.keys(value).length > 0, {
-    message: "Legalább egy mezot meg kell adni.",
+    message: "Legalább egy mezőt meg kell adni.",
   })
 
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -111,18 +108,6 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       }
     }
 
-    const clearPhoto = data.clearPhoto === true
-    const nextPhotoPublicId = data.photoPublicId === "" ? undefined : data.photoPublicId ?? undefined
-    const hasPhotoChange = clearPhoto || data.photoUrl !== undefined || data.photoPublicId !== undefined
-
-    if (hasPhotoChange && existing.photoPublicId && (clearPhoto || nextPhotoPublicId !== existing.photoPublicId)) {
-      try {
-        await destroyReservationPhoto(existing.photoPublicId)
-      } catch (cleanupError) {
-        logApiError("reservation photo cleanup failed", cleanupError)
-      }
-    }
-
     const result = await updateReservation(reservationId, {
       name: data.name,
       phone: data.phone,
@@ -134,9 +119,6 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       treeNumbers: data.treeNumbers,
       notes: data.notes,
       paidTo: data.paidTo ?? undefined,
-      photoUrl: data.photoUrl === "" ? undefined : data.photoUrl ?? undefined,
-      photoPublicId: nextPhotoPublicId,
-      clearPhoto,
     })
 
     if (!result.success) {
@@ -184,11 +166,13 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
       console.warn(`WARNING: Deleting reservation ${reservationId} (${reservation.name}) with assigned tree numbers: ${reservation.treeNumbers}. These tree numbers will be permanently lost and cannot be reused.`)
     }
 
-    if (reservation?.photoPublicId) {
-      try {
-        await destroyReservationPhoto(reservation.photoPublicId)
-      } catch (cleanupError) {
-        logApiError("reservation photo cleanup on delete failed", cleanupError)
+    if (reservation?.photos?.length) {
+      for (const photo of reservation.photos) {
+        try {
+          await destroyReservationPhoto(photo.photoPublicId)
+        } catch (cleanupError) {
+          logApiError("reservation photo cleanup on delete failed", cleanupError)
+        }
       }
     }
 
@@ -204,4 +188,3 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
     return Response.json({ success: false, error: "Szerver hiba" }, { status: 500 })
   }
 }
-

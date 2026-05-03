@@ -21,9 +21,16 @@ export interface Reservation {
   status: ReservationStatus
   createdAt: string
   paidTo?: "János" | "Sanyi"
-  photoUrl?: string
-  photoPublicId?: string
-  photoUploadedAt?: string
+  photos: ReservationPhoto[]
+  hasPhotos?: boolean
+}
+
+export interface ReservationPhoto {
+  id: number
+  reservationId: number
+  photoUrl: string
+  photoPublicId: string
+  createdAt: string
 }
 
 export interface CreateReservationData {
@@ -47,8 +54,10 @@ export interface CreateAdminQuickReservationData {
   status?: ReservationStatus
   treeNumbers?: string
   paidTo?: "János" | "Sanyi"
-  photoUrl?: string
-  photoPublicId?: string
+  photos?: Array<{
+    photoUrl: string
+    photoPublicId: string
+  }>
 }
 
 export interface UpdateReservationData {
@@ -62,9 +71,6 @@ export interface UpdateReservationData {
   pickupDate?: string
   treeCount?: number
   paidTo?: "János" | "Sanyi"
-  photoUrl?: string
-  photoPublicId?: string
-  clearPhoto?: boolean
 }
 
 export interface Expense {

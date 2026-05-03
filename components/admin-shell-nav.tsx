@@ -24,6 +24,7 @@ export function AdminShellNav({ years, viewYear, activeYear }: AdminShellNavProp
   const [managerOpen, setManagerOpen] = useState(false)
   const { isDirty, navigate } = useUnsavedChanges()
   const [keyboardOpen, setKeyboardOpen] = useState(false)
+  const [isMounted, setIsMounted] = useState(false)
 
   useEffect(() => {
     const vv = window.visualViewport
@@ -31,6 +32,10 @@ export function AdminShellNav({ years, viewYear, activeYear }: AdminShellNavProp
     const handleResize = () => setKeyboardOpen(vv.height < window.innerHeight * 0.75)
     vv.addEventListener("resize", handleResize)
     return () => vv.removeEventListener("resize", handleResize)
+  }, [])
+
+  useEffect(() => {
+    setIsMounted(true)
   }, [])
 
   const guardedClick = (e: React.MouseEvent, href: string) => {
@@ -76,19 +81,23 @@ export function AdminShellNav({ years, viewYear, activeYear }: AdminShellNavProp
 
   const yearControls = (
     <div className="flex items-center gap-1.5">
-      <select
-        value={viewYear}
-        onChange={handleYearChange}
-        disabled={isPending}
-        aria-label="Megjelenített év"
-        className="h-8 rounded-lg border border-border bg-white px-2 pr-11 text-sm font-medium text-primary cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 disabled:opacity-50"
-      >
-        {yearOptions.map((y) => (
-          <option key={y.year} value={y.year}>
-            {yearLabel(y)}
-          </option>
-        ))}
-      </select>
+      {isMounted ? (
+        <select
+          value={viewYear}
+          onChange={handleYearChange}
+          disabled={isPending}
+          aria-label="Megjelenített év"
+          className="h-8 rounded-lg border border-border bg-white px-2 pr-11 text-sm font-medium text-primary cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 disabled:opacity-50"
+        >
+          {yearOptions.map((y) => (
+            <option key={y.year} value={y.year}>
+              {yearLabel(y)}
+            </option>
+          ))}
+        </select>
+      ) : (
+        <div aria-hidden="true" className="h-8 w-[132px] rounded-lg border border-border bg-white/70" />
+      )}
       <button
         type="button"
         onClick={() => setManagerOpen(true)}

@@ -1,6 +1,6 @@
 ﻿import "server-only"
 import { enforceSameOrigin, logApiError, requireAdminSessionResponse } from "@/lib/api"
-import { uploadReservationPhoto } from "@/lib/cloudinary"
+import { destroyReservationPhoto, uploadReservationPhoto } from "@/lib/cloudinary"
 
 const ALLOWED_TYPES = new Set([
   "image/jpeg",
@@ -39,6 +39,28 @@ export async function POST(request: Request) {
     return Response.json({ success: true, ...uploaded })
   } catch (error) {
     logApiError("admin reservation photo upload failed", error)
+    return Response.json({ success: false, error: "Szerver hiba" }, { status: 500 })
+  }
+}
+
+export async function DELETE(request: Request) {
+  try {
+    const originError = enforceSameOrigin(request)
+    if (originError) return originError
+
+    const authError = await requireAdminSessionResponse()
+    if (authError) return authError
+
+    const body = await request.json().catch(() => null) as { photoPublicId?: string } | null
+    const photoPublicId = body?.photoPublicId?.trim()
+    if (!photoPublicId) {
+      return Response.json({ success: false, error: "Hiányzó fotó azonosító." }, { status: 400 })
+    }
+
+    await destroyReservationPhoto(photoPublicId)
+    return Response.json({ success: true })
+  } catch (error) {
+    logApiError("admin reservation photo cleanup failed", error)
     return Response.json({ success: false, error: "Szerver hiba" }, { status: 500 })
   }
 }
