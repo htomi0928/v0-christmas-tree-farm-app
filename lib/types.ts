@@ -94,6 +94,7 @@ export interface Settings {
   year: number
   availableDays: string[]
   maxBookingsPerDay: number
+  maxTreesPerSeason: number
   retrievalDays: string[]
   pricePerTree: number
 }

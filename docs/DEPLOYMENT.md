@@ -189,11 +189,12 @@ CREATE TABLE settings (
   year INTEGER PRIMARY KEY REFERENCES years(year),
   available_days TEXT,                            -- comma-separated YYYY-MM-DD
   max_bookings_per_day INTEGER NOT NULL DEFAULT 20,
+  max_trees_per_season INTEGER NOT NULL DEFAULT 500, -- season-wide cap on SUM(tree_count)
   retrieval_days TEXT,                            -- comma-separated YYYY-MM-DD
   price NUMERIC NOT NULL DEFAULT 8000             -- price per tree in HUF
 );
 
-INSERT INTO settings (year, max_bookings_per_day, price) VALUES (2026, 20, 8000);
+INSERT INTO settings (year, max_bookings_per_day, max_trees_per_season, price) VALUES (2026, 20, 500, 8000);
 ```
 
 ## Deployment Process

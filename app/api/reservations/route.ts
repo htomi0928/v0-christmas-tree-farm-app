@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { createReservation } from "@/lib/reservations"
+import { createReservation, getTotalTreesReservedForYear } from "@/lib/reservations"
 import { getSettings } from "@/lib/settings"
 import { logApiError, parseJsonBody } from "@/lib/api"
 import { sendNewReservationNotification } from "@/lib/reservation-notifications"
@@ -56,6 +56,14 @@ export async function POST(request: Request) {
     if (data.pickupDate && settings.retrievalDays.length > 0 && !settings.retrievalDays.includes(data.pickupDate)) {
       return Response.json(
         { success: false, errors: ["A választott átvételi nap nem elérhető."] },
+        { status: 400 },
+      )
+    }
+
+    const treesReserved = await getTotalTreesReservedForYear(activeYear)
+    if (treesReserved + data.treeCount > settings.maxTreesPerSeason) {
+      return Response.json(
+        { success: false, errors: ["Erre a szezonra elfogyott az összes fa."] },
         { status: 400 },
       )
     }

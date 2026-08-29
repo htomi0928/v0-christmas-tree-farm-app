@@ -212,7 +212,7 @@ Deleting a reservation that has assigned `tree_numbers` logs a `WARNING` to serv
 }
 ```
 
-**Errors:** `400 { success: false, errors: [...] }` for validation; `503 { success: false, errors: ["Foglalás jelenleg nem elérhető"] }` if no year is currently marked active in the `years` table; `500 { success: false, errors: ["Szerver hiba. Kérjük, próbáld újra."] }` on server error.
+**Errors:** `400 { success: false, errors: [...] }` for validation, including `["Erre a szezonra elfogyott az összes fa."]` if the sum of `treeCount` across the active year's non-`NO_SHOW` reservations plus this request would exceed `settings.maxTreesPerSeason`; `503 { success: false, errors: ["Foglalás jelenleg nem elérhető"] }` if no year is currently marked active in the `years` table; `500 { success: false, errors: ["Szerver hiba. Kérjük, próbáld újra."] }` on server error.
 
 The `year` is stamped server-side from the active year — the request body never contains it.
 
@@ -234,9 +234,9 @@ There is no public `GET /api/reservations` — availability data is computed in 
 
 ## Settings
 
-- **GET** `/api/admin/settings` (public — no auth) returns the currently active year's settings: `{ success: true, settings: { year, availableDays, maxBookingsPerDay, retrievalDays, pricePerTree } }`. Cached `no-store`. Returns `503 { success: false, error: "Foglalás jelenleg nem elérhető" }` if no year is active.
-- **GET** `/api/admin/settings?year=2026` (admin) — returns settings for the specified year. Requires the admin session.
-- **PATCH** `/api/admin/settings` (admin) — partial update of `availableDays`, `maxBookingsPerDay`, `retrievalDays`, `pricePerTree` for the admin's current view year. The handler upserts: a missing settings row is created on first PATCH for a year. `availableDays` / `retrievalDays` are arrays of `YYYY-MM-DD` strings (max 366).
+- **GET** `/api/admin/settings` (public — no auth) returns the currently active year's settings: `{ success: true, settings: { year, availableDays, maxBookingsPerDay, retrievalDays, pricePerTree }, isSeasonSoldOut: boolean }`. `maxTreesPerSeason` and the raw reserved-tree total are intentionally omitted from this public response — only the computed `isSeasonSoldOut` flag is exposed. Cached `no-store`. Returns `503 { success: false, error: "Foglalás jelenleg nem elérhető" }` if no year is active.
+- **GET** `/api/admin/settings?year=2026` (admin) — returns settings for the specified year (includes `maxTreesPerSeason`). Requires the admin session.
+- **PATCH** `/api/admin/settings` (admin) — partial update of `availableDays`, `maxBookingsPerDay`, `maxTreesPerSeason`, `retrievalDays`, `pricePerTree` for the admin's current view year. The handler upserts: a missing settings row is created on first PATCH for a year. `availableDays` / `retrievalDays` are arrays of `YYYY-MM-DD` strings (max 366).
 
 ## Years (admin)
 
