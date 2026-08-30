@@ -134,7 +134,7 @@ export default function BookingPage() {
     }
     if (!formData.treeCount || Number.parseInt(formData.treeCount) < 1)
       newErrors.treeCount = "Minimum 1 fa szükséges"
-    if (formData.email && !formData.email.includes("@"))
+    if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim()))
       newErrors.email = "Érvénytelen email cím"
     if (!formData.acceptTerms) newErrors.acceptTerms = "Elfogadás szükséges"
     setErrors(newErrors)
