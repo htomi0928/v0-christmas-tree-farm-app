@@ -160,7 +160,7 @@ CREATE TABLE reservations (
   notes TEXT,
   tree_numbers TEXT,            -- comma-separated integers; uniqueness enforced in app code, scoped per year
   status VARCHAR(50) NOT NULL DEFAULT 'BOOKED',
-  paid_to VARCHAR(50),          -- 'János' or 'Sanyi' once paid
+  paid_to VARCHAR(50),          -- a partner name from lib/partners.ts, once paid
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX reservations_year_idx ON reservations (year);
@@ -171,7 +171,7 @@ CREATE INDEX reservations_year_idx ON reservations (year);
 CREATE TABLE expenses (
   id SERIAL PRIMARY KEY,
   year INTEGER NOT NULL REFERENCES years(year),
-  person VARCHAR(50) NOT NULL,  -- 'János' or 'Sanyi'
+  person VARCHAR(50) NOT NULL,  -- a partner name from lib/partners.ts
   amount NUMERIC(12, 2) NOT NULL,
   description TEXT NOT NULL,
   date DATE NOT NULL,
@@ -337,6 +337,7 @@ Before deploying to production:
 - [ ] SSL/TLS is enabled for custom domains
 - [ ] Database backups are configured in Neon
 - [ ] Admin credentials are changed from defaults
+- [ ] `SEED_ADMIN_KEY` is a strong random value and is rotated/removed from Vercel env vars once the initial admin account is seeded — `/api/seed-admin` stays live in production and can overwrite admin credentials for anyone holding that key
 
 ## Backup & Recovery
 

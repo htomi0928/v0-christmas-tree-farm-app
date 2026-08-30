@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { phoneNumber } from "@/lib/site"
 
 export const metadata: Metadata = {
   title: "Adatvédelmi tájékoztató – Zalaegerszegi Nordmann Fenyők",
@@ -14,7 +15,7 @@ export default function AdatvedelemPage() {
           Adatvédelmi tájékoztató
         </h1>
         <p className="text-sm text-[#4a4f4a]/60 mb-10">
-          Utolsó frissítés: 2026. október 1. &nbsp;·&nbsp; EU 2016/679 (GDPR) alapján
+          Utolsó frissítés: 2026. augusztus 30. &nbsp;·&nbsp; EU 2016/679 (GDPR) alapján
         </p>
 
         <div className="space-y-8 text-[#4a4f4a]">
@@ -23,7 +24,7 @@ export default function AdatvedelemPage() {
             <h2 className="text-base font-bold text-[#3a3a3a] mb-2">1. Adatkezelő</h2>
             <p className="text-sm leading-relaxed font-light">
               Zalaegerszegi Nordmann Fenyők (magánszemély, nem gazdasági társaság).
-              Kapcsolat: <strong>+36 (30) 123 4567</strong>.
+              Kapcsolat: <strong>{phoneNumber}</strong>.
             </p>
           </section>
 
@@ -112,7 +113,7 @@ export default function AdatvedelemPage() {
               ))}
             </ul>
             <p className="text-sm leading-relaxed font-light mt-3">
-              Jogaid gyakorlásához írj vagy hívj: <strong>+36 (30) 123 4567</strong>.
+              Jogaid gyakorlásához írj vagy hívj: <strong>{phoneNumber}</strong>.
             </p>
           </section>
 

@@ -49,7 +49,7 @@ Stateless HS256 JWT, hand-rolled in [lib/auth.ts](lib/auth.ts) (no `jose`/`jsonw
 
 ### Reservation state machine
 
-`ReservationStatus` (in [lib/types.ts](lib/types.ts)) flows `BOOKED → TREE_TAGGED → CUT → PICKED_UP_PAID`, with `NO_SHOW` as a terminal off-ramp. Invariant enforced in [lib/reservations.ts](lib/reservations.ts): any status of `TREE_TAGGED`, `CUT`, or `PICKED_UP_PAID` requires a non-empty `treeNumbers`. When changing status logic, also revisit `findConflictingTreeNumbers` — tree numbers are stored as a comma-separated string and uniqueness is checked in app code, scoped per year (the same tree number is fine across years because the tagged trees are different each season).
+`ReservationStatus` (in [lib/types.ts](lib/types.ts)) flows `BOOKED → TREE_TAGGED → CUT → PICKED_UP`, with `FREE` as an alternate paid-off ramp from `CUT`/`PICKED_UP` and `NO_SHOW` as a terminal off-ramp. Invariant enforced in [lib/reservations.ts](lib/reservations.ts): any status of `TREE_TAGGED`, `CUT`, `PICKED_UP`, or `FREE` requires a non-empty `treeNumbers` (`requiresTreeNumber`); only `CUT` and `PICKED_UP` allow a `paidTo` value (`allowsPaidTo`). When changing status logic, also revisit `findConflictingTreeNumbers` — tree numbers are stored as a comma-separated string and uniqueness is checked in app code, scoped per year (the same tree number is fine across years because the tagged trees are different each season). Note: `NO_SHOW` reservations keep their `treeNumbers` indefinitely and are *not* excluded from `findConflictingTreeNumbers`, so a tree number assigned to a no-show reservation can never be reused for that year — this is intentional per a deliberate product decision, not a bug.
 
 ### Year partitioning
 

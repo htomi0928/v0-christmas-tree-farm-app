@@ -3,9 +3,10 @@ import { z } from "zod"
 import { createExpense, listExpenses } from "@/lib/expenses"
 import { enforceSameOrigin, logApiError, parseJsonBody, requireAdminSessionResponse } from "@/lib/api"
 import { getViewYear } from "@/lib/years"
+import { PARTNERS } from "@/lib/partners"
 
 const createExpenseSchema = z.object({
-  person: z.union([z.literal("János"), z.literal("Sanyi")], { errorMap: () => ({ message: "Érvénytelen személy." }) }),
+  person: z.enum(PARTNERS, { errorMap: () => ({ message: "Érvénytelen személy." }) }),
   amount: z.number({ invalid_type_error: "Érvénytelen összeg." }).positive("Az összeg pozitív szám kell legyen.").max(100000000, "Túl magas összeg."),
   description: z.string().trim().min(1, "Leírás szükséges.").max(200, "A leírás legfeljebb 200 karakter lehet."),
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Érvénytelen dátumformátum."),

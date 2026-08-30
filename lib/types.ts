@@ -1,4 +1,6 @@
-﻿export enum ReservationStatus {
+﻿import type { Partner } from "./partners"
+
+export enum ReservationStatus {
   BOOKED = "BOOKED",
   TREE_TAGGED = "TREE_TAGGED",
   CUT = "CUT",
@@ -20,7 +22,7 @@ export interface Reservation {
   treeNumbers?: string
   status: ReservationStatus
   createdAt: string
-  paidTo?: "János" | "Sanyi"
+  paidTo?: Partner
   photos: ReservationPhoto[]
   hasPhotos?: boolean
 }
@@ -53,7 +55,7 @@ export interface CreateAdminQuickReservationData {
   notes?: string
   status?: ReservationStatus
   treeNumbers?: string
-  paidTo?: "János" | "Sanyi"
+  paidTo?: Partner
   photos?: Array<{
     photoUrl: string
     photoPublicId: string
@@ -70,13 +72,13 @@ export interface UpdateReservationData {
   visitDate?: string
   pickupDate?: string
   treeCount?: number
-  paidTo?: "János" | "Sanyi"
+  paidTo?: Partner
 }
 
 export interface Expense {
   id: number
   year: number
-  person: "János" | "Sanyi"
+  person: Partner
   amount: number
   description: string
   date: string
@@ -84,7 +86,7 @@ export interface Expense {
 }
 
 export interface CreateExpenseData {
-  person: "János" | "Sanyi"
+  person: Partner
   amount: number
   description: string
   date: string

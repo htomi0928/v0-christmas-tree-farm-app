@@ -6,6 +6,7 @@ import { AlertCircle, Camera, Image as ImageIcon, Save, Trash2, Upload } from "l
 import { Button } from "@/components/ui/button"
 import { ReservationStatus } from "@/lib/types"
 import { reservationStatusMeta } from "@/lib/site"
+import { PARTNERS, type Partner } from "@/lib/partners"
 import { useUnsavedChanges } from "@/contexts/unsaved-changes-context"
 import AdminDatePicker from "@/components/admin-date-picker"
 
@@ -14,7 +15,7 @@ const inputClass =
 const labelClass = "block text-xs font-bold text-foreground tracking-widest uppercase mb-2"
 
 interface QuickReservationFormProps {
-  currentAdminPaidTo: "Sanyi" | "János" | null
+  currentAdminPaidTo: Partner | null
 }
 
 export default function QuickReservationForm({ currentAdminPaidTo }: QuickReservationFormProps) {
@@ -299,8 +300,9 @@ export default function QuickReservationForm({ currentAdminPaidTo }: QuickReserv
             <label className={labelClass}>Kinek fizettek?</label>
             <select value={formData.paidTo} onChange={(e) => handlePaidToChange(e.target.value)} className={inputClass}>
               <option value="">Még nincs rögzítve</option>
-              <option value="János">János</option>
-              <option value="Sanyi">Sanyi</option>
+              {PARTNERS.map((partner) => (
+                <option key={partner} value={partner}>{partner}</option>
+              ))}
             </select>
           </div>
           <div>

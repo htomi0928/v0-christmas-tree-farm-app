@@ -31,9 +31,17 @@ export async function updateSettings(
   newSettings: Partial<Settings>,
 ): Promise<Settings> {
   // Ensure a row exists for the year so the partial UPDATE below can hit it.
+  const defaults = defaultSettingsFor(year)
   await sql`
     INSERT INTO settings (year, available_days, max_bookings_per_day, max_trees_per_season, retrieval_days, price)
-    VALUES (${year}, '', 20, 500, '', 8000)
+    VALUES (
+      ${year},
+      ${defaults.availableDays.join(",")},
+      ${defaults.maxBookingsPerDay},
+      ${defaults.maxTreesPerSeason},
+      ${defaults.retrievalDays.join(",")},
+      ${defaults.pricePerTree}
+    )
     ON CONFLICT (year) DO NOTHING
   `
 

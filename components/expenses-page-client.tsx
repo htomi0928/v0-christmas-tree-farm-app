@@ -4,6 +4,7 @@ import type React from "react"
 import { useEffect, useState } from "react"
 import { AlertCircle, Plus, Trash2 } from "lucide-react"
 import type { Expense } from "@/lib/types"
+import { PARTNERS, type Partner } from "@/lib/partners"
 
 const inputClass = "w-full px-4 py-3 rounded-lg border border-border bg-white text-foreground placeholder:text-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent text-sm transition-all duration-150"
 const labelClass = "block text-xs font-bold text-foreground tracking-widest uppercase mb-2"
@@ -24,7 +25,7 @@ export default function ExpensesPageClient({ year, initialExpenses }: ExpensesPa
   const [showForm, setShowForm] = useState(false)
   const [error, setError] = useState("")
   const [formData, setFormData] = useState({
-    person: "János" as "János" | "Sanyi",
+    person: PARTNERS[0] as Partner,
     amount: "",
     description: "",
     date: new Date().toISOString().split("T")[0],
@@ -52,7 +53,7 @@ export default function ExpensesPageClient({ year, initialExpenses }: ExpensesPa
       const data = await response.json()
       if (data.success) {
         setExpenses([data.expense, ...expenses])
-        setFormData({ person: "János", amount: "", description: "", date: new Date().toISOString().split("T")[0] })
+        setFormData({ person: PARTNERS[0], amount: "", description: "", date: new Date().toISOString().split("T")[0] })
         setShowForm(false)
       } else {
         setError(data.error || "A mentés nem sikerült.")
@@ -82,7 +83,7 @@ export default function ExpensesPageClient({ year, initialExpenses }: ExpensesPa
       </section>
 
       {/* Stats */}
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div className="border border-border bg-surface rounded-lg p-6">
           <p className="text-xs font-bold text-primary/50 tracking-widest uppercase mb-2">Összes kiadás</p>
           <p className="text-3xl font-bold text-foreground tracking-tight">{total.toLocaleString("hu-HU")} Ft</p>
@@ -91,12 +92,14 @@ export default function ExpensesPageClient({ year, initialExpenses }: ExpensesPa
           <p className="text-xs font-bold text-primary/50 tracking-widest uppercase mb-2">Tételek száma</p>
           <p className="text-3xl font-bold text-foreground tracking-tight">{expenses.length}</p>
         </div>
-        <div className="border border-border bg-surface rounded-lg p-6">
-          <p className="text-xs font-bold text-primary/50 tracking-widest uppercase mb-2">János / Sanyi</p>
-          <p className="text-3xl font-bold text-foreground tracking-tight">
-            {expenses.filter((e) => e.person === "János").reduce((s, e) => s + e.amount, 0).toLocaleString("hu-HU")} / {expenses.filter((e) => e.person === "Sanyi").reduce((s, e) => s + e.amount, 0).toLocaleString("hu-HU")}
-          </p>
-        </div>
+        {PARTNERS.map((partner) => (
+          <div key={partner} className="border border-border bg-surface rounded-lg p-6">
+            <p className="text-xs font-bold text-primary/50 tracking-widest uppercase mb-2">{partner} kiadásai</p>
+            <p className="text-3xl font-bold text-foreground tracking-tight">
+              {expenses.filter((e) => e.person === partner).reduce((s, e) => s + e.amount, 0).toLocaleString("hu-HU")} Ft
+            </p>
+          </div>
+        ))}
       </div>
 
       {/* New expense form */}
@@ -112,9 +115,10 @@ export default function ExpensesPageClient({ year, initialExpenses }: ExpensesPa
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="min-w-0">
                 <label className={labelClass}>Kihez tartozik?</label>
-                <select value={formData.person} onChange={(e) => setFormData({ ...formData, person: e.target.value as "János" | "Sanyi" })} className={inputClass}>
-                  <option value="János">János</option>
-                  <option value="Sanyi">Sanyi</option>
+                <select value={formData.person} onChange={(e) => setFormData({ ...formData, person: e.target.value as Partner })} className={inputClass}>
+                  {PARTNERS.map((partner) => (
+                    <option key={partner} value={partner}>{partner}</option>
+                  ))}
                 </select>
               </div>
               <div className="min-w-0">

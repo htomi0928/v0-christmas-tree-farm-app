@@ -4,6 +4,8 @@ import { getSettings } from "@/lib/settings"
 import { getExpensesSummary } from "@/lib/expenses"
 import { getViewYear } from "@/lib/years"
 import { formatPrice } from "@/lib/utils"
+import { ReservationStatus } from "@/lib/types"
+import { PARTNERS, type Partner } from "@/lib/partners"
 
 async function getStats(year: number) {
   const reservations = await listReservations({ year })
@@ -11,7 +13,11 @@ async function getStats(year: number) {
   const expensesSummary = await getExpensesSummary(year)
 
   const totalReservations = reservations.length
-  const totalTrees = reservations.reduce((sum, reservation) => sum + reservation.treeCount, 0)
+  // Excludes NO_SHOW to match getTotalTreesReservedForYear, which the booking
+  // cap and Settings page use as the season's real tree count.
+  const totalTrees = reservations
+    .filter((reservation) => reservation.status !== ReservationStatus.NO_SHOW)
+    .reduce((sum, reservation) => sum + reservation.treeCount, 0)
   const now = new Date()
   const nextWeekend = getNextWeekend(now)
   const upcomingReservations = reservations.filter((reservation) => {
@@ -20,25 +26,30 @@ async function getStats(year: number) {
   })
 
   const paidReservations = reservations.filter((reservation) => reservation.paidTo)
-  const revenueJanos = paidReservations.filter((reservation) => reservation.paidTo === "János").reduce((sum, reservation) => sum + reservation.treeCount * settings.pricePerTree, 0)
-  const revenueSanyi = paidReservations.filter((reservation) => reservation.paidTo === "Sanyi").reduce((sum, reservation) => sum + reservation.treeCount * settings.pricePerTree, 0)
-  const totalRevenue = revenueJanos + revenueSanyi
+  const revenueByPartner = Object.fromEntries(PARTNERS.map((partner) => [partner, 0])) as Record<Partner, number>
+  for (const reservation of paidReservations) {
+    if (reservation.paidTo) {
+      revenueByPartner[reservation.paidTo] += reservation.treeCount * settings.pricePerTree
+    }
+  }
+  const totalRevenue = PARTNERS.reduce((sum, partner) => sum + revenueByPartner[partner], 0)
   const totalExpenses = expensesSummary.total
+
+  const netByPartner = Object.fromEntries(
+    PARTNERS.map((partner) => [partner, revenueByPartner[partner] - expensesSummary.byPartner[partner]]),
+  ) as Record<Partner, number>
 
   return {
     totalReservations,
     totalTrees,
     upcomingReservations: upcomingReservations.length,
     nextWeekendLabel: `${nextWeekend.start.toLocaleDateString("hu-HU")} - ${nextWeekend.end.toLocaleDateString("hu-HU")}`,
-    revenueJanos,
-    revenueSanyi,
+    revenueByPartner,
     totalRevenue,
     totalExpenses,
-    janosNet: revenueJanos - expensesSummary.janos,
-    sanyiNet: revenueSanyi - expensesSummary.sanyi,
+    netByPartner,
     totalNet: totalRevenue - totalExpenses,
-    janosExpenses: expensesSummary.janos,
-    sanyiExpenses: expensesSummary.sanyi,
+    expensesByPartner: expensesSummary.byPartner,
   }
 }
 
@@ -77,20 +88,13 @@ export default async function AdminDashboard() {
   ]
 
   const revenueCards = [
-    {
-      label: "János bevétele",
-      value: money(stats.revenueJanos),
-      expense: `Kiadás: ${money(stats.janosExpenses)}`,
-      net: `Nettó: ${money(stats.janosNet)}`,
+    ...PARTNERS.map((partner) => ({
+      label: `${partner} bevétele`,
+      value: money(stats.revenueByPartner[partner]),
+      expense: `Kiadás: ${money(stats.expensesByPartner[partner])}`,
+      net: `Nettó: ${money(stats.netByPartner[partner])}`,
       icon: DollarSign,
-    },
-    {
-      label: "Sanyi bevétele",
-      value: money(stats.revenueSanyi),
-      expense: `Kiadás: ${money(stats.sanyiExpenses)}`,
-      net: `Nettó: ${money(stats.sanyiNet)}`,
-      icon: DollarSign,
-    },
+    })),
     {
       label: "Összes bevétel",
       value: money(stats.totalRevenue),
@@ -102,8 +106,8 @@ export default async function AdminDashboard() {
     {
       label: "Összes kiadás",
       value: money(stats.totalExpenses),
-      expense: `János: ${money(stats.janosExpenses)}`,
-      net: `Sanyi: ${money(stats.sanyiExpenses)}`,
+      expense: PARTNERS.map((partner) => `${partner}: ${money(stats.expensesByPartner[partner])}`).join(" · "),
+      net: "",
       icon: TrendingDown,
       accent: "red" as const,
     },
@@ -147,7 +151,7 @@ export default async function AdminDashboard() {
               <p className={`text-2xl font-bold tracking-tight mb-3 ${'accent' in item && item.accent === 'green' ? 'text-emerald-700' : 'accent' in item && item.accent === 'red' ? 'text-red-600' : 'text-foreground'}`}>{item.value}</p>
               <div className="space-y-1 border-t border-border pt-3">
                 <p className="text-xs text-primary font-light">{item.expense}</p>
-                <p className="text-xs font-semibold text-foreground">{item.net}</p>
+                {item.net && <p className="text-xs font-semibold text-foreground">{item.net}</p>}
               </div>
             </div>
           ))}
