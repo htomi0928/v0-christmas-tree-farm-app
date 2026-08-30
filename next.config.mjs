@@ -1,10 +1,17 @@
+// React dev mode needs eval() for its debugging features (never used in
+// production), and Next's dev server needs a websocket for HMR — so the
+// CSP is relaxed in development and stays strict in production.
+const isDev = process.env.NODE_ENV !== "production"
+
 const contentSecurityPolicy = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline'",
+  isDev ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'" : "script-src 'self' 'unsafe-inline'",
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: https:",
   "font-src 'self' data:",
-  "connect-src 'self' https://vitals.vercel-insights.com https://va.vercel-scripts.com",
+  isDev
+    ? "connect-src 'self' ws: wss: https://vitals.vercel-insights.com https://va.vercel-scripts.com"
+    : "connect-src 'self' https://vitals.vercel-insights.com https://va.vercel-scripts.com",
   "frame-src https://www.google.com",
   "object-src 'none'",
   "base-uri 'self'",
