@@ -3,7 +3,7 @@ import { redirect } from "next/navigation"
 import { validateSession } from "@/lib/auth"
 import { getSettings } from "@/lib/settings"
 import { getViewYear } from "@/lib/years"
-import { getTotalTreesReservedForYear } from "@/lib/reservations"
+import { getTotalTreesReservedForYear, getReservationCountsByDay } from "@/lib/reservations"
 import SettingsClient from "@/components/settings-client"
 
 export default async function SettingsPage() {
@@ -15,10 +15,18 @@ export default async function SettingsPage() {
   }
 
   const year = await getViewYear()
-  const [settings, totalTreesReserved] = await Promise.all([
+  const [settings, totalTreesReserved, initialDayCounts] = await Promise.all([
     getSettings(year),
     getTotalTreesReservedForYear(year),
+    getReservationCountsByDay(year),
   ])
 
-  return <SettingsClient initialSettings={settings} year={year} initialTreesReserved={totalTreesReserved} />
+  return (
+    <SettingsClient
+      initialSettings={settings}
+      year={year}
+      initialTreesReserved={totalTreesReserved}
+      initialDayCounts={initialDayCounts}
+    />
+  )
 }

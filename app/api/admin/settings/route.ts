@@ -1,7 +1,7 @@
 import "server-only"
 import { z } from "zod"
 import { getSettings, updateSettings } from "@/lib/settings"
-import { getTotalTreesReservedForYear } from "@/lib/reservations"
+import { getTotalTreesReservedForYear, getFullyBookedDates } from "@/lib/reservations"
 import { enforceSameOrigin, logApiError, parseJsonBody, requireAdminSessionResponse } from "@/lib/api"
 import { getActiveYear, getViewYear } from "@/lib/years"
 
@@ -48,7 +48,11 @@ export async function GET(request: Request) {
     const settings = await getSettings(activeYear)
     const treesReserved = await getTotalTreesReservedForYear(activeYear)
     const isSeasonSoldOut = treesReserved >= settings.maxTreesPerSeason
+    const fullyBookedDates = await getFullyBookedDates(activeYear, settings.maxBookingsPerDay)
     const { maxTreesPerSeason, ...publicSettings } = settings
+    publicSettings.availableDays = publicSettings.availableDays.filter(
+      (day) => !fullyBookedDates.includes(day),
+    )
     return Response.json(
       { success: true, settings: publicSettings, isSeasonSoldOut },
       { headers: { "Cache-Control": "no-store, max-age=0" } },

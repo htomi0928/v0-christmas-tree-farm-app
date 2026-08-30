@@ -9,6 +9,7 @@ interface Props {
   initialSettings: Settings
   year: number
   initialTreesReserved: number
+  initialDayCounts: Record<string, number>
 }
 
 const inputClass = "w-full px-4 py-3 rounded-lg border border-border bg-white text-foreground placeholder:text-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent text-sm transition-all duration-150"
@@ -18,14 +19,27 @@ const monthNames = ["január","február","március","április","május","június
 // Monday-first
 const dayNames = ["H","K","Sze","Cs","P","Szo","V"]
 
-export default function SettingsClient({ initialSettings, year, initialTreesReserved }: Props) {
+export default function SettingsClient({ initialSettings, year, initialTreesReserved, initialDayCounts }: Props) {
   const alertRef = useRef<HTMLDivElement>(null)
   const { setDirty } = useUnsavedChanges()
   const [treesReserved, setTreesReserved] = useState(initialTreesReserved)
+  const [dayCounts, setDayCounts] = useState(initialDayCounts)
 
   useEffect(() => {
     setTreesReserved(initialTreesReserved)
   }, [initialTreesReserved])
+
+  useEffect(() => {
+    setDayCounts(initialDayCounts)
+  }, [initialDayCounts])
+
+  const refreshDayCounts = async () => {
+    try {
+      const res = await fetch("/api/admin/stats/day-counts")
+      const data = await res.json()
+      if (data.success) setDayCounts(data.counts)
+    } catch {}
+  }
 
   useEffect(() => {
     const interval = setInterval(async () => {
@@ -34,6 +48,7 @@ export default function SettingsClient({ initialSettings, year, initialTreesRese
         const data = await res.json()
         if (data.success) setTreesReserved(data.totalTreesReserved)
       } catch {}
+      refreshDayCounts()
     }, 30_000)
     return () => clearInterval(interval)
   }, [])
@@ -148,7 +163,7 @@ export default function SettingsClient({ initialSettings, year, initialTreesRese
   ): string[] => {
     const changes: string[] = []
     if (before.maxBookingsPerDay !== after.maxBookingsPerDay) {
-      changes.push(`Max. fa/rendelés: ${before.maxBookingsPerDay} → ${after.maxBookingsPerDay}`)
+      changes.push(`Max. foglalás/nap: ${before.maxBookingsPerDay} → ${after.maxBookingsPerDay}`)
     }
     if (before.maxTreesPerSeason !== after.maxTreesPerSeason) {
       changes.push(`Max. fa/szezon: ${before.maxTreesPerSeason} → ${after.maxTreesPerSeason}`)
@@ -172,7 +187,7 @@ export default function SettingsClient({ initialSettings, year, initialTreesRese
     setSuccess("")
     setSavedSummary([])
     if (formData.maxBookingsPerDay === "") {
-      setError("A maximum fa rendelésenként mező nem lehet üres.")
+      setError("A maximális foglalás naponta mező nem lehet üres.")
       return
     }
     if (formData.maxTreesPerSeason === "") {
@@ -200,6 +215,7 @@ export default function SettingsClient({ initialSettings, year, initialTreesRese
         setDirty(false)
         setSuccess("A beállítások mentése sikerült.")
         setSavedSummary(summary)
+        refreshDayCounts()
         lastSavedRef.current = {
           availableDays: [...formData.availableDays].sort(),
           maxBookingsPerDay: formData.maxBookingsPerDay,
@@ -225,6 +241,7 @@ export default function SettingsClient({ initialSettings, year, initialTreesRese
     dates,
     dayKey,
     activeClass,
+    dayCounts: dayCountsForBlock,
   }: {
     title: string
     subtitle: string
@@ -233,6 +250,7 @@ export default function SettingsClient({ initialSettings, year, initialTreesRese
     dates: string[]
     dayKey: "availableDays" | "retrievalDays"
     activeClass: string
+    dayCounts?: Record<string, number>
   }) => (
     <div className="border border-border bg-surface rounded-lg p-6">
       <p className="text-xs font-bold text-foreground tracking-widest uppercase mb-1">{title}</p>
@@ -261,14 +279,34 @@ export default function SettingsClient({ initialSettings, year, initialTreesRese
               if (!day) return <div key={`${wi}-${di}`} className="h-10" />
               const dateStr = toDateStr(month.getFullYear(), month.getMonth(), day)
               const active = dates.includes(dateStr)
+              const count = dayCountsForBlock?.[dateStr] ?? 0
+              const maxPerDay = typeof formData.maxBookingsPerDay === "number" ? formData.maxBookingsPerDay : 0
+              const pct = maxPerDay > 0 ? Math.min(100, Math.round((count / maxPerDay) * 100)) : 0
+              const isFull = maxPerDay > 0 && count >= maxPerDay
+              const dayClass = isFull
+                ? active
+                  ? "bg-accent text-accent-foreground font-semibold"
+                  : "bg-accent/15 text-accent border border-accent/30"
+                : active
+                  ? activeClass
+                  : "text-primary/50 hover:bg-primary/8"
               return (
                 <button
                   key={dateStr}
                   type="button"
                   onClick={() => toggleDay(dayKey, dateStr)}
-                  className={`h-10 rounded-2xl text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30 ${active ? activeClass : "text-primary/50 hover:bg-primary/8"}`}
+                  title={count > 0 ? `${count} / ${maxPerDay} foglalás` : undefined}
+                  className={`relative h-10 rounded-2xl text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30 ${dayClass}`}
                 >
                   {day}
+                  {count > 0 && (
+                    <span className="absolute left-1.5 right-1.5 bottom-1 h-1 rounded-full bg-current/20 overflow-hidden">
+                      <span
+                        className="block h-full rounded-full bg-current transition-all duration-500"
+                        style={{ width: `${pct}%` }}
+                      />
+                    </span>
+                  )}
                 </button>
               )
             })}
@@ -330,7 +368,7 @@ export default function SettingsClient({ initialSettings, year, initialTreesRese
           <div className="border border-border bg-surface rounded-lg p-6 space-y-5">
             <p className="text-xs font-bold text-foreground tracking-widest uppercase">Általános</p>
             <div>
-              <label className={labelClass}>Maximum fa rendelésenként</label>
+              <label className={labelClass}>Maximális foglalás naponta</label>
               <input type="number" min="1" value={formData.maxBookingsPerDay} onChange={(e) => setFormData({ ...formData, maxBookingsPerDay: e.target.value === "" ? "" : Number.parseInt(e.target.value) })} className={inputClass} />
             </div>
             <div>
@@ -396,12 +434,13 @@ export default function SettingsClient({ initialSettings, year, initialTreesRese
         <div className="space-y-6">
           <CalendarBlock
             title="Foglalható napok"
-            subtitle="Ezek a napok jelennek meg a publikus foglalási naptárban."
+            subtitle="Ezek a napok jelennek meg a publikus foglalási naptárban. A sáv az adott nap foglaltsági szintjét mutatja a napi limithez képest."
             month={availableMonth}
             onMonthChange={setAvailableMonth}
             dates={formData.availableDays}
             dayKey="availableDays"
             activeClass="bg-foreground text-background font-semibold"
+            dayCounts={dayCounts}
           />
           <CalendarBlock
             title="Átvételi napok"
