@@ -40,7 +40,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="hu" className={plusJakarta.variable}>
+    <html lang="hu" className={plusJakarta.variable} data-scroll-behavior="smooth">
       <body className="font-sans antialiased flex flex-col min-h-screen">
         <CookieConsentProvider>
           <UnsavedChangesProvider>
