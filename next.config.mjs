@@ -3,16 +3,21 @@
 // CSP is relaxed in development and stays strict in production.
 const isDev = process.env.NODE_ENV !== "production"
 
+// Vercel's preview-deployment live-feedback toolbar (vercel.live) injects its
+// own script/iframe/websocket — allowed everywhere since it's inert on
+// production URLs anyway (Vercel only activates it on preview deployments).
 const contentSecurityPolicy = [
   "default-src 'self'",
-  isDev ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'" : "script-src 'self' 'unsafe-inline'",
+  isDev
+    ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.live"
+    : "script-src 'self' 'unsafe-inline' https://vercel.live",
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: https:",
   "font-src 'self' data:",
   isDev
-    ? "connect-src 'self' ws: wss: https://vitals.vercel-insights.com https://va.vercel-scripts.com"
-    : "connect-src 'self' https://vitals.vercel-insights.com https://va.vercel-scripts.com",
-  "frame-src https://www.google.com",
+    ? "connect-src 'self' ws: wss: https://vitals.vercel-insights.com https://va.vercel-scripts.com https://vercel.live wss://*.pusher.com"
+    : "connect-src 'self' https://vitals.vercel-insights.com https://va.vercel-scripts.com https://vercel.live wss://*.pusher.com",
+  "frame-src https://www.google.com https://maps.google.com https://vercel.live",
   "object-src 'none'",
   "base-uri 'self'",
   "frame-ancestors 'self'",
