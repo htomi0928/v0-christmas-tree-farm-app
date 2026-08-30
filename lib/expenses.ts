@@ -1,6 +1,7 @@
 import "server-only"
 import { sql } from "./db"
 import type { Expense, CreateExpenseData } from "./types"
+import { PARTNERS, type Partner } from "./partners"
 
 function rowToExpense(row: any): Expense {
   return {
@@ -8,7 +9,7 @@ function rowToExpense(row: any): Expense {
     year: Number(row.year),
     description: row.description,
     amount: Number(row.amount),
-    person: row.person as "János" | "Sanyi",
+    person: row.person as Partner,
     date: row.date,
     createdAt: row.created_at,
   }
@@ -16,7 +17,7 @@ function rowToExpense(row: any): Expense {
 
 export async function listExpenses(filters: {
   year: number
-  person?: "János" | "Sanyi"
+  person?: Partner
 }): Promise<Expense[]> {
   let query = "SELECT * FROM expenses WHERE year = $1"
   const params: any[] = [filters.year]
@@ -58,7 +59,7 @@ export async function deleteExpense(id: number): Promise<{ success: boolean; err
 
 export async function getExpensesSummary(
   year: number,
-): Promise<{ janos: number; sanyi: number; total: number }> {
+): Promise<{ byPartner: Record<Partner, number>; total: number }> {
   const rows = await sql`
     SELECT person, COALESCE(SUM(amount), 0) AS total_amount
     FROM expenses
@@ -66,13 +67,16 @@ export async function getExpensesSummary(
     GROUP BY person
   `
 
-  let janos = 0
-  let sanyi = 0
+  const byPartner = Object.fromEntries(PARTNERS.map((partner) => [partner, 0])) as Record<Partner, number>
+  let total = 0
 
   for (const row of rows) {
-    if (row.person === "János") janos = Number(row.total_amount)
-    if (row.person === "Sanyi") sanyi = Number(row.total_amount)
+    const amount = Number(row.total_amount)
+    if (row.person in byPartner) {
+      byPartner[row.person as Partner] = amount
+      total += amount
+    }
   }
 
-  return { janos, sanyi, total: janos + sanyi }
+  return { byPartner, total }
 }

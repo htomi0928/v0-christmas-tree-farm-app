@@ -4,6 +4,7 @@ import { createAdminQuickReservation } from "@/lib/reservations"
 import { ReservationStatus } from "@/lib/types"
 import { enforceSameOrigin, logApiError, parseJsonBody, requireAdminSessionResponse, requireAdminUser } from "@/lib/api"
 import { getActiveYear } from "@/lib/years"
+import { PARTNERS } from "@/lib/partners"
 
 const quickCreateReservationSchema = z.object({
   treeCount: z.number({ invalid_type_error: "A darabszám szám kell legyen" }).int({ message: "A darabszám egész szám kell legyen" }).min(1, { message: "Legalább 1 fa szükséges" }).max(20, { message: "Legfeljebb 20 fa adható meg" }),
@@ -15,7 +16,7 @@ const quickCreateReservationSchema = z.object({
   notes: z.union([z.string().trim().max(1000, { message: "A megjegyzés legfeljebb 1000 karakter lehet" }), z.literal(""), z.undefined()]).optional(),
   status: z.nativeEnum(ReservationStatus, { message: "Érvénytelen státusz" }).optional(),
   treeNumbers: z.union([z.string().trim().max(200, { message: "A fa sorszáma legfeljebb 200 karakter lehet" }), z.literal(""), z.undefined()]).optional(),
-  paidTo: z.union([z.literal("János"), z.literal("Sanyi"), z.literal(""), z.undefined()], { message: "Érvénytelen érték a 'kinek fizetek' mezoben" }).optional(),
+  paidTo: z.union([z.enum(PARTNERS), z.literal(""), z.undefined()], { message: "Érvénytelen érték a 'kinek fizetek' mezoben" }).optional(),
   photos: z
     .array(
       z.object({

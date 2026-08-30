@@ -148,7 +148,7 @@ All fields optional; at least one must be present.
   "visitDate": "2024-12-16",
   "pickupDate": "2024-12-20",
   "treeCount": 3,
-  "status": "PICKED_UP_PAID",
+  "status": "PICKED_UP",
   "treeNumbers": "12, 13, 14",
   "notes": "...",
   "paidTo": "Sanyi"
@@ -156,9 +156,9 @@ All fields optional; at least one must be present.
 ```
 
 **Server-enforced rules** (see `lib/reservations.ts`):
-- `status` ∈ `{TREE_TAGGED, CUT, PICKED_UP_PAID}` requires non-empty `treeNumbers`.
+- `status` ∈ `{TREE_TAGGED, CUT, PICKED_UP, FREE}` requires non-empty `treeNumbers`.
 - `treeNumbers` is a comma-separated list of positive integers; numbers already assigned to other reservations *in the same year* return `400` with the conflicting reservation names. The same number is allowed across different years.
-- `paidTo` must be `"János"` or `"Sanyi"` (or empty/null to clear).
+- `paidTo` must be one of the names in `lib/partners.ts` (currently `"János"` or `"Sanyi"`), or empty/null to clear.
 - Date fields must match `YYYY-MM-DD`.
 - `treeCount` is an integer between 1 and 20.
 - The reservation's `year` is immutable and cannot be changed via PATCH.
@@ -229,12 +229,8 @@ There is no public `GET /api/reservations` — availability data is computed in 
 ## Expenses (admin)
 
 - **GET** `/api/admin/expenses` → `{ success: true, expenses: [ ... ] }`
-- **POST** `/api/admin/expenses` body `{ person, amount, description, date }`. `person` ∈ `{"János", "Sanyi"}`, `amount` > 0, `date` `YYYY-MM-DD`. Returns `{ success: true, expense }`.
+- **POST** `/api/admin/expenses` body `{ person, amount, description, date }`. `person` must be one of the names in `lib/partners.ts` (currently `"János"` or `"Sanyi"`), `amount` > 0, `date` `YYYY-MM-DD`. Returns `{ success: true, expense }`.
 - **DELETE** `/api/admin/expenses/[id]` → `{ success: true }` or `404`.
-
-## Stats (admin)
-
-**GET** `/api/admin/stats` → `{ success: true, stats: { totalReservations, totalTrees, upcomingWeekend, revenueJanos, revenueSanyi, totalRevenue } }`. Revenue is computed only from `PICKED_UP_PAID` reservations using `settings.price`.
 
 ## Settings
 

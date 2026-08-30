@@ -6,21 +6,22 @@ import Link from "next/link"
 import { AlertCircle, ArrowLeft, Camera, CheckCircle2, Image as ImageIcon, Plus, Save, Trash2, Upload, X } from "lucide-react"
 import { type Reservation, ReservationStatus } from "@/lib/types"
 import { formatDateHu, reservationStatusMeta } from "@/lib/site"
+import { PARTNERS, isPartner, type Partner } from "@/lib/partners"
 import AdminDatePicker from "@/components/admin-date-picker"
 import { useUnsavedChanges } from "@/contexts/unsaved-changes-context"
 
 interface Props {
   reservation: Reservation
-  currentAdminPaidTo: "Sanyi" | "János" | null
+  currentAdminPaidTo: Partner | null
   justCreated?: boolean
 }
 
 const inputClass = "w-full px-4 py-3 rounded-lg border border-border bg-white text-foreground placeholder:text-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent text-sm transition-all duration-150"
 const disabledInputClass = "w-full px-4 py-3 rounded-lg border border-border bg-muted text-primary/60 placeholder:text-primary/40 text-sm cursor-not-allowed"
 const labelClass = "block text-xs font-bold text-foreground tracking-widest uppercase mb-2"
-const normalizePaidTo = (value: string | undefined) => {
+const normalizePaidTo = (value: string | undefined): Partner | "" => {
   const trimmed = (value || "").trim()
-  return trimmed === "János" || trimmed === "Sanyi" ? trimmed : ""
+  return isPartner(trimmed) ? trimmed : ""
 }
 
 export default function ReservationDetailClient({ reservation: initialReservation, currentAdminPaidTo, justCreated }: Props) {
@@ -485,15 +486,16 @@ export default function ReservationDetailClient({ reservation: initialReservatio
               value={formData.paidTo}
               disabled={!allowsPaidTo(formData.status) && !formData.paidTo}
               onChange={(e) => {
-                const updated = { ...formData, paidTo: e.target.value as "János" | "Sanyi" | "" }
+                const updated = { ...formData, paidTo: e.target.value as Partner | "" }
                 setFormData(updated)
                 setValidationErrors(validate(updated))
               }}
               className={`${allowsPaidTo(formData.status) || formData.paidTo ? inputClass : disabledInputClass} ${validationErrors.paidTo ? "border-destructive ring-1 ring-destructive/40" : ""}`}
             >
               <option value="">Még nincs rögzítve</option>
-              <option value="János">János</option>
-              <option value="Sanyi">Sanyi</option>
+              {PARTNERS.map((partner) => (
+                <option key={partner} value={partner}>{partner}</option>
+              ))}
             </select>
             {validationErrors.paidTo ? (
               <p className="mt-1.5 text-xs text-destructive flex items-center gap-1">

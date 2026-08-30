@@ -4,6 +4,7 @@ import { deleteReservation, findConflictingTreeNumbers, getReservationById, upda
 import { ReservationStatus } from "@/lib/types"
 import { destroyReservationPhoto } from "@/lib/cloudinary"
 import { enforceSameOrigin, logApiError, parseJsonBody, parseNumericId, requireAdminSessionResponse } from "@/lib/api"
+import { PARTNERS } from "@/lib/partners"
 
 const updateReservationSchema = z
   .object({
@@ -16,7 +17,7 @@ const updateReservationSchema = z
     status: z.nativeEnum(ReservationStatus, { errorMap: () => ({ message: "Érvénytelen státusz." }) }).optional(),
     treeNumbers: z.union([z.string().trim().max(200, "A sorszámok legfeljebb 200 karakter lehetnek."), z.literal(""), z.null()]).optional(),
     notes: z.union([z.string().trim().max(1000, "A megjegyzés legfeljebb 1000 karakter lehet."), z.literal(""), z.null()]).optional(),
-    paidTo: z.union([z.literal("János"), z.literal("Sanyi"), z.literal(""), z.null()]).optional(),
+    paidTo: z.union([z.enum(PARTNERS), z.literal(""), z.null()]).optional(),
   })
   .refine((value) => Object.keys(value).length > 0, {
     message: "Legalább egy mezőt meg kell adni.",
