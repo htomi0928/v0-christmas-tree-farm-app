@@ -77,6 +77,20 @@ export async function PATCH(request: Request) {
     if (!parsedBody.success) return parsedBody.response
 
     const year = await getViewYear()
+
+    if (parsedBody.data.maxTreesPerSeason !== undefined) {
+      const treesReserved = await getTotalTreesReservedForYear(year)
+      if (parsedBody.data.maxTreesPerSeason < treesReserved) {
+        return Response.json(
+          {
+            success: false,
+            error: `A szezonális limit nem lehet kevesebb, mint a már megrendelt fák száma (${treesReserved} db).`,
+          },
+          { status: 400 },
+        )
+      }
+    }
+
     const settings = await updateSettings(year, parsedBody.data)
 
     return Response.json(
