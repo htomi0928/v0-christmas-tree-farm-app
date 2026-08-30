@@ -19,8 +19,8 @@ export function Footer() {
           </div>
           <div>
             <h3 className="text-sm font-semibold text-background mb-3">Helyszín</h3>
-            <Link href="/contact" className="block text-sm text-background/65 hover:text-background transition-colors">Zalaegerszeg határa</Link>
-            <Link href="/contact" className="block text-sm text-background/65 hover:text-background transition-colors">GPS koordináták alapján</Link>
+            <Link href="/contact?highlight=1" className="block text-sm text-background/65 hover:text-background transition-colors">Zalaegerszeg határa</Link>
+            <Link href="/contact?highlight=1" className="block text-sm text-background/65 hover:text-background transition-colors">GPS koordináták alapján</Link>
           </div>
           <div>
             <h3 className="text-sm font-semibold text-background mb-3">Kövess minket</h3>
@@ -41,7 +41,7 @@ export function Footer() {
           </p>
           <div className="flex items-center gap-5">
             <Link href="/aszf" className="text-xs text-background/40 hover:text-background/70 transition-colors">
-              ASZF
+              ÁSZF
             </Link>
             <Link href="/adatvedelem" className="text-xs text-background/40 hover:text-background/70 transition-colors">
               Adatvédelmi tájékoztató

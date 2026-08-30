@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { createReservation, getTotalTreesReservedForYear } from "@/lib/reservations"
+import { createReservation, getTotalTreesReservedForYear, getFullyBookedDates } from "@/lib/reservations"
 import { getSettings } from "@/lib/settings"
 import { logApiError, parseJsonBody } from "@/lib/api"
 import { sendNewReservationNotification } from "@/lib/reservation-notifications"
@@ -7,17 +7,15 @@ import { getActiveYear } from "@/lib/years"
 
 export const runtime = "nodejs"
 
-function buildReservationSchema(maxTrees: number) {
-  return z.object({
-    name: z.string().trim().min(1, "Név szükséges.").max(120, "A név legfeljebb 120 karakter lehet."),
-    phone: z.string().trim().min(1, "Telefonszám szükséges.").max(50, "A telefonszám legfeljebb 50 karakter lehet."),
-    email: z.union([z.string().trim().email("Érvénytelen e-mail cím."), z.literal(""), z.undefined()]).optional(),
-    visitDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Érvénytelen dátumformátum."),
-    pickupDate: z.union([z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Érvénytelen dátumformátum."), z.literal(""), z.undefined()]).optional(),
-    treeCount: z.number({ invalid_type_error: "Érvénytelen faszám." }).int("Egész számot adj meg.").min(1, "Minimum 1 fa szükséges.").max(maxTrees, `Maximum ${maxTrees} fa rendelhető egyszerre.`),
-    notes: z.union([z.string().trim().max(1000, "A megjegyzés legfeljebb 1000 karakter lehet."), z.literal(""), z.undefined()]).optional(),
-  })
-}
+const reservationSchema = z.object({
+  name: z.string().trim().min(1, "Név szükséges.").max(120, "A név legfeljebb 120 karakter lehet."),
+  phone: z.string().trim().min(1, "Telefonszám szükséges.").max(50, "A telefonszám legfeljebb 50 karakter lehet."),
+  email: z.union([z.string().trim().email("Érvénytelen e-mail cím."), z.literal(""), z.undefined()]).optional(),
+  visitDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Érvénytelen dátumformátum."),
+  pickupDate: z.union([z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Érvénytelen dátumformátum."), z.literal(""), z.undefined()]).optional(),
+  treeCount: z.number({ invalid_type_error: "Érvénytelen faszám." }).int("Egész számot adj meg.").min(1, "Minimum 1 fa szükséges."),
+  notes: z.union([z.string().trim().max(1000, "A megjegyzés legfeljebb 1000 karakter lehet."), z.literal(""), z.undefined()]).optional(),
+})
 
 export async function POST(request: Request) {
   try {
@@ -33,13 +31,20 @@ export async function POST(request: Request) {
     }
 
     const settings = await getSettings(activeYear)
-    const reservationSchema = buildReservationSchema(settings.maxBookingsPerDay)
     const parsedBody = await parseJsonBody(request, reservationSchema)
     if (!parsedBody.success) return parsedBody.response
 
     const data = parsedBody.data
 
     if (settings.availableDays.length === 0 || !settings.availableDays.includes(data.visitDate)) {
+      return Response.json(
+        { success: false, errors: ["A választott nap nem elérhető foglalásra."] },
+        { status: 400 },
+      )
+    }
+
+    const fullyBookedDates = await getFullyBookedDates(activeYear, settings.maxBookingsPerDay)
+    if (fullyBookedDates.includes(data.visitDate)) {
       return Response.json(
         { success: false, errors: ["A választott nap nem elérhető foglalásra."] },
         { status: 400 },
@@ -61,9 +66,16 @@ export async function POST(request: Request) {
     }
 
     const treesReserved = await getTotalTreesReservedForYear(activeYear)
-    if (treesReserved + data.treeCount > settings.maxTreesPerSeason) {
+    const remaining = settings.maxTreesPerSeason - treesReserved
+    if (remaining <= 0) {
       return Response.json(
-        { success: false, errors: ["Erre a szezonra elfogyott az összes fa."] },
+        { success: false, errors: ["Sajnáljuk, erre a szezonra elfogyott az összes fa."] },
+        { status: 400 },
+      )
+    }
+    if (data.treeCount > remaining) {
+      return Response.json(
+        { success: false, errors: [`Sajnáljuk, jelenleg a készleteink végén járunk — maximum ${remaining} db fát tudunk biztosítani, de te ${data.treeCount} db-ot kértél. Kérjük, csökkentsd a darabszámot.`] },
         { status: 400 },
       )
     }

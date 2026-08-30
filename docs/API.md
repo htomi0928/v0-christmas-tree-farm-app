@@ -212,7 +212,11 @@ Deleting a reservation that has assigned `tree_numbers` logs a `WARNING` to serv
 }
 ```
 
-**Errors:** `400 { success: false, errors: [...] }` for validation, including `["Erre a szezonra elfogyott az összes fa."]` if the sum of `treeCount` across the active year's non-`NO_SHOW` reservations plus this request would exceed `settings.maxTreesPerSeason`; `503 { success: false, errors: ["Foglalás jelenleg nem elérhető"] }` if no year is currently marked active in the `years` table; `500 { success: false, errors: ["Szerver hiba. Kérjük, próbáld újra."] }` on server error.
+**Errors:** `400 { success: false, errors: [...] }` for validation, including:
+- `["Sajnáljuk, erre a szezonra elfogyott az összes fa."]` (or a variant naming the remaining count) if the sum of `treeCount` across the active year's non-`NO_SHOW` reservations plus this request would exceed `settings.maxTreesPerSeason`;
+- `["A választott nap nem elérhető foglalásra."]` if `visitDate` is either not in `settings.availableDays` or has reached the `settings.maxBookingsPerDay` reservation-count cap for that date (see Settings section below) — both cases are indistinguishable to the client, since a full day behaves exactly like an unavailable one.
+
+`503 { success: false, errors: ["Foglalás jelenleg nem elérhető"] }` if no year is currently marked active in the `years` table; `500 { success: false, errors: ["Szerver hiba. Kérjük, próbáld újra."] }` on server error.
 
 The `year` is stamped server-side from the active year — the request body never contains it.
 
@@ -234,8 +238,10 @@ There is no public `GET /api/reservations` — availability data is computed in 
 
 ## Settings
 
-- **GET** `/api/admin/settings` (public — no auth) returns the currently active year's settings: `{ success: true, settings: { year, availableDays, maxBookingsPerDay, retrievalDays, pricePerTree }, isSeasonSoldOut: boolean }`. `maxTreesPerSeason` and the raw reserved-tree total are intentionally omitted from this public response — only the computed `isSeasonSoldOut` flag is exposed. Cached `no-store`. Returns `503 { success: false, error: "Foglalás jelenleg nem elérhető" }` if no year is active.
-- **GET** `/api/admin/settings?year=2026` (admin) — returns settings for the specified year (includes `maxTreesPerSeason`). Requires the admin session.
+- `maxBookingsPerDay` is a cap on how many reservations (rows, not trees) a single `visitDate` may have — not a cap on `treeCount` for one booking. Dates that reach the cap (`COUNT(*)` of non-`NO_SHOW` reservations ≥ `maxBookingsPerDay`, see `lib/reservations.ts` `getFullyBookedDates`) are treated as full.
+- **GET** `/api/admin/settings` (public — no auth) returns the currently active year's settings: `{ success: true, settings: { year, availableDays, maxBookingsPerDay, retrievalDays, pricePerTree }, isSeasonSoldOut: boolean }`. `availableDays` in this public response has any fully-booked dates already filtered out, so the booking page's calendar never offers them. `maxTreesPerSeason` and the raw reserved-tree total are intentionally omitted from this public response — only the computed `isSeasonSoldOut` flag is exposed. Cached `no-store`. Returns `503 { success: false, error: "Foglalás jelenleg nem elérhető" }` if no year is active.
+- **GET** `/api/admin/settings?year=2026` (admin) — returns settings for the specified year (includes `maxTreesPerSeason`, and `availableDays` is the raw admin-curated list, not filtered for full dates). Requires the admin session.
+- **GET** `/api/admin/stats/day-counts` (admin) — `{ success: true, counts: Record<string, number>, year }`. Per-`visit_date` reservation counts (dates with zero reservations are simply absent) for the admin's current view year, used by the admin settings page to render an occupancy bar per day against `maxBookingsPerDay`.
 - **PATCH** `/api/admin/settings` (admin) — partial update of `availableDays`, `maxBookingsPerDay`, `maxTreesPerSeason`, `retrievalDays`, `pricePerTree` for the admin's current view year. The handler upserts: a missing settings row is created on first PATCH for a year. `availableDays` / `retrievalDays` are arrays of `YYYY-MM-DD` strings (max 366).
 
 ## Years (admin)

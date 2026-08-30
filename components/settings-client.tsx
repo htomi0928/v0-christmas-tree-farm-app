@@ -8,6 +8,8 @@ import { useUnsavedChanges } from "@/contexts/unsaved-changes-context"
 interface Props {
   initialSettings: Settings
   year: number
+  initialTreesReserved: number
+  initialDayCounts: Record<string, number>
 }
 
 const inputClass = "w-full px-4 py-3 rounded-lg border border-border bg-white text-foreground placeholder:text-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent text-sm transition-all duration-150"
@@ -17,9 +19,39 @@ const monthNames = ["január","február","március","április","május","június
 // Monday-first
 const dayNames = ["H","K","Sze","Cs","P","Szo","V"]
 
-export default function SettingsClient({ initialSettings, year }: Props) {
+export default function SettingsClient({ initialSettings, year, initialTreesReserved, initialDayCounts }: Props) {
   const alertRef = useRef<HTMLDivElement>(null)
   const { setDirty } = useUnsavedChanges()
+  const [treesReserved, setTreesReserved] = useState(initialTreesReserved)
+  const [dayCounts, setDayCounts] = useState(initialDayCounts)
+
+  useEffect(() => {
+    setTreesReserved(initialTreesReserved)
+  }, [initialTreesReserved])
+
+  useEffect(() => {
+    setDayCounts(initialDayCounts)
+  }, [initialDayCounts])
+
+  const refreshDayCounts = async () => {
+    try {
+      const res = await fetch("/api/admin/stats/day-counts")
+      const data = await res.json()
+      if (data.success) setDayCounts(data.counts)
+    } catch {}
+  }
+
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch("/api/admin/stats/trees")
+        const data = await res.json()
+        if (data.success) setTreesReserved(data.totalTreesReserved)
+      } catch {}
+      refreshDayCounts()
+    }, 30_000)
+    return () => clearInterval(interval)
+  }, [])
   const [isSaving, setIsSaving] = useState(false)
   const [error, setError] = useState("")
   const [success, setSuccess] = useState("")
@@ -166,6 +198,10 @@ export default function SettingsClient({ initialSettings, year }: Props) {
       setError("Az ár fánként mező nem lehet üres.")
       return
     }
+    if (typeof formData.maxTreesPerSeason === "number" && formData.maxTreesPerSeason < treesReserved) {
+      setError(`A szezonális limit nem lehet kevesebb, mint a már megrendelt fák száma (${treesReserved} db).`)
+      return
+    }
     setIsSaving(true)
     try {
       const summary = computeChangeSummary(lastSavedRef.current, formData)
@@ -179,6 +215,7 @@ export default function SettingsClient({ initialSettings, year }: Props) {
         setDirty(false)
         setSuccess("A beállítások mentése sikerült.")
         setSavedSummary(summary)
+        refreshDayCounts()
         lastSavedRef.current = {
           availableDays: [...formData.availableDays].sort(),
           maxBookingsPerDay: formData.maxBookingsPerDay,
@@ -204,6 +241,7 @@ export default function SettingsClient({ initialSettings, year }: Props) {
     dates,
     dayKey,
     activeClass,
+    dayCounts: dayCountsForBlock,
   }: {
     title: string
     subtitle: string
@@ -212,6 +250,7 @@ export default function SettingsClient({ initialSettings, year }: Props) {
     dates: string[]
     dayKey: "availableDays" | "retrievalDays"
     activeClass: string
+    dayCounts?: Record<string, number>
   }) => (
     <div className="border border-border bg-surface rounded-lg p-6">
       <p className="text-xs font-bold text-foreground tracking-widest uppercase mb-1">{title}</p>
@@ -240,14 +279,34 @@ export default function SettingsClient({ initialSettings, year }: Props) {
               if (!day) return <div key={`${wi}-${di}`} className="h-10" />
               const dateStr = toDateStr(month.getFullYear(), month.getMonth(), day)
               const active = dates.includes(dateStr)
+              const count = dayCountsForBlock?.[dateStr] ?? 0
+              const maxPerDay = typeof formData.maxBookingsPerDay === "number" ? formData.maxBookingsPerDay : 0
+              const pct = maxPerDay > 0 ? Math.min(100, Math.round((count / maxPerDay) * 100)) : 0
+              const isFull = maxPerDay > 0 && count >= maxPerDay
+              const dayClass = isFull
+                ? active
+                  ? "bg-accent text-accent-foreground font-semibold"
+                  : "bg-accent/15 text-accent border border-accent/30"
+                : active
+                  ? activeClass
+                  : "text-primary/50 hover:bg-primary/8"
               return (
                 <button
                   key={dateStr}
                   type="button"
                   onClick={() => toggleDay(dayKey, dateStr)}
-                  className={`h-10 rounded-2xl text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30 ${active ? activeClass : "text-primary/50 hover:bg-primary/8"}`}
+                  title={count > 0 ? `${count} / ${maxPerDay} foglalás` : undefined}
+                  className={`relative h-10 rounded-2xl text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30 ${dayClass}`}
                 >
                   {day}
+                  {count > 0 && (
+                    <span className="absolute left-1.5 right-1.5 bottom-1 h-1 rounded-full bg-current/20 overflow-hidden">
+                      <span
+                        className="block h-full rounded-full bg-current transition-all duration-500"
+                        style={{ width: `${pct}%` }}
+                      />
+                    </span>
+                  )}
                 </button>
               )
             })}
@@ -304,31 +363,70 @@ export default function SettingsClient({ initialSettings, year }: Props) {
 
       <div className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
 
-        {/* Left — numeric settings */}
-        <div className="border border-border bg-surface rounded-lg p-6 space-y-5">
-          <p className="text-xs font-bold text-foreground tracking-widest uppercase">Általános</p>
-          <div>
-            <label className={labelClass}>Maximális foglalás naponta</label>
-            <input type="number" min="1" value={formData.maxBookingsPerDay} onChange={(e) => setFormData({ ...formData, maxBookingsPerDay: e.target.value === "" ? "" : Number.parseInt(e.target.value) })} className={inputClass} />
+        {/* Left — numeric settings + season capacity */}
+        <div className="space-y-6">
+          <div className="border border-border bg-surface rounded-lg p-6 space-y-5">
+            <p className="text-xs font-bold text-foreground tracking-widest uppercase">Általános</p>
+            <div>
+              <label className={labelClass}>Maximális foglalás naponta</label>
+              <input type="number" min="1" value={formData.maxBookingsPerDay} onChange={(e) => setFormData({ ...formData, maxBookingsPerDay: e.target.value === "" ? "" : Number.parseInt(e.target.value) })} className={inputClass} />
+            </div>
+            <div>
+              <label className={labelClass}>Maximális fa szezononként</label>
+              <input type="number" min="1" value={formData.maxTreesPerSeason} onChange={(e) => setFormData({ ...formData, maxTreesPerSeason: e.target.value === "" ? "" : Number.parseInt(e.target.value) })} className={inputClass} />
+            </div>
+            <div>
+              <label className={labelClass}>Ár fánként (Ft)</label>
+              <input type="number" min="1" value={formData.pricePerTree} onChange={(e) => setFormData({ ...formData, pricePerTree: e.target.value === "" ? "" : Number.parseInt(e.target.value) })} className={inputClass} />
+            </div>
           </div>
-          <div>
-            <label className={labelClass}>Maximális fa szezononként</label>
-            <input type="number" min="1" value={formData.maxTreesPerSeason} onChange={(e) => setFormData({ ...formData, maxTreesPerSeason: e.target.value === "" ? "" : Number.parseInt(e.target.value) })} className={inputClass} />
-          </div>
-          <div>
-            <label className={labelClass}>Ár fánként (Ft)</label>
-            <input type="number" min="1" value={formData.pricePerTree} onChange={(e) => setFormData({ ...formData, pricePerTree: e.target.value === "" ? "" : Number.parseInt(e.target.value) })} className={inputClass} />
-          </div>
-          <div className="border-t border-border pt-5 space-y-0">
-            {[
-              { label: "Elérhető napok", value: formData.availableDays.length },
-              { label: "Átvételi napok", value: formData.retrievalDays.length },
-            ].map((row) => (
-              <div key={row.label} className="flex justify-between py-3 border-b border-border last:border-b-0">
-                <span className="text-xs font-bold text-accent tracking-widest uppercase">{row.label}</span>
-                <span className="text-sm font-bold text-foreground">{row.value}</span>
+
+          {/* Season tree capacity — first on mobile */}
+          {(() => {
+            const limit = typeof formData.maxTreesPerSeason === "number" ? formData.maxTreesPerSeason : 0
+            const remaining = Math.max(0, limit - treesReserved)
+            const pct = limit > 0 ? Math.min(100, Math.round((treesReserved / limit) * 100)) : 0
+            return (
+              <div className="border border-border bg-surface rounded-lg p-6">
+                <p className="text-xs font-bold text-foreground tracking-widest uppercase mb-4">Szezonális fa kapacitás</p>
+                <div className="space-y-0">
+                  <div className="flex justify-between py-3 border-b border-border">
+                    <span className="text-xs font-bold text-accent tracking-widest uppercase">Megrendelt fák</span>
+                    <span className="text-sm font-bold text-foreground">{treesReserved} db</span>
+                  </div>
+                  <div className="flex justify-between py-3 border-b border-border">
+                    <span className="text-xs font-bold text-accent tracking-widest uppercase">Szabad kapacitás</span>
+                    <span className={`text-sm font-bold ${remaining === 0 ? "text-destructive" : "text-foreground"}`}>{remaining} db</span>
+                  </div>
+                  <div className="flex justify-between py-3">
+                    <span className="text-xs font-bold text-accent tracking-widest uppercase">Kihasználtság</span>
+                    <span className="text-sm font-bold text-foreground">{pct}%</span>
+                  </div>
+                </div>
+                <div className="mt-4 h-2 rounded-full bg-border overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all duration-500 ${pct >= 90 ? "bg-destructive" : "bg-accent"}`}
+                    style={{ width: `${pct}%` }}
+                  />
+                </div>
               </div>
-            ))}
+            )
+          })()}
+
+          {/* Calendar summary */}
+          <div className="border border-border bg-surface rounded-lg p-6">
+            <p className="text-xs font-bold text-foreground tracking-widest uppercase mb-4">Naptár összesítő</p>
+            <div className="space-y-0">
+              {[
+                { label: "Elérhető napok", value: formData.availableDays.length },
+                { label: "Átvételi napok", value: formData.retrievalDays.length },
+              ].map((row) => (
+                <div key={row.label} className="flex justify-between py-3 border-b border-border last:border-b-0">
+                  <span className="text-xs font-bold text-accent tracking-widest uppercase">{row.label}</span>
+                  <span className="text-sm font-bold text-foreground">{row.value}</span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -336,12 +434,13 @@ export default function SettingsClient({ initialSettings, year }: Props) {
         <div className="space-y-6">
           <CalendarBlock
             title="Foglalható napok"
-            subtitle="Ezek a napok jelennek meg a publikus foglalási naptárban."
+            subtitle="Ezek a napok jelennek meg a publikus foglalási naptárban. A sáv az adott nap foglaltsági szintjét mutatja a napi limithez képest."
             month={availableMonth}
             onMonthChange={setAvailableMonth}
             dates={formData.availableDays}
             dayKey="availableDays"
             activeClass="bg-foreground text-background font-semibold"
+            dayCounts={dayCounts}
           />
           <CalendarBlock
             title="Átvételi napok"

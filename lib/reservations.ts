@@ -187,6 +187,30 @@ export async function getTotalTreesReservedForYear(year: number): Promise<number
   return Number(rows[0].total_trees)
 }
 
+// Reservation count per visit_date for the year, excluding no-shows. Dates with zero
+// reservations are simply absent from the map.
+export async function getReservationCountsByDay(year: number): Promise<Record<string, number>> {
+  const rows = await sql`
+    SELECT visit_date, COUNT(*) AS count
+    FROM reservations
+    WHERE year = ${year} AND status != ${ReservationStatus.NO_SHOW}
+    GROUP BY visit_date
+  `
+  const counts: Record<string, number> = {}
+  for (const row of rows) {
+    counts[formatDate(row.visit_date)] = Number(row.count)
+  }
+  return counts
+}
+
+// Visit dates that have reached the daily reservation-count cap.
+export async function getFullyBookedDates(year: number, maxBookingsPerDay: number): Promise<string[]> {
+  const counts = await getReservationCountsByDay(year)
+  return Object.entries(counts)
+    .filter(([, count]) => count >= maxBookingsPerDay)
+    .map(([date]) => date)
+}
+
 function requiresTreeNumber(status: ReservationStatus) {
   return (
     status === ReservationStatus.TREE_TAGGED ||

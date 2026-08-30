@@ -1,7 +1,7 @@
 import "server-only"
 import { z } from "zod"
 import { getSettings, updateSettings } from "@/lib/settings"
-import { getTotalTreesReservedForYear } from "@/lib/reservations"
+import { getTotalTreesReservedForYear, getFullyBookedDates } from "@/lib/reservations"
 import { enforceSameOrigin, logApiError, parseJsonBody, requireAdminSessionResponse } from "@/lib/api"
 import { getActiveYear, getViewYear } from "@/lib/years"
 
@@ -48,7 +48,11 @@ export async function GET(request: Request) {
     const settings = await getSettings(activeYear)
     const treesReserved = await getTotalTreesReservedForYear(activeYear)
     const isSeasonSoldOut = treesReserved >= settings.maxTreesPerSeason
+    const fullyBookedDates = await getFullyBookedDates(activeYear, settings.maxBookingsPerDay)
     const { maxTreesPerSeason, ...publicSettings } = settings
+    publicSettings.availableDays = publicSettings.availableDays.filter(
+      (day) => !fullyBookedDates.includes(day),
+    )
     return Response.json(
       { success: true, settings: publicSettings, isSeasonSoldOut },
       { headers: { "Cache-Control": "no-store, max-age=0" } },
@@ -77,6 +81,20 @@ export async function PATCH(request: Request) {
     if (!parsedBody.success) return parsedBody.response
 
     const year = await getViewYear()
+
+    if (parsedBody.data.maxTreesPerSeason !== undefined) {
+      const treesReserved = await getTotalTreesReservedForYear(year)
+      if (parsedBody.data.maxTreesPerSeason < treesReserved) {
+        return Response.json(
+          {
+            success: false,
+            error: `A szezonális limit nem lehet kevesebb, mint a már megrendelt fák száma (${treesReserved} db).`,
+          },
+          { status: 400 },
+        )
+      }
+    }
+
     const settings = await updateSettings(year, parsedBody.data)
 
     return Response.json(
