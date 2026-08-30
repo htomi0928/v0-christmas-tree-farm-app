@@ -206,7 +206,7 @@ export default function BookingPage() {
                 Hamarosan<br />jelentkezünk.
               </h1>
               <p className="text-primary font-light mb-10 max-w-xs">
-                A foglalásod megkaptuk. Köszönjük, hogy hozzánk fordultál — várunk az általad választott napon.
+                Megkaptuk a foglalásod. Várunk az általad választott napon.
               </p>
 
               <div className="space-y-0 mb-10">
@@ -443,7 +443,7 @@ export default function BookingPage() {
                   onDateSelect={handleDateSelect}
                   availableDates={settings?.availableDays}
                 />
-                <p className="text-primary text-xs mt-1">Válassz egy elérhető napot — a megadott napokon 10:00-12:00 magasságában</p>
+                <p className="text-primary text-xs mt-1">Válassz egy elérhető napot, a megadott napokon 10:00 és 12:00 között.</p>
                 {errors.visitDate && <p data-error className="text-destructive text-xs mt-1">{errors.visitDate}</p>}
               </div>
 
@@ -558,7 +558,7 @@ export default function BookingPage() {
                       rel="noopener noreferrer"
                       className="text-secondary underline underline-offset-2 hover:text-primary transition-colors"
                     >
-                      ASZF
+                      ÁSZF
                     </Link>
                     -et.{" "}
                     <span className="text-secondary">*</span>

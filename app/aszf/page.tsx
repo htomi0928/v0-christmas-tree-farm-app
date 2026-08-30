@@ -1,4 +1,5 @@
 import type { Metadata } from "next"
+import { phoneNumber } from "@/lib/site"
 
 export const metadata: Metadata = {
   title: "ASZF – Zalaegerszegi Nordmann Fenyők",
@@ -13,12 +14,12 @@ export default function ASZFPage() {
         <h1 className="text-3xl sm:text-4xl font-extrabold text-[#3a3a3a] tracking-tight mb-2">
           Általános Szerződési Feltételek
         </h1>
-        <p className="text-sm text-[#4a4f4a]/60 mb-10">Utolsó frissítés: 2026. október 1.</p>
+        <p className="text-sm text-[#4a4f4a]/60 mb-10">Utolsó frissítés: 2026. augusztus 30.</p>
 
         <div className="bg-[#6e7f6a]/10 border border-[#6e7f6a]/20 rounded-xl px-6 py-5 mb-10">
           <p className="text-sm text-[#4a4f4a] leading-relaxed">
             <strong className="text-[#3a3a3a]">Röviden:</strong> Online időpontot foglalsz egy fenyő megtekintésére és
-            kiválasztására. A foglalás nem jelent kötelező vásárlást — a fa ára a helyszínen, az átvételkor fizetendő.
+            kiválasztására. A foglalás nem jelent kötelező vásárlást, a fa ára a helyszínen, az átvételkor fizetendő.
           </p>
         </div>
 
@@ -64,7 +65,7 @@ export default function ASZFPage() {
             <h2 className="text-base font-bold text-[#3a3a3a] mb-2">5. A fa megjelölése és átadása</h2>
             <p className="text-sm leading-relaxed font-light">
               A helyszínen kiválasztott fát sorszámmal jelöljük meg. A sorszámmal ellátott fa csak a te
-              foglalásodhoz rendelt — más nem viheti el. A fa kivágása és átadása a szezon vége felé,
+              foglalásodhoz rendelt, más nem viheti el. A fa kivágása és átadása a szezon vége felé,
               karácsony előtt néhány héttel történik; az időpontot a foglalásban rögzített kapcsolaton
               egyeztetjük.
             </p>
@@ -93,7 +94,7 @@ export default function ASZFPage() {
           <section>
             <h2 className="text-base font-bold text-[#3a3a3a] mb-2">8. Kapcsolat</h2>
             <p className="text-sm leading-relaxed font-light">
-              Kérdés esetén hívj minket: <strong>+36 (30) 123 4567</strong>, szombat–vasárnap 10:00–12:00 között.
+              Kérdés esetén hívj minket: <strong>{phoneNumber}</strong>, szombat–vasárnap 10:00–12:00 között.
             </p>
           </section>
 

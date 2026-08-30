@@ -61,9 +61,16 @@ export async function POST(request: Request) {
     }
 
     const treesReserved = await getTotalTreesReservedForYear(activeYear)
-    if (treesReserved + data.treeCount > settings.maxTreesPerSeason) {
+    const remaining = settings.maxTreesPerSeason - treesReserved
+    if (remaining <= 0) {
       return Response.json(
-        { success: false, errors: ["Erre a szezonra elfogyott az összes fa."] },
+        { success: false, errors: ["Sajnáljuk, erre a szezonra elfogyott az összes fa."] },
+        { status: 400 },
+      )
+    }
+    if (data.treeCount > remaining) {
+      return Response.json(
+        { success: false, errors: [`Sajnáljuk, jelenleg a készleteink végén járunk — maximum ${remaining} db fát tudunk biztosítani, de te ${data.treeCount} db-ot kértél. Kérjük, csökkentsd a darabszámot.`] },
         { status: 400 },
       )
     }
