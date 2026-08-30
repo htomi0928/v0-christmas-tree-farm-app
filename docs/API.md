@@ -220,7 +220,7 @@ Deleting a reservation that has assigned `tree_numbers` logs a `WARNING` to serv
 
 The `year` is stamped server-side from the active year — the request body never contains it.
 
-A side-effect `POST` triggers a Resend email to `RESERVATION_NOTIFY_TO` if all email env vars are set; missing email config logs a warning and the reservation still succeeds.
+A side-effect `POST` triggers two Resend emails if all email env vars are set: an internal notification to `RESERVATION_NOTIFY_TO`, and a booking confirmation to the customer's own `email` (skipped if they didn't provide one). Missing email config, or either send failing, logs a warning/error and the reservation still succeeds.
 
 There is no public `GET /api/reservations` — availability data is computed in the booking page from settings + admin reservation data, not from a public endpoint.
 

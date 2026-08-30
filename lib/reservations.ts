@@ -152,7 +152,7 @@ export async function getReservationById(id: number): Promise<Reservation | null
 export async function createReservation(
   data: CreateReservationData,
   year: number,
-): Promise<{ success: boolean; data?: Reservation; errors?: string[] }> {
+): Promise<{ success: true; data: Reservation } | { success: false; errors: string[] }> {
   const errors = validateReservationData(data)
   if (errors.length > 0) {
     return { success: false, errors }

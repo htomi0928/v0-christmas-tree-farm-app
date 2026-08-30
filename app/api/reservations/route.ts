@@ -2,7 +2,7 @@ import { z } from "zod"
 import { createReservation, getTotalTreesReservedForYear, getFullyBookedDates } from "@/lib/reservations"
 import { getSettings } from "@/lib/settings"
 import { logApiError, parseJsonBody } from "@/lib/api"
-import { sendNewReservationNotification } from "@/lib/reservation-notifications"
+import { sendNewReservationNotification, sendReservationConfirmationEmail } from "@/lib/reservation-notifications"
 import { getActiveYear } from "@/lib/years"
 
 export const runtime = "nodejs"
@@ -107,6 +107,12 @@ export async function POST(request: Request) {
       await sendNewReservationNotification(result.data)
     } catch (error) {
       logApiError("reservation notification email failed", error)
+    }
+
+    try {
+      await sendReservationConfirmationEmail(result.data, settings.pricePerTree)
+    } catch (error) {
+      logApiError("reservation confirmation email failed", error)
     }
 
     return Response.json({
