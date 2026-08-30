@@ -94,6 +94,7 @@ export default function BookingPage() {
   const [settings, setSettings] = useState<any>(null)
   const [settingsLoading, setSettingsLoading] = useState(true)
   const [seasonClosed, setSeasonClosed] = useState(false)
+  const [seasonSoldOut, setSeasonSoldOut] = useState(false)
 
   const infoRows = [
     { label: "Érkezés", value: "10:00 – 12:00 között", href: undefined },
@@ -113,7 +114,10 @@ export default function BookingPage() {
         return res.json()
       })
       .then((data) => {
-        if (data?.success) setSettings(data.settings)
+        if (data?.success) {
+          setSettings(data.settings)
+          setSeasonSoldOut(Boolean(data.isSeasonSoldOut))
+        }
       })
       .catch(() => {})
       .finally(() => setSettingsLoading(false))
@@ -284,6 +288,28 @@ export default function BookingPage() {
           </h1>
           <p className="text-primary font-light max-w-md mx-auto mb-10">
             A következő szezon foglalása hamarosan nyílik. Hívj minket, ha kérdésed van: +36 (30) 123 4567.
+          </p>
+          <Link href="/">
+            <Button className="h-12 px-7 text-base rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 font-semibold">
+              Vissza a főoldalra
+            </Button>
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
+  /* ── Season sold out (season-wide tree cap reached) ── */
+  if (seasonSoldOut) {
+    return (
+      <div className="bg-background min-h-[calc(100vh-4rem)]">
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 w-full py-24 text-center">
+          <div className="section-label justify-center">Foglalás</div>
+          <h1 className="text-4xl sm:text-5xl font-bold text-foreground mb-4 tracking-tight leading-tight">
+            Erre a szezonra elfogyott az összes fa
+          </h1>
+          <p className="text-primary font-light max-w-md mx-auto mb-10">
+            Ebben a szezonban minden fát lefoglaltak. Hívj minket, ha kérdésed van: +36 (30) 123 4567.
           </p>
           <Link href="/">
             <Button className="h-12 px-7 text-base rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 font-semibold">

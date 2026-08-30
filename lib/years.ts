@@ -75,7 +75,7 @@ export async function createYear(
   // Pull the most recent prior year's settings as a template (excluding available_days,
   // which always need to be picked fresh per season).
   const priorRows = await sql`
-    SELECT max_bookings_per_day, retrieval_days, price
+    SELECT max_bookings_per_day, max_trees_per_season, retrieval_days, price
     FROM settings
     WHERE year < ${year}
     ORDER BY year DESC
@@ -83,14 +83,15 @@ export async function createYear(
   `
   const template = priorRows[0]
   const maxBookings = template ? Number(template.max_bookings_per_day) : 20
+  const maxTreesPerSeason = template ? Number(template.max_trees_per_season) : 500
   const retrievalDays = template?.retrieval_days ?? ""
   const price = template ? Number(template.price) : 8000
 
   await sql.transaction([
     sql`INSERT INTO years (year, is_active) VALUES (${year}, FALSE)`,
     sql`
-      INSERT INTO settings (year, available_days, max_bookings_per_day, retrieval_days, price)
-      VALUES (${year}, '', ${maxBookings}, ${retrievalDays}, ${price})
+      INSERT INTO settings (year, available_days, max_bookings_per_day, max_trees_per_season, retrieval_days, price)
+      VALUES (${year}, '', ${maxBookings}, ${maxTreesPerSeason}, ${retrievalDays}, ${price})
     `,
   ])
 
@@ -155,6 +156,7 @@ export function defaultSettingsFor(year: number): Settings {
     year,
     availableDays: [],
     maxBookingsPerDay: 20,
+    maxTreesPerSeason: 500,
     retrievalDays: [],
     pricePerTree: 8000,
   }

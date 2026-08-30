@@ -27,6 +27,7 @@ export default function SettingsClient({ initialSettings, year }: Props) {
   const lastSavedRef = useRef({
     availableDays: [...(initialSettings.availableDays || [])].sort(),
     maxBookingsPerDay: initialSettings.maxBookingsPerDay,
+    maxTreesPerSeason: initialSettings.maxTreesPerSeason,
     retrievalDays: [...(initialSettings.retrievalDays || [])].sort(),
     pricePerTree: initialSettings.pricePerTree,
   })
@@ -39,11 +40,13 @@ export default function SettingsClient({ initialSettings, year }: Props) {
   const [formData, setFormData] = useState<{
     availableDays: string[]
     maxBookingsPerDay: number | ""
+    maxTreesPerSeason: number | ""
     retrievalDays: string[]
     pricePerTree: number | ""
   }>({
     availableDays: initialSettings.availableDays || [],
     maxBookingsPerDay: initialSettings.maxBookingsPerDay,
+    maxTreesPerSeason: initialSettings.maxTreesPerSeason,
     retrievalDays: initialSettings.retrievalDays || [],
     pricePerTree: initialSettings.pricePerTree,
   })
@@ -53,6 +56,7 @@ export default function SettingsClient({ initialSettings, year }: Props) {
     setFormData({
       availableDays: initialSettings.availableDays || [],
       maxBookingsPerDay: initialSettings.maxBookingsPerDay,
+      maxTreesPerSeason: initialSettings.maxTreesPerSeason,
       retrievalDays: initialSettings.retrievalDays || [],
       pricePerTree: initialSettings.pricePerTree,
     })
@@ -62,6 +66,7 @@ export default function SettingsClient({ initialSettings, year }: Props) {
     () => ({
       availableDays: [...(initialSettings.availableDays || [])].sort(),
       maxBookingsPerDay: initialSettings.maxBookingsPerDay,
+      maxTreesPerSeason: initialSettings.maxTreesPerSeason,
       retrievalDays: [...(initialSettings.retrievalDays || [])].sort(),
       pricePerTree: initialSettings.pricePerTree,
     }),
@@ -72,6 +77,7 @@ export default function SettingsClient({ initialSettings, year }: Props) {
     () => ({
       availableDays: [...formData.availableDays].sort(),
       maxBookingsPerDay: formData.maxBookingsPerDay,
+      maxTreesPerSeason: formData.maxTreesPerSeason,
       retrievalDays: [...formData.retrievalDays].sort(),
       pricePerTree: formData.pricePerTree,
     }),
@@ -121,11 +127,14 @@ export default function SettingsClient({ initialSettings, year }: Props) {
 
   const computeChangeSummary = (
     before: typeof lastSavedRef.current,
-    after: { availableDays: string[]; maxBookingsPerDay: number | ""; retrievalDays: string[]; pricePerTree: number | "" },
+    after: { availableDays: string[]; maxBookingsPerDay: number | ""; maxTreesPerSeason: number | ""; retrievalDays: string[]; pricePerTree: number | "" },
   ): string[] => {
     const changes: string[] = []
     if (before.maxBookingsPerDay !== after.maxBookingsPerDay) {
       changes.push(`Max. foglalás/nap: ${before.maxBookingsPerDay} → ${after.maxBookingsPerDay}`)
+    }
+    if (before.maxTreesPerSeason !== after.maxTreesPerSeason) {
+      changes.push(`Max. fa/szezon: ${before.maxTreesPerSeason} → ${after.maxTreesPerSeason}`)
     }
     if (before.pricePerTree !== after.pricePerTree) {
       changes.push(`Ár fánként: ${Number(before.pricePerTree).toLocaleString("hu-HU")} Ft → ${Number(after.pricePerTree).toLocaleString("hu-HU")} Ft`)
@@ -149,6 +158,10 @@ export default function SettingsClient({ initialSettings, year }: Props) {
       setError("A maximális foglalás naponta mező nem lehet üres.")
       return
     }
+    if (formData.maxTreesPerSeason === "") {
+      setError("A maximális fa/szezon mező nem lehet üres.")
+      return
+    }
     if (formData.pricePerTree === "") {
       setError("Az ár fánként mező nem lehet üres.")
       return
@@ -169,6 +182,7 @@ export default function SettingsClient({ initialSettings, year }: Props) {
         lastSavedRef.current = {
           availableDays: [...formData.availableDays].sort(),
           maxBookingsPerDay: formData.maxBookingsPerDay,
+          maxTreesPerSeason: formData.maxTreesPerSeason,
           retrievalDays: [...formData.retrievalDays].sort(),
           pricePerTree: formData.pricePerTree,
         }
@@ -296,6 +310,10 @@ export default function SettingsClient({ initialSettings, year }: Props) {
           <div>
             <label className={labelClass}>Maximális foglalás naponta</label>
             <input type="number" min="1" value={formData.maxBookingsPerDay} onChange={(e) => setFormData({ ...formData, maxBookingsPerDay: e.target.value === "" ? "" : Number.parseInt(e.target.value) })} className={inputClass} />
+          </div>
+          <div>
+            <label className={labelClass}>Maximális fa szezononként</label>
+            <input type="number" min="1" value={formData.maxTreesPerSeason} onChange={(e) => setFormData({ ...formData, maxTreesPerSeason: e.target.value === "" ? "" : Number.parseInt(e.target.value) })} className={inputClass} />
           </div>
           <div>
             <label className={labelClass}>Ár fánként (Ft)</label>

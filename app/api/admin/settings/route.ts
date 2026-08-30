@@ -1,12 +1,14 @@
 import "server-only"
 import { z } from "zod"
 import { getSettings, updateSettings } from "@/lib/settings"
+import { getTotalTreesReservedForYear } from "@/lib/reservations"
 import { enforceSameOrigin, logApiError, parseJsonBody, requireAdminSessionResponse } from "@/lib/api"
 import { getActiveYear, getViewYear } from "@/lib/years"
 
 const settingsSchema = z.object({
   availableDays: z.array(z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Érvénytelen dátumformátum.")).max(366, "Legfeljebb 366 nap adható meg.").optional(),
   maxBookingsPerDay: z.number({ invalid_type_error: "Érvénytelen szám." }).int("Egész számot adj meg.").min(1, "Minimum 1 foglalás naponta.").max(500, "Maximum 500 foglalás naponta.").optional(),
+  maxTreesPerSeason: z.number({ invalid_type_error: "Érvénytelen szám." }).int("Egész számot adj meg.").min(1, "Minimum 1 fa szezononként.").max(100000, "Maximum 100000 fa szezononként.").optional(),
   retrievalDays: z.array(z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Érvénytelen dátumformátum.")).max(366, "Legfeljebb 366 nap adható meg.").optional(),
   pricePerTree: z.number({ invalid_type_error: "Érvénytelen ár." }).int("Egész számot adj meg.").min(0, "Az ár nem lehet negatív.").max(100000000, "Túl magas ár.").optional(),
 })
@@ -44,8 +46,11 @@ export async function GET(request: Request) {
       )
     }
     const settings = await getSettings(activeYear)
+    const treesReserved = await getTotalTreesReservedForYear(activeYear)
+    const isSeasonSoldOut = treesReserved >= settings.maxTreesPerSeason
+    const { maxTreesPerSeason, ...publicSettings } = settings
     return Response.json(
-      { success: true, settings },
+      { success: true, settings: publicSettings, isSeasonSoldOut },
       { headers: { "Cache-Control": "no-store, max-age=0" } },
     )
   } catch (error) {

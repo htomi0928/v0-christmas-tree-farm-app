@@ -8,6 +8,7 @@ function rowToSettings(row: any): Settings {
     year: Number(row.year),
     availableDays: row.available_days ? row.available_days.split(",").filter(Boolean) : [],
     maxBookingsPerDay: Number(row.max_bookings_per_day),
+    maxTreesPerSeason: Number(row.max_trees_per_season),
     retrievalDays: row.retrieval_days ? row.retrieval_days.split(",").filter(Boolean) : [],
     pricePerTree: Number(row.price),
   }
@@ -31,8 +32,8 @@ export async function updateSettings(
 ): Promise<Settings> {
   // Ensure a row exists for the year so the partial UPDATE below can hit it.
   await sql`
-    INSERT INTO settings (year, available_days, max_bookings_per_day, retrieval_days, price)
-    VALUES (${year}, '', 20, '', 8000)
+    INSERT INTO settings (year, available_days, max_bookings_per_day, max_trees_per_season, retrieval_days, price)
+    VALUES (${year}, '', 20, 500, '', 8000)
     ON CONFLICT (year) DO NOTHING
   `
 
@@ -47,6 +48,10 @@ export async function updateSettings(
   if (newSettings.maxBookingsPerDay !== undefined) {
     updates.push(`max_bookings_per_day = $${paramIndex++}`)
     values.push(newSettings.maxBookingsPerDay)
+  }
+  if (newSettings.maxTreesPerSeason !== undefined) {
+    updates.push(`max_trees_per_season = $${paramIndex++}`)
+    values.push(newSettings.maxTreesPerSeason)
   }
   if (newSettings.retrievalDays !== undefined) {
     updates.push(`retrieval_days = $${paramIndex++}`)

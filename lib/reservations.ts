@@ -177,6 +177,16 @@ export async function createReservation(
   return { success: true, data: rowToReservation(rows[0]) }
 }
 
+// Total trees reserved for the year, excluding no-shows, used to enforce the season-wide cap.
+export async function getTotalTreesReservedForYear(year: number): Promise<number> {
+  const rows = await sql`
+    SELECT COALESCE(SUM(tree_count), 0) AS total_trees
+    FROM reservations
+    WHERE year = ${year} AND status != ${ReservationStatus.NO_SHOW}
+  `
+  return Number(rows[0].total_trees)
+}
+
 function requiresTreeNumber(status: ReservationStatus) {
   return (
     status === ReservationStatus.TREE_TAGGED ||
