@@ -24,7 +24,7 @@ There is **no test runner configured**. "Testing" in this repo means running the
 
 - `DATABASE_URL` — Neon Postgres connection string
 - `AUTH_SECRET` — HMAC key for session JWTs
-- `RESEND_API_KEY`, `RESERVATION_NOTIFY_TO`, `RESERVATION_EMAIL_FROM` — optional; if any are missing, new-reservation emails are skipped with a warning instead of failing (see `lib/reservation-notifications.ts`).
+- `RESEND_API_KEY`, `RESERVATION_NOTIFY_TO`, `RESERVATION_EMAIL_FROM` — optional; if any are missing, new-reservation emails (both the internal notification and the customer confirmation) are skipped with a warning instead of failing (see `lib/reservation-notifications.ts`).
 
 ## Architecture
 
