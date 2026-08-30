@@ -9,8 +9,8 @@ const isDev = process.env.NODE_ENV !== "production"
 const contentSecurityPolicy = [
   "default-src 'self'",
   isDev
-    ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.live"
-    : "script-src 'self' 'unsafe-inline' https://vercel.live",
+    ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.live https://va.vercel-scripts.com"
+    : "script-src 'self' 'unsafe-inline' https://vercel.live https://va.vercel-scripts.com",
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: https:",
   "font-src 'self' data:",
