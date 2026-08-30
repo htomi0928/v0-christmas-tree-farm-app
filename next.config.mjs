@@ -11,9 +11,9 @@ const contentSecurityPolicy = [
   isDev
     ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.live https://va.vercel-scripts.com"
     : "script-src 'self' 'unsafe-inline' https://vercel.live https://va.vercel-scripts.com",
-  "style-src 'self' 'unsafe-inline'",
+  "style-src 'self' 'unsafe-inline' https://vercel.live",
   "img-src 'self' data: https:",
-  "font-src 'self' data:",
+  "font-src 'self' data: https://vercel.live",
   isDev
     ? "connect-src 'self' ws: wss: https://vitals.vercel-insights.com https://va.vercel-scripts.com https://vercel.live wss://*.pusher.com"
     : "connect-src 'self' https://vitals.vercel-insights.com https://va.vercel-scripts.com https://vercel.live wss://*.pusher.com",
