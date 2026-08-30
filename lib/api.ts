@@ -57,8 +57,10 @@ export function enforceSameOrigin(request: Request): Response | null {
     return null
   }
 
-  const origin = request.headers.get("origin")
-  if (!origin) return null
+  const origin = request.headers.get("origin") ?? refererOrigin(request.headers.get("referer"))
+  if (!origin) {
+    return jsonError("Hianyzo keres eredet.", 403)
+  }
 
   const host = request.headers.get("x-forwarded-host") ?? request.headers.get("host")
   if (!host) {
@@ -74,6 +76,15 @@ export function enforceSameOrigin(request: Request): Response | null {
   }
 
   return null
+}
+
+function refererOrigin(referer: string | null): string | null {
+  if (!referer) return null
+  try {
+    return new URL(referer).origin
+  } catch {
+    return null
+  }
 }
 
 export function logApiError(context: string, error: unknown) {

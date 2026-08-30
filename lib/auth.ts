@@ -1,4 +1,5 @@
 import "server-only"
+import { timingSafeEqual } from "node:crypto"
 import { sql } from "./db"
 
 const SESSION_DURATION_SECONDS = 8 * 60 * 60
@@ -93,18 +94,27 @@ export async function hashPassword(password: string, saltHex?: string): Promise<
   return `${bytesToHex(saltBuffer)}:${bytesToHex(new Uint8Array(derivedBits))}`
 }
 
+// A syntactically valid but unusable hash, used to keep timing consistent
+// when a username doesn't exist (see validateCredentials).
+const DUMMY_HASH = "0000000000000000000000000000000000000000000000000000000000000000000000000000"
+
 export async function verifyPassword(password: string, storedHash: string): Promise<boolean> {
   const [saltHex] = storedHash.split(":")
   const newHash = await hashPassword(password, saltHex)
-  return newHash === storedHash
+
+  const a = textEncoder.encode(newHash)
+  const b = textEncoder.encode(storedHash)
+  if (a.length !== b.length) return false
+  return timingSafeEqual(a, b)
 }
 
 export async function validateCredentials(username: string, password: string): Promise<boolean> {
   try {
     const rows = await sql`SELECT password_hash FROM admin_users WHERE username = ${username}`
-    if (rows.length === 0) return false
+    const storedHash = rows.length > 0 ? rows[0].password_hash : DUMMY_HASH
 
-    return verifyPassword(password, rows[0].password_hash)
+    const isValid = await verifyPassword(password, storedHash)
+    return rows.length > 0 && isValid
   } catch (error) {
     console.error("[auth] Failed to validate admin credentials:", error)
     return false

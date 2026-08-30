@@ -9,6 +9,7 @@ import CalendarPicker from "@/components/calendar-picker"
 import { formatPrice } from "@/lib/utils"
 import { useUnsavedChanges } from "@/contexts/unsaved-changes-context"
 import { Skeleton } from "@/components/ui/skeleton"
+import { phoneNumber } from "@/lib/site"
 
 interface FormData {
   name: string
@@ -214,7 +215,7 @@ export default function BookingPage() {
                   "Érkezz 10:00 és 12:00 között.",
                   "Fizetés helyszínen: készpénz vagy bankkártya.",
                   "A fát karácsony előtti hétvégén vágjuk és adjuk át.",
-                  "Kérdés esetén hívj: +36 (30) 123 4567",
+                  `Kérdés esetén hívj: ${phoneNumber}`,
                 ].map((item, i) => (
                   <div key={i} className="flex gap-4 py-3 border-b border-border last:border-b-0">
                     <span className="text-secondary font-bold text-sm flex-shrink-0 tabular-nums">
@@ -287,7 +288,7 @@ export default function BookingPage() {
             Foglalás jelenleg nem elérhető
           </h1>
           <p className="text-primary font-light max-w-md mx-auto mb-10">
-            A következő szezon foglalása hamarosan nyílik. Hívj minket, ha kérdésed van: +36 (30) 123 4567.
+            A következő szezon foglalása hamarosan nyílik. Hívj minket, ha kérdésed van: {phoneNumber}.
           </p>
           <Link href="/">
             <Button className="h-12 px-7 text-base rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 font-semibold">
@@ -309,7 +310,7 @@ export default function BookingPage() {
             Erre a szezonra elfogyott az összes fa
           </h1>
           <p className="text-primary font-light max-w-md mx-auto mb-10">
-            Ebben a szezonban minden fát lefoglaltak. Hívj minket, ha kérdésed van: +36 (30) 123 4567.
+            Ebben a szezonban minden fát lefoglaltak. Hívj minket, ha kérdésed van: {phoneNumber}.
           </p>
           <Link href="/">
             <Button className="h-12 px-7 text-base rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 font-semibold">
@@ -412,7 +413,7 @@ export default function BookingPage() {
                   <input
                     id="phone" name="phone" type="tel"
                     value={formData.phone} onChange={handleChange}
-                    placeholder="+36 (30) 123 4567"
+                    placeholder={phoneNumber}
                     className={inputClass(!!errors.phone)}
                   />
                   {errors.phone && <p data-error className="text-destructive text-xs mt-1">{errors.phone}</p>}

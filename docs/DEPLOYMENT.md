@@ -337,6 +337,7 @@ Before deploying to production:
 - [ ] SSL/TLS is enabled for custom domains
 - [ ] Database backups are configured in Neon
 - [ ] Admin credentials are changed from defaults
+- [ ] `SEED_ADMIN_KEY` is a strong random value and is rotated/removed from Vercel env vars once the initial admin account is seeded — `/api/seed-admin` stays live in production and can overwrite admin credentials for anyone holding that key
 
 ## Backup & Recovery
 

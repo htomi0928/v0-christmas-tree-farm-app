@@ -1,6 +1,7 @@
 ﻿import { neon } from "@neondatabase/serverless"
 import { NextResponse } from "next/server"
 import { z } from "zod"
+import { timingSafeEqual } from "node:crypto"
 import { hashPassword } from "@/lib/auth"
 import { logApiError, parseJsonBody } from "@/lib/api"
 
@@ -19,7 +20,14 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, error: "DATABASE_URL nincs beállítva" }, { status: 503 })
     }
 
-    if (req.headers.get("x-seed-key") !== process.env.SEED_ADMIN_KEY) {
+    const providedKey = req.headers.get("x-seed-key") ?? ""
+    const expectedKey: string = process.env.SEED_ADMIN_KEY
+    const providedKeyBuffer = Buffer.from(providedKey)
+    const expectedKeyBuffer = Buffer.from(expectedKey)
+    const keysMatch =
+      providedKeyBuffer.length === expectedKeyBuffer.length && timingSafeEqual(providedKeyBuffer, expectedKeyBuffer)
+
+    if (!keysMatch) {
       return NextResponse.json({ success: false, error: "Nem engedélyezett" }, { status: 401 })
     }
 

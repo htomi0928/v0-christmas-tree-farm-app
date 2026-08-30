@@ -4,6 +4,7 @@ import { getSettings } from "@/lib/settings"
 import { getExpensesSummary } from "@/lib/expenses"
 import { getViewYear } from "@/lib/years"
 import { formatPrice } from "@/lib/utils"
+import { ReservationStatus } from "@/lib/types"
 
 async function getStats(year: number) {
   const reservations = await listReservations({ year })
@@ -11,7 +12,11 @@ async function getStats(year: number) {
   const expensesSummary = await getExpensesSummary(year)
 
   const totalReservations = reservations.length
-  const totalTrees = reservations.reduce((sum, reservation) => sum + reservation.treeCount, 0)
+  // Excludes NO_SHOW to match getTotalTreesReservedForYear, which the booking
+  // cap and Settings page use as the season's real tree count.
+  const totalTrees = reservations
+    .filter((reservation) => reservation.status !== ReservationStatus.NO_SHOW)
+    .reduce((sum, reservation) => sum + reservation.treeCount, 0)
   const now = new Date()
   const nextWeekend = getNextWeekend(now)
   const upcomingReservations = reservations.filter((reservation) => {
