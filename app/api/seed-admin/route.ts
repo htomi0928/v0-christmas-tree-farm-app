@@ -30,7 +30,8 @@ export async function POST(req: Request) {
     const parsedBody = await parseJsonBody(req, seedSchema)
     if (!parsedBody.success) return parsedBody.response
 
-    const { username, password } = parsedBody.data
+    const { password } = parsedBody.data
+    const username = parsedBody.data.username ?? "admin"
     const hashedPassword = await hashPassword(password)
 
     await sql`
