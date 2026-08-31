@@ -2,17 +2,36 @@
 
 ## Overview
 
-This app is deployed on Vercel and uses Neon PostgreSQL for the database. Changes are automatically synchronized from this repository.
+The same `main` branch is deployed to Vercel + Neon and Dokploy + PostgreSQL. Each deployment uses only its own `DATABASE_URL`; the application has no synchronization, replication, or dual-write behaviour.
 
 ## Prerequisites
 
-1. **Vercel Account** - Already set up at [vercel.com](https://vercel.com)
-2. **GitHub Repository** - Repository connected to Vercel
-3. **Neon Database** - PostgreSQL database set up with tables
+1. **GitHub Repository** - connected to both deployments from `main`
+2. **Vercel + Neon** - test/demo environment
+3. **Dokploy + PostgreSQL** - future production environment
 
 ## Environment Variables
 
-The following environment variables must be configured in Vercel:
+Use the same application code in both environments. Copy the complete variable list from [`.env.example`](../.env.example); do not copy secrets between independent environments.
+
+### Vercel + Neon
+
+```env
+DEPLOY_TARGET=vercel
+DATABASE_URL=postgresql://...neon.tech/...
+```
+
+Use Neon’s pooled connection string. Configure the same `AUTH_SECRET`, email, Cloudinary, and optional `SEED_ADMIN_KEY` values required by the application.
+
+### Dokploy + VPS PostgreSQL
+
+```env
+DEPLOY_TARGET=vps
+DATABASE_URL=postgresql://USER:PASSWORD@POSTGRES_HOST:5432/DATABASE
+NIXPACKS_NODE_VERSION=22
+```
+
+Configure the same application secrets independently. Do not relax the secure cookie setting while the generated domain is HTTP; use an HTTPS domain before relying on admin login sessions.
 
 ### Required Variables
 
@@ -31,19 +50,19 @@ node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 4. Apply to: Production, Preview, Development
 
 #### `DATABASE_URL`
-PostgreSQL connection string from Neon.
+PostgreSQL connection string for the current deployment.
 
 **Format:**
 ```
 postgresql://user:password@host.neon.tech/dbname?sslmode=require
 ```
 
-**Get from Neon:**
+**Vercel / Neon:**
 1. Log into Neon console
 2. Go to your project and database
 3. Click "Connection string"
 4. Copy the "Pooled connection" string
-5. Use the `postgres://` variant (not `postgresql://`)
+5. Use the pooled connection string
 
 **Set in Vercel:**
 1. Go to Project Settings → Environment Variables
@@ -95,14 +114,17 @@ Cloudinary cloud name for admin reservation photo uploads.
 Cloudinary API key for signed upload and destroy calls.
 
 #### `CLOUDINARY_API_SECRET`
-Cloudinary API secret for request signing.## Database Setup
+Cloudinary API secret for request signing.
 
 ## Database Setup
 
 ### Initial Setup
 
-1. **Create Database** in Neon
-2. **Create tables** by running the SQL in [Required Tables](#required-tables) below against your Neon database (via the Neon SQL editor or `psql`). There are no automated migrations — `/scripts/test-db-connection.ts` only verifies connectivity.
+1. **Create an empty PostgreSQL database** in Neon or on the VPS.
+2. **Create tables** by running the canonical schema. There are no automated migrations:
+   ```bash
+   psql "$DATABASE_URL" -f db/schema.sql
+   ```
 
    After tables exist, seed an admin via:
    ```bash
@@ -112,7 +134,11 @@ Cloudinary API secret for request signing.## Database Setup
      -d '{"username":"admin","password":"<at-least-12-chars>"}'
    ```
 
-### Required Tables
+### Schema
+
+[`db/schema.sql`](../db/schema.sql) is the single canonical schema file. It contains all required tables, indexes, foreign keys, checks, and the one-active-year constraint. It uses idempotent `CREATE ... IF NOT EXISTS` statements and does not delete existing data.
+
+### Legacy schema reference
 
 The app requires the following tables in PostgreSQL. Field names below match what the code reads/writes (see `lib/db.ts`, `lib/reservations.ts`, `lib/expenses.ts`, `lib/settings.ts`, `lib/years.ts`, `lib/auth.ts`).
 

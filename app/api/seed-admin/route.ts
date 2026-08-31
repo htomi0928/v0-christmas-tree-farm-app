@@ -1,9 +1,9 @@
-﻿import { neon } from "@neondatabase/serverless"
 import { NextResponse } from "next/server"
 import { z } from "zod"
 import { timingSafeEqual } from "node:crypto"
 import { hashPassword } from "@/lib/auth"
 import { logApiError, parseJsonBody } from "@/lib/api"
+import { sql } from "@/lib/db"
 
 const seedSchema = z.object({
   username: z.string().trim().min(1).max(100).default("admin"),
@@ -14,10 +14,6 @@ export async function POST(req: Request) {
   try {
     if (!process.env.SEED_ADMIN_KEY) {
       return NextResponse.json({ success: false, error: "SEED_ADMIN_KEY nincs beállítva" }, { status: 503 })
-    }
-
-    if (!process.env.DATABASE_URL) {
-      return NextResponse.json({ success: false, error: "DATABASE_URL nincs beállítva" }, { status: 503 })
     }
 
     const providedKey = req.headers.get("x-seed-key") ?? ""
@@ -34,8 +30,8 @@ export async function POST(req: Request) {
     const parsedBody = await parseJsonBody(req, seedSchema)
     if (!parsedBody.success) return parsedBody.response
 
-    const sql = neon(process.env.DATABASE_URL)
-    const { username, password } = parsedBody.data
+    const { password } = parsedBody.data
+    const username = parsedBody.data.username ?? "admin"
     const hashedPassword = await hashPassword(password)
 
     await sql`

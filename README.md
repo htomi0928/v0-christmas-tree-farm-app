@@ -73,11 +73,12 @@ A comprehensive management system for Christmas tree farm operations. The app fe
 
 ## Environment Variables
 
-Required environment variables (set in Vercel):
+Required environment variables (set for each deployment):
 
 ```env
 AUTH_SECRET              # Secret key for session signing
-DATABASE_URL            # Neon PostgreSQL connection string
+DATABASE_URL            # PostgreSQL connection string for the current environment
+DEPLOY_TARGET           # vercel or vps
 RESEND_API_KEY          # API key from Resend
 RESERVATION_NOTIFY_TO   # Comma-separated internal recipients
 RESERVATION_EMAIL_FROM  # Verified sender, e.g. Foglalás <noreply@yourdomain.tld>

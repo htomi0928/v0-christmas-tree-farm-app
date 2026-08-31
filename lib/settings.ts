@@ -76,6 +76,6 @@ export async function updateSettings(
 
   values.push(year)
   const query = `UPDATE settings SET ${updates.join(", ")} WHERE year = $${paramIndex} RETURNING *`
-  const rows = await sql.query(query, values)
+  const rows = await sql.unsafe(query, values)
   return rowToSettings(rows[0])
 }

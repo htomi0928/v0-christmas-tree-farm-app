@@ -5,7 +5,7 @@ This guide covers local development setup, common workflows, and debugging tips.
 ## Quick Start
 
 ### Prerequisites
-- Node.js 18+ installed
+- Node.js 22+ installed
 - pnpm package manager (or npm/yarn)
 - PostgreSQL locally OR Neon database access
 - Code editor (VS Code recommended)
@@ -22,6 +22,7 @@ pnpm install
 
 # Create .env.local with database connection
 echo 'DATABASE_URL=postgresql://...' > .env.local
+echo 'DEPLOY_TARGET=vps' >> .env.local
 echo 'AUTH_SECRET=dev-secret-key-not-for-production' >> .env.local
 ```
 
@@ -105,7 +106,10 @@ createdb christmas_tree_farm
 
 ### Initialize Database
 
-1. Create tables via the Neon SQL editor or `psql`. The schema lives in [docs/DEPLOYMENT.md](DEPLOYMENT.md#required-tables) — `admin_users`, `reservations`, `expenses`, `settings`.
+1. Create tables with the canonical schema file. It works with both Neon and standard PostgreSQL:
+   ```bash
+   psql "$DATABASE_URL" -f db/schema.sql
+   ```
 
 2. Verify the connection:
    ```bash
@@ -183,7 +187,7 @@ createdb christmas_tree_farm
    ```typescript
    // lib/reservations.ts
    export async function getReservationById(id: number) {
-     const result = await sql.query(
+     const result = await sql.unsafe(
        'SELECT * FROM reservations WHERE id = $1',
        [id]
      )

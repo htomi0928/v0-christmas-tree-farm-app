@@ -2,22 +2,28 @@
 // production), and Next's dev server needs a websocket for HMR — so the
 // CSP is relaxed in development and stays strict in production.
 const isDev = process.env.NODE_ENV !== "production"
+const deployTarget = process.env.DEPLOY_TARGET
+const isVercel = deployTarget === "vercel"
 
-// Vercel's preview-deployment live-feedback toolbar (vercel.live) injects its
-// own script/iframe/websocket — allowed everywhere since it's inert on
-// production URLs anyway (Vercel only activates it on preview deployments).
+const vercelScriptSources = isVercel ? " https://vercel.live https://va.vercel-scripts.com" : ""
+const vercelStyleSources = isVercel ? " https://vercel.live" : ""
+const vercelConnectSources = isVercel
+  ? " https://vitals.vercel-insights.com https://va.vercel-scripts.com https://vercel.live"
+  : ""
+const vercelFrameSources = isVercel ? " https://vercel.live" : ""
+
 const contentSecurityPolicy = [
   "default-src 'self'",
   isDev
-    ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://vercel.live https://va.vercel-scripts.com"
-    : "script-src 'self' 'unsafe-inline' https://vercel.live https://va.vercel-scripts.com",
-  "style-src 'self' 'unsafe-inline' https://vercel.live",
+    ? `script-src 'self' 'unsafe-inline' 'unsafe-eval'${vercelScriptSources}`
+    : `script-src 'self' 'unsafe-inline'${vercelScriptSources}`,
+  `style-src 'self' 'unsafe-inline'${vercelStyleSources}`,
   "img-src 'self' data: https:",
-  "font-src 'self' data: https://vercel.live",
+  `font-src 'self' data:${vercelStyleSources}`,
   isDev
-    ? "connect-src 'self' ws: wss: https://vitals.vercel-insights.com https://va.vercel-scripts.com https://vercel.live wss://*.pusher.com"
-    : "connect-src 'self' https://vitals.vercel-insights.com https://va.vercel-scripts.com https://vercel.live wss://*.pusher.com",
-  "frame-src https://www.google.com https://maps.google.com https://vercel.live",
+    ? `connect-src 'self' ws: wss:${vercelConnectSources} wss://*.pusher.com`
+    : `connect-src 'self'${vercelConnectSources} wss://*.pusher.com`,
+  `frame-src https://www.google.com https://maps.google.com${vercelFrameSources}`,
   "object-src 'none'",
   "base-uri 'self'",
   "frame-ancestors 'self'",
@@ -34,6 +40,11 @@ const securityHeaders = [
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  env: {
+    // Client components receive this build-time value without requiring a
+    // second, separately configured NEXT_PUBLIC environment variable.
+    NEXT_PUBLIC_DEPLOY_TARGET: deployTarget ?? "",
+  },
   typescript: {
     ignoreBuildErrors: true,
   },
