@@ -22,7 +22,7 @@ There is **no test runner configured**. "Testing" in this repo means running the
 
 `.env.local` must define these or the server will throw on boot (see `lib/db.ts`, `lib/auth.ts`):
 
-- `DATABASE_URL` — Neon Postgres connection string
+- `DATABASE_URL` — PostgreSQL connection string for the current deployment
 - `AUTH_SECRET` — HMAC key for session JWTs
 - `RESEND_API_KEY`, `RESERVATION_NOTIFY_TO`, `RESERVATION_EMAIL_FROM` — optional; if any are missing, new-reservation emails (both the internal notification and the customer confirmation) are skipped with a warning instead of failing (see `lib/reservation-notifications.ts`).
 
@@ -30,7 +30,7 @@ There is **no test runner configured**. "Testing" in this repo means running the
 
 Next.js 16 App Router + React 19 + Neon serverless Postgres. Three concentric layers:
 
-1. **`lib/` — server-only domain layer.** Every file starts with `import "server-only"` and must never be imported from a client component. `lib/db.ts` exports a single `sql` tagged-template client from `@neondatabase/serverless`. Domain modules (`reservations.ts`, `expenses.ts`, `settings.ts`) own all SQL and return camelCased objects matching `lib/types.ts`. The pattern for partial updates is hand-built dynamic SQL with `$1, $2…` parameter placeholders accumulated in a `values` array — follow this pattern when extending update endpoints rather than using an ORM.
+1. **`lib/` — server-only domain layer.** Every file starts with `import "server-only"` and must never be imported from a client component. `lib/db.ts` exports the shared `postgres` tagged-template client configured by `DATABASE_URL`; TLS is enabled when `DEPLOY_TARGET=vercel` and disabled otherwise. Domain modules (`reservations.ts`, `expenses.ts`, `settings.ts`) own all SQL and return camelCased objects matching `lib/types.ts`. The pattern for partial updates is hand-built dynamic SQL with `$1, $2…` parameter placeholders accumulated in a `values` array — follow this pattern when extending update endpoints rather than using an ORM.
 
 2. **`app/api/**/route.ts` — thin HTTP layer.** Every admin route follows the same shape, in this order:
    ```ts

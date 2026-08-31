@@ -57,7 +57,7 @@ function rowToReservationPhoto(row: any): ReservationPhoto {
 async function attachPhotos(reservations: Reservation[]): Promise<Reservation[]> {
   if (reservations.length === 0) return reservations
   const ids = reservations.map((r) => r.id)
-  const photoRows = await sql.query(
+  const photoRows = await sql.unsafe(
     "SELECT id, reservation_id, photo_url, photo_public_id, created_at FROM reservation_photos WHERE reservation_id = ANY($1) ORDER BY created_at ASC",
     [ids],
   )
@@ -131,7 +131,7 @@ export async function listReservations(filters: {
 
   query += " ORDER BY r.visit_date DESC, r.created_at DESC"
 
-  const rows = await sql.query(query, params)
+  const rows = await sql.unsafe(query, params)
   return attachPhotos(rows.map(rowToReservation))
 }
 
@@ -408,7 +408,7 @@ export async function updateReservation(
   values.push(id)
   const query = `UPDATE reservations SET ${updates.join(", ")} WHERE id = $${paramIndex} RETURNING *`
 
-  const rows = await sql.query(query, values)
+  const rows = await sql.unsafe(query, values)
   const reloaded = await getReservationById(id)
   return { success: true, data: reloaded ?? rowToReservation(rows[0]) }
 }
@@ -480,7 +480,7 @@ export async function findConflictingTreeNumbers(
     query += ` AND id != $${params.length}`
   }
 
-  const rows = await sql.query(query, params)
+  const rows = await sql.unsafe(query, params)
 
   const conflictingNumbers: number[] = []
   const reservationNames = new Map<number, string>()

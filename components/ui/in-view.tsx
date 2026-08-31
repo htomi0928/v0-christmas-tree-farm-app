@@ -4,7 +4,7 @@ import { motion, useInView, Variants, Transition } from 'framer-motion'
 
 export type InViewProps = {
   children: ReactNode
-  variants?: { hidden: object; visible: object }
+  variants?: Variants
   transition?: Transition
   margin?: string
   once?: boolean

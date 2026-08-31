@@ -28,7 +28,7 @@ export async function listExpenses(filters: {
   }
 
   query += " ORDER BY date DESC, created_at DESC"
-  const rows = await sql.query(query, params)
+  const rows = await sql.unsafe(query, params)
   return rows.map(rowToExpense)
 }
 

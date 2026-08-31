@@ -87,13 +87,13 @@ export async function createYear(
   const retrievalDays = template?.retrieval_days ?? ""
   const price = template ? Number(template.price) : 8000
 
-  await sql.transaction([
-    sql`INSERT INTO years (year, is_active) VALUES (${year}, FALSE)`,
-    sql`
+  await sql.begin(async (tx) => {
+    await tx`INSERT INTO years (year, is_active) VALUES (${year}, FALSE)`
+    await tx`
       INSERT INTO settings (year, available_days, max_bookings_per_day, max_trees_per_season, retrieval_days, price)
       VALUES (${year}, '', ${maxBookings}, ${maxTreesPerSeason}, ${retrievalDays}, ${price})
-    `,
-  ])
+    `
+  })
 
   const rows = await sql`SELECT year, is_active, created_at FROM years WHERE year = ${year}`
   return { success: true, data: rowToYear(rows[0]) }
@@ -125,10 +125,10 @@ export async function deleteYear(
     }
   }
 
-  await sql.transaction([
-    sql`DELETE FROM settings WHERE year = ${year}`,
-    sql`DELETE FROM years WHERE year = ${year}`,
-  ])
+  await sql.begin(async (tx) => {
+    await tx`DELETE FROM settings WHERE year = ${year}`
+    await tx`DELETE FROM years WHERE year = ${year}`
+  })
   return { success: true }
 }
 
@@ -139,10 +139,10 @@ export async function activateYear(
     return { success: false, error: `A(z) ${year}-os év nem létezik` }
   }
 
-  await sql.transaction([
-    sql`UPDATE years SET is_active = FALSE WHERE is_active = TRUE`,
-    sql`UPDATE years SET is_active = TRUE  WHERE year = ${year}`,
-  ])
+  await sql.begin(async (tx) => {
+    await tx`UPDATE years SET is_active = FALSE WHERE is_active = TRUE`
+    await tx`UPDATE years SET is_active = TRUE WHERE year = ${year}`
+  })
   return { success: true }
 }
 
