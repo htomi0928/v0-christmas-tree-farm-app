@@ -10,6 +10,19 @@ Operational data is partitioned by calendar year. The admin pages filter on a pe
 https://v0-christmas-tree-farm-app.vercel.app
 ```
 
+## Health check
+
+**GET** `/api/health`
+
+Returns a lightweight availability response; it does not access the database or require authentication.
+
+```json
+{
+  "status": "ok",
+  "timestamp": "2026-08-31T20:00:00.000Z"
+}
+```
+
 ## Authentication
 
 Admin endpoints require a valid `admin_session` cookie obtained from `POST /api/admin/login`. The session is a stateless HS256 JWT signed with `AUTH_SECRET`, valid for 8 hours.
