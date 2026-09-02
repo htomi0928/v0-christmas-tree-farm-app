@@ -399,7 +399,7 @@ export default function BookingPage() {
                     Név <span className="text-secondary">*</span>
                   </label>
                   <input
-                    id="name" name="name" type="text"
+                    id="name" name="name" type="text" autoComplete="name"
                     value={formData.name} onChange={handleChange}
                     placeholder="pl. Kovács István"
                     className={inputClass(!!errors.name)}
@@ -411,7 +411,7 @@ export default function BookingPage() {
                     Telefon <span className="text-secondary">*</span>
                   </label>
                   <input
-                    id="phone" name="phone" type="tel"
+                    id="phone" name="phone" type="tel" autoComplete="tel"
                     value={formData.phone} onChange={handleChange}
                     placeholder={phoneNumber}
                     className={inputClass(!!errors.phone)}
@@ -426,7 +426,7 @@ export default function BookingPage() {
                   E-mail <span className="text-primary text-xs font-normal normal-case tracking-normal">(opcionális)</span>
                 </label>
                 <input
-                  id="email" name="email" type="email"
+                  id="email" name="email" type="email" autoComplete="email"
                   value={formData.email} onChange={handleChange}
                   placeholder="nev@email.com"
                   className={inputClass(!!errors.email)}
@@ -455,7 +455,7 @@ export default function BookingPage() {
                     Átvételi nap <span className="text-secondary">*</span>
                   </label>
                   <select
-                    id="pickupDate" name="pickupDate"
+                    id="pickupDate" name="pickupDate" autoComplete="off"
                     value={formData.pickupDate} onChange={handleChange}
                     className={inputClass(!!errors.pickupDate)}
                   >
@@ -501,28 +501,35 @@ export default function BookingPage() {
                     )
                   })}
                   {(["pl.: 5", "Adja meg hány fát szeretne, pl.: 5"] as const).map((placeholder, i) => (
-                    <input
-                      key={i}
-                      type="number"
-                      min="1"
-                      inputMode="numeric"
-                      placeholder={placeholder}
-                      value={customTreeCount ? formData.treeCount : ""}
-                      onFocus={() => {
-                        setCustomTreeCount(true)
-                        setFormData((prev) => ({ ...prev, treeCount: "" }))
-                      }}
-                      onChange={(e) => {
-                        setCustomTreeCount(true)
-                        const v = e.target.value.replace(/[^0-9]/g, "")
-                        setFormData((prev) => ({ ...prev, treeCount: v }))
-                      }}
-                      className={`py-3 px-4 rounded-lg border text-sm transition-all duration-150 ${i === 0 ? "md:hidden" : "hidden md:block"} ${
-                        customTreeCount
-                          ? "border-secondary bg-secondary/10 text-foreground ring-2 ring-secondary/20 outline-none"
-                          : `bg-surface text-foreground placeholder:text-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary ${errors.treeCount ? "border-destructive" : "border-border"}`
-                      }`}
-                    />
+                    <div key={i} className={i === 0 ? "md:hidden" : "hidden md:block"}>
+                      <label htmlFor={`treeCountCustom-${i}`} className="sr-only">
+                        Egyéni fa darabszám
+                      </label>
+                      <input
+                        id={`treeCountCustom-${i}`}
+                        name="treeCountCustom"
+                        type="number"
+                        min="1"
+                        inputMode="numeric"
+                        autoComplete="off"
+                        placeholder={placeholder}
+                        value={customTreeCount ? formData.treeCount : ""}
+                        onFocus={() => {
+                          setCustomTreeCount(true)
+                          setFormData((prev) => ({ ...prev, treeCount: "" }))
+                        }}
+                        onChange={(e) => {
+                          setCustomTreeCount(true)
+                          const v = e.target.value.replace(/[^0-9]/g, "")
+                          setFormData((prev) => ({ ...prev, treeCount: v }))
+                        }}
+                        className={`w-full py-3 px-4 rounded-lg border text-sm transition-all duration-150 ${
+                          customTreeCount
+                            ? "border-secondary bg-secondary/10 text-foreground ring-2 ring-secondary/20 outline-none"
+                            : `bg-surface text-foreground placeholder:text-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary ${errors.treeCount ? "border-destructive" : "border-border"}`
+                        }`}
+                      />
+                    </div>
                   ))}
                 </div>
                 {errors.treeCount && <p data-error className="text-destructive text-xs mt-1">{errors.treeCount}</p>}
@@ -534,7 +541,7 @@ export default function BookingPage() {
                   Megjegyzés <span className="text-primary text-xs font-normal normal-case tracking-normal">(opcionális)</span>
                 </label>
                 <textarea
-                  id="notes" name="notes"
+                  id="notes" name="notes" autoComplete="off"
                   value={formData.notes} onChange={handleChange}
                   placeholder="pl. magas fát keresek, kb. 2,5 m"
                   rows={3}
