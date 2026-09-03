@@ -71,8 +71,10 @@ export default function LoginPage() {
             )}
 
             <div>
-              <label className={labelClass}>Felhasználónév</label>
+              <label htmlFor="username" className={labelClass}>Felhasználónév</label>
               <input
+                id="username"
+                name="username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 className={inputClass}
@@ -81,8 +83,10 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <label className={labelClass}>Jelszó</label>
+              <label htmlFor="password" className={labelClass}>Jelszó</label>
               <input
+                id="password"
+                name="password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}

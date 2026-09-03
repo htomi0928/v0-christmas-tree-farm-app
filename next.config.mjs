@@ -3,27 +3,15 @@
 // CSP is relaxed in development and stays strict in production.
 const isDev = process.env.NODE_ENV !== "production"
 const deployTarget = process.env.DEPLOY_TARGET
-const isVercel = deployTarget === "vercel"
-
-const vercelScriptSources = isVercel ? " https://vercel.live https://va.vercel-scripts.com" : ""
-const vercelStyleSources = isVercel ? " https://vercel.live" : ""
-const vercelConnectSources = isVercel
-  ? " https://vitals.vercel-insights.com https://va.vercel-scripts.com https://vercel.live"
-  : ""
-const vercelFrameSources = isVercel ? " https://vercel.live" : ""
 
 const contentSecurityPolicy = [
   "default-src 'self'",
-  isDev
-    ? `script-src 'self' 'unsafe-inline' 'unsafe-eval'${vercelScriptSources}`
-    : `script-src 'self' 'unsafe-inline'${vercelScriptSources}`,
-  `style-src 'self' 'unsafe-inline'${vercelStyleSources}`,
+  isDev ? `script-src 'self' 'unsafe-inline' 'unsafe-eval'` : `script-src 'self' 'unsafe-inline'`,
+  `style-src 'self' 'unsafe-inline'`,
   "img-src 'self' data: https:",
-  `font-src 'self' data:${vercelStyleSources}`,
-  isDev
-    ? `connect-src 'self' ws: wss:${vercelConnectSources} wss://*.pusher.com`
-    : `connect-src 'self'${vercelConnectSources} wss://*.pusher.com`,
-  `frame-src https://www.google.com https://maps.google.com${vercelFrameSources}`,
+  `font-src 'self' data:`,
+  isDev ? `connect-src 'self' ws: wss: wss://*.pusher.com` : `connect-src 'self' wss://*.pusher.com`,
+  `frame-src https://www.google.com https://maps.google.com`,
   "object-src 'none'",
   "base-uri 'self'",
   "frame-ancestors 'self'",

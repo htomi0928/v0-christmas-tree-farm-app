@@ -6,9 +6,6 @@ import { Navigation } from "@/components/navigation"
 import { ConditionalFooter } from "@/components/conditional-footer"
 import { PageTransition } from "@/components/ui/page-transition"
 import { UnsavedChangesProvider } from "@/contexts/unsaved-changes-context"
-import { CookieConsentProvider } from "@/contexts/cookie-consent-context"
-import { CookieBanner } from "@/components/cookie-banner"
-import { ConsentAwareAnalytics } from "@/components/consent-aware-analytics"
 
 const plusJakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -42,18 +39,14 @@ export default function RootLayout({
   return (
     <html lang="hu" className={plusJakarta.variable} data-scroll-behavior="smooth">
       <body className="font-sans antialiased flex flex-col min-h-screen">
-        <CookieConsentProvider>
-          <UnsavedChangesProvider>
-            <Navigation />
-            {/* pt-16 compensates for the fixed nav (h-16) so content on all pages isn't hidden underneath it */}
-            <main className="flex-1 pt-16">
-              <PageTransition>{children}</PageTransition>
-            </main>
-            <ConditionalFooter />
-          </UnsavedChangesProvider>
-          <CookieBanner />
-          <ConsentAwareAnalytics />
-        </CookieConsentProvider>
+        <UnsavedChangesProvider>
+          <Navigation />
+          {/* pt-16 compensates for the fixed nav (h-16) so content on all pages isn't hidden underneath it */}
+          <main className="flex-1 pt-16">
+            <PageTransition>{children}</PageTransition>
+          </main>
+          <ConditionalFooter />
+        </UnsavedChangesProvider>
       </body>
     </html>
   )

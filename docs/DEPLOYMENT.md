@@ -4,11 +4,13 @@
 
 The same `main` branch is deployed to Vercel + Neon and Dokploy + PostgreSQL. Each deployment uses only its own `DATABASE_URL`; the application has no synchronization, replication, or dual-write behaviour.
 
+**Vercel + Neon is test/dev only and must never hold real customer data** — it exists to preview changes before they reach production. **Dokploy + VPS PostgreSQL (karifa.hu) is the production deployment** that real customers use, and is the only environment relevant to the app's GDPR/privacy notice.
+
 ## Prerequisites
 
 1. **GitHub Repository** - connected to both deployments from `main`
-2. **Vercel + Neon** - test/demo environment
-3. **Dokploy + PostgreSQL** - future production environment
+2. **Vercel + Neon** - test/dev environment only, seeded with fake data
+3. **Dokploy + VPS PostgreSQL** - production (karifa.hu, Contabo VPS, EU datacenter)
 
 ## Environment Variables
 
@@ -225,67 +227,40 @@ INSERT INTO settings (year, max_bookings_per_day, max_trees_per_season, price) V
 
 ## Deployment Process
 
-### Automatic Deployments
+### Production (Dokploy + VPS, karifa.hu)
 
-Changes are automatically deployed when:
-1. Code is pushed to the main branch
-2. Pull requests are merged to main
-3. Vercel detects changes in the repository
+1. Push/merge to `main`
+2. Dokploy detects changes and builds/deploys to the Contabo VPS
+3. Check build logs and container status in the Dokploy dashboard
+4. Verify `https://karifa.hu` after deployment
 
-### Manual Deployment
+### Test/Dev (Vercel)
 
-Trigger a manual deployment:
-1. Go to [Vercel Dashboard](https://vercel.com/dashboard)
-2. Select the `v0-christmas-tree-farm-app` project
-3. Click "Redeploy" on the latest deployment
-
-### Deployment Status
-
-Monitor deployments:
-1. Go to Vercel Dashboard → Project
-2. View deployment history
-3. Check build logs if deployment fails
-4. View live URL when deployment is complete
+1. Push/merge to `main`
+2. Vercel auto-deploys to its own preview/test project (points at Neon, never real customer data)
+3. Monitor via the Vercel Dashboard as before
 
 ## Configuration
 
-### Custom Domain
+### Custom Domain (production)
 
-If using a custom domain:
-1. Go to Project Settings → Domains
-2. Add your custom domain
-3. Update DNS records as instructed
-4. Wait for SSL certificate generation
+`karifa.hu` is configured directly in Dokploy/the VPS reverse proxy (not through Vercel's domain settings). Point DNS at the VPS IP and let the reverse proxy (or `certbot`) issue/renew the TLS certificate.
 
 ### Environment Variables
 
-Update environment variables:
-1. Go to Project Settings → Environment Variables
-2. Modify values as needed
-3. Redeploy the project for changes to take effect
+- **Production**: set in the Dokploy app's environment variables panel; redeploy for changes to take effect
+- **Test/dev**: set in Vercel Project Settings → Environment Variables
 
 ## Monitoring & Maintenance
 
 ### View Logs
 
-Check application logs:
-1. Go to Vercel Dashboard → Project
-2. Click on a deployment
-3. View "Logs" tab
+- **Production**: Dokploy dashboard → app → Logs, or `docker logs`/journal on the VPS depending on setup
+- **Test/dev**: Vercel Dashboard → Project → deployment → Logs tab
 
-### Performance
+### Performance & Error Tracking
 
-Monitor performance:
-1. Go to Project Settings → Analytics
-2. View request metrics and response times
-3. Check Vercel Speed Insights
-
-### Error Tracking
-
-For production errors:
-1. Check Vercel logs
-2. Monitor database connection health
-3. Verify environment variables are correctly set
+There is no analytics/APM service wired up (Vercel Analytics/Speed Insights were removed). For production, rely on Dokploy/VPS-level logs and the `/api/health` endpoint; add a dedicated monitoring tool later if needed.
 
 ## Troubleshooting
 
@@ -294,9 +269,9 @@ For production errors:
 **Problem:** Deployment fails during build
 
 **Solutions:**
-1. Check build logs in Vercel
-2. Verify all environment variables are set
-3. Check for TypeScript errors: `pnpm run build`
+1. Check build logs (Dokploy for production, Vercel for test/dev)
+2. Verify all environment variables are set for that environment
+3. Check for TypeScript errors: `pnpm exec tsc --noEmit`
 4. Ensure database schema is correct
 
 ### Database Connection Issues
@@ -304,29 +279,29 @@ For production errors:
 **Problem:** "DATABASE_URL environment variable is required"
 
 **Solutions:**
-1. Verify `DATABASE_URL` is set in Vercel
+1. Verify `DATABASE_URL` is set in the environment that's failing (Dokploy for production, Vercel for test/dev)
 2. Check connection string format is correct
-3. Ensure Neon database is active and running
-4. Verify IP whitelist settings in Neon
+3. Production: confirm the VPS PostgreSQL instance is running; test/dev: confirm the Neon database is active
+4. Test/dev only: verify IP whitelist settings in Neon
 
 ### Reservation Email Issues
 
 **Problem:** New reservations are saved but notification emails are not sent
 
 **Solutions:**
-1. Verify `RESEND_API_KEY` is set in Vercel
+1. Verify `RESEND_API_KEY` is set in the relevant environment
 2. Verify `RESERVATION_NOTIFY_TO` contains valid comma-separated email addresses
 3. Verify `RESERVATION_EMAIL_FROM` is a verified sender in Resend
-4. Check function logs in Vercel for `[email]` warnings and API errors
+4. Check application logs for `[email]` warnings and API errors
 
 ### Authentication Issues
 
 **Problem:** Can't log in to admin panel
 
 **Solutions:**
-1. Verify `AUTH_SECRET` is set in Vercel
-2. Check that `users` table exists in database
-3. Verify user account exists with correct email/password
+1. Verify `AUTH_SECRET` is set in the relevant environment
+2. Check that `admin_users` table exists in the database
+3. Verify the admin account exists with the correct username/password
 4. Check session cookie settings
 
 ### Tree Number Conflicts
@@ -340,48 +315,37 @@ For production errors:
 
 ## Rollback
 
-If a deployment has issues:
+**Production (Dokploy):** redeploy the previous known-good commit/tag through Dokploy, or `git revert` on `main` and let it redeploy automatically.
 
-1. Go to Vercel Dashboard
-2. Find the previous working deployment
-3. Click the three dots (⋯)
-4. Select "Promote to Production"
-5. The previous version will be restored
+**Test/dev (Vercel):** Vercel Dashboard → find the previous working deployment → "Promote to Production" (of the Vercel project, i.e. its own test/dev environment).
 
 ## Security Checklist
 
-Before deploying to production:
+Before relying on the production (karifa.hu) deployment:
 
-- [ ] `AUTH_SECRET` is set to a strong random value
-- [ ] `DATABASE_URL` uses a secure connection string (postgresql://)
+- [ ] `AUTH_SECRET` is set to a strong random value, distinct from the test/dev value
+- [ ] `DATABASE_URL` uses a secure connection string (postgresql://) to the VPS PostgreSQL instance
 - [ ] `RESEND_API_KEY` is configured
 - [ ] `RESERVATION_NOTIFY_TO` includes at least one valid recipient
 - [ ] `RESERVATION_EMAIL_FROM` is verified in Resend
 - [ ] Database credentials are not in code
 - [ ] Same-origin (`enforceSameOrigin`) checks active in production (automatic when `NODE_ENV=production`)
-- [ ] All environment variables are configured
-- [ ] SSL/TLS is enabled for custom domains
-- [ ] Database backups are configured in Neon
+- [ ] All environment variables are configured on the VPS/Dokploy, independently from Vercel
+- [ ] TLS is enabled for `karifa.hu` (via the reverse proxy / certbot)
+- [ ] Database backups are configured for the VPS PostgreSQL instance (Neon backups do not cover production)
 - [ ] Admin credentials are changed from defaults
-- [ ] `SEED_ADMIN_KEY` is a strong random value and is rotated/removed from Vercel env vars once the initial admin account is seeded — `/api/seed-admin` stays live in production and can overwrite admin credentials for anyone holding that key
+- [ ] `SEED_ADMIN_KEY` is a strong random value and is rotated/removed once the initial admin account is seeded — `/api/seed-admin` stays live in production and can overwrite admin credentials for anyone holding that key
+- [ ] The Vercel test/dev deployment is confirmed to point at a separate Neon database seeded with fake data only — never real customer data
 
 ## Backup & Recovery
 
 ### Database Backups
 
-Neon provides automatic backups. To restore:
-
-1. Log into Neon console
-2. Go to your database
-3. Click "Backups"
-4. Select a backup point
-5. Click "Restore"
+Production data lives in PostgreSQL on the VPS, not Neon — Neon's automatic backups only cover the test/dev database. Configure your own backup strategy for the VPS instance (e.g. scheduled `pg_dump`, or Contabo/VPS-level snapshots) and verify restores periodically.
 
 ### Code Backup
 
-The entire codebase is backed up by:
-1. GitHub repository (version control)
-2. Vercel deployment history (up to 100 deployments)
+The entire codebase is backed up via the GitHub repository (version control). Dokploy deployment history depends on your Dokploy retention settings.
 
 ## Performance Optimization
 
@@ -393,24 +357,18 @@ The entire codebase is backed up by:
    CREATE INDEX idx_reservations_status ON reservations(status);
    ```
 
-2. Monitor slow queries in Neon
+2. Monitor slow queries directly against the VPS PostgreSQL instance
 
 ### Frontend Optimization
 
-1. Next.js automatically optimizes:
-   - Code splitting
-   - Image optimization
-   - Static generation where possible
-
-2. Monitor Core Web Vitals in Vercel Analytics
+Next.js automatically optimizes code splitting and static generation where possible. `images.unoptimized: true` is set in `next.config.mjs`, so image optimization is not applied — revisit this if the VPS setup should serve optimized images.
 
 ## Support
 
 For issues or questions:
-1. Check Vercel documentation: [vercel.com/docs](https://vercel.com/docs)
-2. Check Neon documentation: [neon.tech/docs](https://neon.tech/docs)
+1. Check Dokploy documentation for production deployment issues
+2. Check Neon/Vercel documentation for test/dev environment issues
 3. Review GitHub repository issues
-4. Contact Vercel support if needed
 
 
 ### Cloudinary Reservation Photo Variables
