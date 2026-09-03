@@ -4,8 +4,9 @@ A full-stack web application for managing Christmas tree farm operations, includ
 
 *Automatically synced with your [v0.app](https://v0.app) deployments*
 
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/hollositamas-projects/v0-christmas-tree-farm-app)
 [![Built with v0](https://img.shields.io/badge/Built%20with-v0.app-black?style=for-the-badge)](https://v0.app/chat/uLhcWiTTbMh)
+
+Production runs on a self-hosted VPS at [karifa.hu](https://karifa.hu). Vercel + Neon is used only as a test/dev deployment target, never for real customer data.
 
 ## Overview
 
@@ -109,16 +110,14 @@ pnpm start
 
 ## Deployment
 
-Your project is live at:
-
-**[https://vercel.com/hollositamas-projects/v0-christmas-tree-farm-app](https://vercel.com/hollositamas-projects/v0-christmas-tree-farm-app)**
+Production is live at **[https://karifa.hu](https://karifa.hu)**, self-hosted on a Contabo VPS (EU datacenter) via Dokploy. Vercel + Neon is a separate test/dev deployment seeded with fake data only — see [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 
 ### How It Works
 
 1. Create and modify your project using [v0.app](https://v0.app)
 2. Deploy your chats from the v0 interface
 3. Changes are automatically pushed to this repository
-4. Vercel deploys the latest version from this repository
+4. The VPS (Dokploy) deploys the latest version from this repository for production; Vercel deploys it separately for test/dev
 
 ## Database
 

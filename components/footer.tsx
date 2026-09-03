@@ -2,12 +2,9 @@
 
 import Link from "next/link"
 import { Facebook } from "lucide-react"
-import { useCookieConsent } from "@/contexts/cookie-consent-context"
 import { phoneNumber } from "@/lib/site"
 
 export function Footer() {
-  const { resetConsent } = useCookieConsent()
-
   return (
     <footer className="bg-foreground mt-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -46,12 +43,6 @@ export function Footer() {
             <Link href="/adatvedelem" className="text-xs text-background/40 hover:text-background/70 transition-colors">
               Adatvédelmi tájékoztató
             </Link>
-            <button
-              onClick={resetConsent}
-              className="text-xs text-background/40 hover:text-background/70 transition-colors cursor-pointer"
-            >
-              Süti-beállítások
-            </button>
           </div>
         </div>
       </div>
