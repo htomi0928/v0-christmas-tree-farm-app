@@ -568,7 +568,16 @@ export default function BookingPage() {
                     >
                       ÁSZF
                     </Link>
-                    -et.{" "}
+                    -et, és megismertem az{" "}
+                    <Link
+                      href="/adatvedelem"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-secondary underline underline-offset-2 hover:text-primary transition-colors"
+                    >
+                      adatvédelmi tájékoztatót
+                    </Link>
+                    .{" "}
                     <span className="text-secondary">*</span>
                   </span>
                 </label>

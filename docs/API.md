@@ -7,7 +7,7 @@ Operational data is partitioned by calendar year. The admin pages filter on a pe
 ## Base URL
 
 ```
-https://v0-christmas-tree-farm-app.vercel.app
+https://karifa.hu
 ```
 
 ## Health check
