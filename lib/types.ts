@@ -111,3 +111,11 @@ export interface YearWithCounts extends Year {
   reservationCount: number
   expenseCount: number
 }
+
+export interface AdminUser {
+  id: number
+  username: string
+  passwordHash: string
+  mustChangePassword: boolean
+  createdAt: string
+}

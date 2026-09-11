@@ -121,6 +121,16 @@ export async function validateCredentials(username: string, password: string): P
   }
 }
 
+export async function getMustChangePassword(username: string): Promise<boolean> {
+  try {
+    const rows = await sql`SELECT must_change_password FROM admin_users WHERE username = ${username}`
+    return rows.length > 0 ? Boolean(rows[0].must_change_password) : false
+  } catch (error) {
+    console.error("[auth] Failed to read must_change_password flag:", error)
+    return false
+  }
+}
+
 export async function createSession(username: string): Promise<string> {
   const now = Math.floor(Date.now() / 1000)
   const header = {

@@ -47,9 +47,31 @@ Sets the `admin_session` cookie (httpOnly, sameSite=strict, secure in production
 - `401` — `{ "success": false, "error": "Hibás felhasználónév vagy jelszó" }`
 - `403` — Same-origin check failed (production only)
 
+If the logged-in user's `admin_users.must_change_password` flag is set (true for accounts just created or reset via `pnpm create-admin-user`), every `/admin/**` page redirects to `/admin-change-password` until the password is changed.
+
 ### Logout
 
 **POST** `/api/admin/logout` — clears the session cookie.
+
+### Change password
+
+**POST** `/api/admin/change-password`
+
+**Request body:**
+```json
+{ "currentPassword": "temporary-password", "newPassword": "new-secure-password" }
+```
+
+**Response (200):**
+```json
+{ "success": true }
+```
+Verifies `currentPassword` against the stored hash, then updates `password_hash` and clears `must_change_password`.
+
+**Errors:**
+- `400` — Invalid body (`newPassword` empty or over 200 chars) or wrong `currentPassword` (`{ "success": false, "error": "Hibás jelenlegi jelszó." }`)
+- `401` — `{ "success": false, "error": "Nincs hitelesites" }`
+- `403` — Same-origin check failed (production only)
 
 ---
 

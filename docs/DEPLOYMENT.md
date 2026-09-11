@@ -23,7 +23,7 @@ DEPLOY_TARGET=vercel
 DATABASE_URL=postgresql://...neon.tech/...
 ```
 
-Use Neon’s pooled connection string. Configure the same `AUTH_SECRET`, email, Cloudinary, and optional `SEED_ADMIN_KEY` values required by the application.
+Use Neon’s pooled connection string. Configure the same `AUTH_SECRET`, email, and Cloudinary values required by the application.
 
 ### Dokploy + VPS PostgreSQL
 
@@ -128,13 +128,13 @@ Cloudinary API secret for request signing.
    psql "$DATABASE_URL" -f db/schema.sql
    ```
 
-   After tables exist, seed an admin via:
+   After tables exist, create an admin user by running the CLI script directly on the machine that has `DATABASE_URL` configured (the VPS, or locally against the Neon database):
    ```bash
-   curl -X POST "$DEPLOYED_URL/api/seed-admin" \
-     -H "x-seed-key: $SEED_ADMIN_KEY" \
-     -H "content-type: application/json" \
-     -d '{"username":"admin","password":"<at-least-12-chars>"}'
+   pnpm create-admin-user admin
+   # or, with no dependency on pnpm/corepack at all:
+   node scripts/create-admin-user.mjs admin
    ```
+   Both forms run the same plain-JS script (`scripts/create-admin-user.mjs`) — it only needs `node` and the app's already-installed `node_modules`, so it works even if `pnpm`/corepack itself is broken on the box. It prints a random temporary password once; the account is required to change it on first login. To rotate a lost/forgotten password for an existing user, add `--reset`; to set a specific password instead of a random one (which skips the forced first-login change), add `--password <value>`.
 
 ### Schema
 
@@ -154,11 +154,12 @@ CREATE TABLE admin_users (
   id SERIAL PRIMARY KEY,
   username VARCHAR(100) UNIQUE NOT NULL,
   password_hash TEXT NOT NULL,
+  must_change_password BOOLEAN NOT NULL DEFAULT FALSE,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 ```
 
-`password_hash` stores PBKDF2-SHA256 output as `<salt-hex>:<hash-hex>` (100k iterations, 16-byte salt). Use `POST /api/seed-admin` with the `SEED_ADMIN_KEY` header to insert the initial admin without hashing manually.
+`password_hash` stores PBKDF2-SHA256 output as `<salt-hex>:<hash-hex>` (100k iterations, 16-byte salt). Use `pnpm create-admin-user <username>` or `node scripts/create-admin-user.mjs <username>` (see [scripts/create-admin-user.mjs](../scripts/create-admin-user.mjs)) to insert or reset an admin account without hashing manually — by default it sets `must_change_password = TRUE`, forcing the account through `/admin-change-password` on next login.
 
 #### `years` table
 ```sql
@@ -334,7 +335,7 @@ Before relying on the production (karifa.hu) deployment:
 - [ ] TLS is enabled for `karifa.hu` (via the reverse proxy / certbot)
 - [ ] Database backups are configured for the VPS PostgreSQL instance (Neon backups do not cover production)
 - [ ] Admin credentials are changed from defaults
-- [ ] `SEED_ADMIN_KEY` is a strong random value and is rotated/removed once the initial admin account is seeded — `/api/seed-admin` stays live in production and can overwrite admin credentials for anyone holding that key
+- [ ] Initial admin account(s) created via `pnpm create-admin-user <username>` (or `node scripts/create-admin-user.mjs <username>` if pnpm/corepack isn't working) run directly on the server (there is no network endpoint for this) — record/hand off the printed temporary password securely, it is not shown again
 - [ ] The Vercel test/dev deployment is confirmed to point at a separate Neon database seeded with fake data only — never real customer data
 
 ## Backup & Recovery
