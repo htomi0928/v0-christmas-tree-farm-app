@@ -116,13 +116,16 @@ createdb christmas_tree_farm
    pnpm exec tsx scripts/test-db-connection.ts
    ```
 
-3. Seed an admin user. Don't insert raw SQL — the app stores PBKDF2 hashes (`salt:hash`), not bcrypt. Use the seed endpoint:
+3. Create an admin user. Don't insert raw SQL — the app stores PBKDF2 hashes (`salt:hash`), not bcrypt. Use the CLI script instead, which prints a random temporary password (the account must change it on first login):
    ```bash
-   # Set SEED_ADMIN_KEY in .env.local first
-   curl -X POST http://localhost:3000/api/seed-admin \
-     -H "x-seed-key: $SEED_ADMIN_KEY" \
-     -H "content-type: application/json" \
-     -d '{"username":"admin","password":"at-least-12-chars"}'
+   pnpm create-admin-user admin
+   # to rotate an existing user's password:
+   pnpm create-admin-user admin --reset
+   # to set a specific password instead of a random one (skips the forced first-login change):
+   pnpm create-admin-user admin --password "some-password"
+   # the underlying script is plain JS and needs nothing but `node` — useful if pnpm/corepack
+   # itself is broken (e.g. on the VPS):
+   node scripts/create-admin-user.mjs admin
    ```
 
 ## Development Workflows

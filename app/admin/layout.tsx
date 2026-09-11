@@ -1,16 +1,21 @@
 import type React from "react"
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
-import { validateSession } from "@/lib/auth"
+import { getMustChangePassword, getSessionUser } from "@/lib/auth"
 import { AdminShellNav } from "@/components/admin-shell-nav"
 import { getActiveYear, getViewYear, listYears } from "@/lib/years"
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const cookieStore = await cookies()
   const adminSessionId = cookieStore.get("admin_session")?.value
+  const username = adminSessionId ? await getSessionUser(adminSessionId) : null
 
-  if (!adminSessionId || !(await validateSession(adminSessionId))) {
+  if (!username) {
     redirect("/admin-login")
+  }
+
+  if (await getMustChangePassword(username)) {
+    redirect("/admin-change-password")
   }
 
   const [years, activeYear, viewYear] = await Promise.all([

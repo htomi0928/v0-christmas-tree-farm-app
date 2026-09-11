@@ -155,8 +155,10 @@ Key tables:
 ### Public Routes
 - `POST /api/reservations` - Create new reservation, stamped with the active year (returns 503 if no year is active)
 
+- `POST /api/admin/change-password` - Change the current admin's password (verifies current password, clears `must_change_password`)
+
 ### Bootstrap
-- `POST /api/seed-admin` - Create/update an admin user (requires `SEED_ADMIN_KEY` header `x-seed-key`)
+Admin users are created/reset with the `pnpm create-admin-user <username> [--reset]` CLI script (run directly on the server), not an HTTP endpoint.
 
 ## Security Notes
 
